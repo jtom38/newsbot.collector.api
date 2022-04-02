@@ -6,5 +6,5 @@ RUN go build .
 
 FROM alpine
 
-COPY --from=build /app/db /app
-ENTRYPOINT [ "/app/db" ]
+COPY --from=build /app/collector /app
+ENTRYPOINT [ "/app/collector" ]
