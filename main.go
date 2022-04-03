@@ -39,7 +39,6 @@ func main() {
 
 func CheckReddit() {
 	dc := database.NewDatabaseClient()
-	dc.Articles.List()
 	sources, err := dc.Sources.FindBySource("reddit")
 	if err != nil { log.Println(err) }
 
@@ -51,7 +50,12 @@ func CheckReddit() {
 	for _, item := range raw.Data.Children {
 		var article model.Articles
 		article, err = rc.ConvertToArticle(item.Data)
+		if err != nil { log.Println(err); continue }
 		redditArticles = append(redditArticles, article)
+	}
+
+	for _, item := range redditArticles {
+		dc.Articles.FindByUrl(item.Url)
 	}
 	dc.Articles.Add()
 
