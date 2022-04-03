@@ -2,9 +2,10 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"errors"
+	"time"
 
 	"github.com/jtom38/newsbot/collector/domain/model"
 )
@@ -12,7 +13,7 @@ import (
 type RedditClient struct {
 	subreddit string
 	url string
-	sourceId int32
+	sourceId uint
 }
 
 var (
@@ -28,7 +29,7 @@ func init() {
 	PULLNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
 }
 
-func NewReddit(subreddit string, sourceID int32) RedditClient {
+func NewReddit(subreddit string, sourceID uint) RedditClient {
 	rc := RedditClient{
 		subreddit: subreddit,
 		url: fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
@@ -56,9 +57,17 @@ func (rc RedditClient) GetContent() (model.RedditJsonContent, error ) {
 func (rc RedditClient) ConvertToArticle(source model.RedditPost) (model.Articles, error) {
 	var item model.Articles
 
-
+	
 	if source.Content == "" && source.Url != ""{
 		item = rc.convertPicturePost(source)
+	}
+	
+	if source.Media.RedditVideo.FallBackUrl != "" {
+		item = rc.convertVideoPost(source)
+	}
+
+	if source.Content != "" {
+		item = rc.convertTextPost(source)
 	}
 
 	if item.Description == "" {
@@ -71,9 +80,28 @@ func (rc RedditClient) ConvertToArticle(source model.RedditPost) (model.Articles
 
 func (rc RedditClient) convertPicturePost(source model.RedditPost) model.Articles {
 	var item = model.Articles{
-		SourceId: rc.sourceId,
-		Url: fmt.Sprintf("https://www.reddit.com/%v", source.Permalink),
+		SourceID: rc.sourceId,
+		Tags: "a",
 		Title: source.Title,
+		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		PubDate: time.Now(),
+		Video: "null",
+		VideoHeight: 0,
+		VideoWidth: 0,
+		Thumbnail: source.Thumbnail,
+		Description: source.Content,
+		AuthorName: source.Author,
+		AuthorImage: "null",
+	}
+	return item
+}
+
+func (rc RedditClient) convertTextPost(source model.RedditPost) model.Articles {
+	var item = model.Articles{
+		SourceID: rc.sourceId,
+		Tags: "a",
+		Title: source.Title,
+		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
 		AuthorName: source.Author,
 		Description: source.Content,
 		
@@ -81,10 +109,14 @@ func (rc RedditClient) convertPicturePost(source model.RedditPost) model.Article
 	return item
 }
 
-func (rc RedditClient) isTextPost(source model.RedditPost) {
-
-}
-
-func (rc RedditClient) isVideoPost(source model.RedditPost) {
-
+func (rc RedditClient) convertVideoPost(source model.RedditPost) model.Articles {
+	var item = model.Articles{
+		SourceID: rc.sourceId,
+		Tags: "a",
+		Title: source.Title,
+		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		AuthorName: source.Author,
+		Description: source.Media.RedditVideo.ScrubberMediaUrl,
+	}
+	return item
 }
