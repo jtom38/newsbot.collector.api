@@ -29,6 +29,8 @@ type RedditPost struct {
 	IsVideo bool `json:"is_video"`
 	Media RedditPostMedia `json:"media"`
 	Url string `json:"url"`
+
+	Thumbnail string `json:"thumbnail"`
 }
 
 // RedditPostMedia defines if the post contains a video that is hosted on Reddit.

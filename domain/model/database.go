@@ -6,19 +6,15 @@ import (
 
 // Articles represents the model for an Article
 type Articles struct {
-	ID int64 `json:"ID"`
-	CreatedAt time.Time `json:"CreatedAt"`
-	UpdatedAt time.Time `json:"UpdatedAt"`
-	DeletedAt time.Time `json:"DeletedAt"`
-
-	SourceId int32 `json:"sourceId"`
+	ID uint `json:"ID"`
+	SourceID uint `json:"sourceId"`
 	Tags string	`json:"tags"`
 	Title string `json:"title"`
 	Url string `json:"url"`
 	PubDate time.Time `json:"pubdate"`
 	Video string `json:"video"`
-	VideoHeight int16 `json:"videoHeight"`
-	VideoWidth int16 `json:"videoWidth"`
+	VideoHeight uint16 `json:"videoHeight"`
+	VideoWidth uint16 `json:"videoWidth"`
 	Thumbnail string `json:"thumbnail"`
 	Description string `json:"description"`
 	AuthorName string `json:"authorName"`
@@ -69,11 +65,7 @@ type Settings struct {
 }
 
 type Sources struct {
-	ID int32 `json:"ID"`
-	CreatedAt time.Time `json:"CreatedAt"`
-	UpdatedAt time.Time `json:"UpdatedAt"`
-	DeletedAt time.Time `json:"DeletedAt"`
-
+	ID uint `json:"ID"`
 	Site string		`json:"site"`
 	Name string		`json:"name"`
 	Source string	`json:"source"`
