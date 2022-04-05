@@ -29,6 +29,7 @@ type RedditPost struct {
 	IsVideo bool `json:"is_video"`
 	Media RedditPostMedia `json:"media"`
 	Url string `json:"url"`
+	UrlOverriddenByDest string `json:"url_overridden_by_dest"`
 
 	Thumbnail string `json:"thumbnail"`
 }

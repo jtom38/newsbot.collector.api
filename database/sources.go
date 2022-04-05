@@ -15,9 +15,10 @@ type SourcesClient struct {
 func (sb *SourcesClient) List() ([]model.Sources, error) {
 	var items []model.Sources
 	url := fmt.Sprintf("%v/api/v1/sources", sb.rootUri)
-	resp := getContent(url)
+	resp, err := getContent(url)
+	if err != nil { return items, err }
 
-	err := json.Unmarshal(resp, &items)
+	err = json.Unmarshal(resp, &items)
 	if err != nil { return []model.Sources{}, err }
 	
 	return items, nil

@@ -22,7 +22,7 @@ type Articles struct {
 }
 
 type DiscordQueue struct {
-	ID int64 `json:"ID"`
+	ID uint `json:"ID"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
 	DeletedAt time.Time `json:"DeletedAt"`
@@ -30,7 +30,7 @@ type DiscordQueue struct {
 }
 
 type DiscordWebHooks struct {
-	ID int32 `json:"ID"`
+	ID uint `json:"ID"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
 	DeletedAt time.Time `json:"DeletedAt"`
@@ -44,7 +44,7 @@ type DiscordWebHooks struct {
 }
 
 type Icons struct {
-	ID int32 `json:"ID"`
+	ID uint `json:"ID"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
 	DeletedAt time.Time `json:"DeletedAt"`
@@ -54,7 +54,7 @@ type Icons struct {
 }
 
 type Settings struct {
-	ID int16 `json:"ID"`
+	ID uint `json:"ID"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
 	DeletedAt time.Time `json:"DeletedAt"`
@@ -65,7 +65,7 @@ type Settings struct {
 }
 
 type Sources struct {
-	ID uint `json:"ID"`
+	ID uint 		`json:"ID"`
 	Site string		`json:"site"`
 	Name string		`json:"name"`
 	Source string	`json:"source"`
@@ -77,14 +77,14 @@ type Sources struct {
 }
 
 type SourceLinks struct {
-	ID int32 `json:"ID"`
+	ID uint `json:"ID"`
 	CreatedAt time.Time `json:"CreatedAt"`
 	UpdatedAt time.Time `json:"UpdatedAt"`
 	DeletedAt time.Time `json:"DeletedAt"`
 	
-	SourceID string		`json:"sourceId"`
+	SourceID uint		`json:"sourceId"`
 	SourceType string	`json:"sourceType"`
 	SourceName string	`json:"sourceName"`
-	DiscordID string	`json:"discordId"`
+	DiscordID uint	`json:"discordId"`
 	DiscordName string	`json:"discordName"`
 }

@@ -1,8 +1,9 @@
 package database
 
 import (
-	"log"
+	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/jtom38/newsbot/collector/services"
@@ -27,25 +28,30 @@ func NewDatabaseClient() DatabaseClient {
 	return client
 }
 
-func getContent(url string) []byte {
+func getContent(url string) ([]byte, error) {
 	client := &http.Client{}
+	var blank []byte
 	
 	req, err := http.NewRequest("GET", url, nil)
-	if err != nil { log.Fatalln(err) }
+	if err != nil { return blank, err }
 
 	// set the user agent header to avoid kick backs.. as much
 	req.Header.Set("User-Agent", getUserAgent())
 
 	log.Printf("Requesting content from %v\n", url)
 	resp, err := client.Do(req)
-	if err != nil { log.Fatalln(err) }
+	if err != nil { return blank, err }
+	if resp.StatusCode == 404 { 
+		err = errors.New("404 not found")
+		return blank, err
+	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil { log.Fatalln(err) }
+	if err != nil { return blank, err }
 
 	//log.Println(string(body))
-	return body
+	return body, nil
 }
 
 func httpDelete(url string) error {

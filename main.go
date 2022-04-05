@@ -54,9 +54,12 @@ func CheckReddit() {
 		redditArticles = append(redditArticles, article)
 	}
 
-	for _, item := range redditArticles {
-		dc.Articles.FindByUrl(item.Url)
+	for _, item := range redditArticles {		
+		_, err = dc.Articles.FindByUrl(item.Url)
+		if err != nil {
+			err = dc.Articles.Add(item)
+			if err != nil { log.Println("Failed to post article.")}
+		}
 	}
-	dc.Articles.Add()
 
 }

@@ -70,6 +70,10 @@ func (rc RedditClient) ConvertToArticle(source model.RedditPost) (model.Articles
 		item = rc.convertTextPost(source)
 	}
 
+	if source.UrlOverriddenByDest != "" {
+		item = rc.convertRedirectPost(source)
+	}
+
 	if item.Description == "" {
 		var err = errors.New("reddit post failed to parse correctly")
 		return item, err
@@ -116,7 +120,20 @@ func (rc RedditClient) convertVideoPost(source model.RedditPost) model.Articles 
 		Title: source.Title,
 		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
 		AuthorName: source.Author,
-		Description: source.Media.RedditVideo.ScrubberMediaUrl,
+		Description: source.Media.RedditVideo.FallBackUrl,
+	}
+	return item
+}
+
+// This post is nothing more then a redirect to another location.
+func (rc *RedditClient) convertRedirectPost(source model.RedditPost) model.Articles {
+	var item = model.Articles{
+		SourceID: rc.sourceId,
+		Tags: "a",
+		Title: source.Title,
+		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		AuthorName: source.Author,
+		Description: source.UrlOverriddenByDest,
 	}
 	return item
 }
