@@ -11,7 +11,6 @@ import (
 
 	"github.com/jtom38/newsbot/collector/routes"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/domain/model"
 	"github.com/jtom38/newsbot/collector/services"
 )
 
