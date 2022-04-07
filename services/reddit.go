@@ -52,9 +52,20 @@ func (rc RedditClient) GetContent() (model.RedditJsonContent, error ) {
 	return items, nil
 }
 
+func (rc RedditClient) ConvertToArticles(items model.RedditJsonContent) []model.Articles {
+	var redditArticles []model.Articles
+	for _, item := range items.Data.Children {
+		var article model.Articles
+		article, err := rc.convertToArticle(item.Data)
+		if err != nil { log.Println(err); continue }
+		redditArticles = append(redditArticles, article)
+	}
+	return redditArticles
+}
+
 // ConvertToArticle() will take the reddit model struct and convert them over to Article structs.
 // This data can be passed to the database.
-func (rc RedditClient) ConvertToArticle(source model.RedditPost) (model.Articles, error) {
+func (rc RedditClient) convertToArticle(source model.RedditPost) (model.Articles, error) {
 	var item model.Articles
 
 	

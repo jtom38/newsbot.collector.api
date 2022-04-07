@@ -46,14 +46,8 @@ func CheckReddit() {
 	raw, err := rc.GetContent()
 	if err != nil { log.Println(err) }
 	
-	var redditArticles []model.Articles
-	for _, item := range raw.Data.Children {
-		var article model.Articles
-		article, err = rc.ConvertToArticle(item.Data)
-		if err != nil { log.Println(err); continue }
-		redditArticles = append(redditArticles, article)
-	}
-
+	redditArticles := rc.ConvertToArticles(raw)
+	
 	for _, item := range redditArticles {		
 		_, err = dc.Articles.FindByUrl(item.Url)
 		if err != nil {
@@ -61,5 +55,4 @@ func CheckReddit() {
 			if err != nil { log.Println("Failed to post article.")}
 		}
 	}
-
 }
