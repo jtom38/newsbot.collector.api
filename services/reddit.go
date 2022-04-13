@@ -14,19 +14,13 @@ type RedditClient struct {
 	subreddit string
 	url string
 	sourceId uint
+	config RedditConfig
 }
 
-var (
-	PULLTOP string
-	PULLHOT string
-	PULLNSFW string
-)
-
-func init() {
-	cc := NewConfigClient()
-	PULLTOP = cc.GetConfig(REDDIT_PULL_TOP)
-	PULLHOT = cc.GetConfig(REDDIT_PULL_HOT)
-	PULLNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
+type RedditConfig struct {
+	PullTop string
+	PullHot string
+	PullNSFW string
 }
 
 func NewRedditClient(subreddit string, sourceID uint) RedditClient {
@@ -35,6 +29,11 @@ func NewRedditClient(subreddit string, sourceID uint) RedditClient {
 		url: fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
 		sourceId:  sourceID,
 	}
+	cc := NewConfigClient()
+	rc.config.PullHot = cc.GetConfig(REDDIT_PULL_HOT)
+	rc.config.PullNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
+	rc.config.PullTop = cc.GetConfig(REDDIT_PULL_TOP)
+
 	return rc
 }
 
