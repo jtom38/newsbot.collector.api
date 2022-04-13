@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
@@ -16,8 +15,14 @@ import (
 
 type YoutubeClient struct {
 	SourceID  uint
-	url       string
+	Url       string
 	ChannelID string
+	AvatarUri string
+	//config YoutubeConfig
+}
+
+type YoutubeConfig struct {
+
 }
 
 const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channel_id="
@@ -25,57 +30,38 @@ const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channe
 func NewYoutubeClient(SourceID uint, Url string) YoutubeClient {
 	return YoutubeClient{
 		SourceID: SourceID,
-		url:      Url,
+		Url:      Url,
 	}
 }
 
 // CheckSource will go and run all the commands needed to process a source.
 func (yc *YoutubeClient) CheckSource() error {
-	//docParser, err := yc.GetPageParser()
-	//if err != nil { return err }
+	docParser, err := yc.GetParser(yc.Url)
+	if err != nil { return err }
 
-	browser := rod.New().MustConnect()
-	defer browser.Close()
-
-	page := browser.MustPage(yc.url)
-	defer page.Close()
-
-	time.Sleep(5 * time.Second)
-	page.Race().ElementX("//*[@id=\"img\"]").MustHandle(func(e *rod.Element) {
-		log.Println(e)
-	}).MustDo()
-	//element := page.MustElementX().MustAttribute("src")
-	//if err != nil { return err }
-	//log.Println(element)
-	page.MustWaitLoad().MustScreenshot("a.png")
-
-	/*
-	_, err = yc.GetChannelId(docParser)
-	if err != nil {
-		return err
-	}
+	// Check cache/db for existing value
+	// If we have the value, skip
+	channelId, err := yc.GetChannelId(docParser)
+	if err != nil { return err }
+	yc.ChannelID = channelId
 	
-	_, err = yc.GetAvatarUri(docParser)
-	if err != nil {
-		return err
-	}
+	// Check the cache/db forthe value.
+	// if we have the value, skip
+	avatar, err := yc.GetAvatarUri()
+	if err != nil { return err }
+	yc.AvatarUri = avatar
 
 	feed, err := yc.PullFeed()
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	
 	err = yc.CheckForNewPosts(feed)
-	if err != nil {
-		return err
-	}
-	*/
+	if err != nil { return err }
 	
 	return nil
 }
 
-func (yc *YoutubeClient) GetPageParser() (*goquery.Document, error) {
-	html, err := http.Get(yc.url)
+func (yc *YoutubeClient) GetParser(uri string) (*goquery.Document, error) {
+	html, err := http.Get(uri)
 	if err != nil {
 		log.Println(err)
 	}
@@ -103,19 +89,46 @@ func (yc *YoutubeClient) GetChannelId(doc *goquery.Document) (string, error) {
 }
 
 // This will parse the page to find the current Avatar of the channel.
-// TODO This needs to be pulled via headless browser
-func (yc *YoutubeClient) GetAvatarUri(doc *goquery.Document) (string, error) {
-	res := doc.Find("yt-img-shadow")
-	if res.Nodes == nil {
-		return "", errors.New("unable to find the Avatar Uri")
+func (yc *YoutubeClient) GetAvatarUri() (string, error) {
+	var AvatarUri string
+
+	browser := rod.New().MustConnect()
+	page := browser.MustPage(yc.Url)
+	
+	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")
+
+	if *res == "" || res == nil {
+		return AvatarUri, errors.New("unable to find the avatar on the page")
 	}
-	log.Println(res)
-	return "", errors.New("not implemented")
+		
+	defer browser.Close()
+	defer page.Close()
+	return AvatarUri, nil
 }
 
 // This will parse and look for the tags that has been defined by the user.
-func (yc *YoutubeClient) GetTags() error {
-	return errors.New("not implemented")
+func (yc *YoutubeClient) GetTags(parser *goquery.Document) (string, error) {
+	meta := parser.Find("meta")
+
+	for _, item := range meta.Nodes {
+		if item.Attr[0].Val == "keywords" {
+			res := item.Attr[1].Val
+			return res, nil
+		}
+	}
+	return "", errors.New("unable to find the tags on the video")
+}
+
+func (yc *YoutubeClient) GetVideoThumbnail(parser *goquery.Document) (string, error) {
+	meta := parser.Find("meta")
+
+	for _, item := range meta.Nodes {
+		if item.Attr[0].Val == "og:image" {
+			res := item.Attr[1].Val
+			return res, nil
+		}
+	}
+	return "", errors.New("unable to find the video thumbnail on a youtube video.")
 }
 
 // This will pull the RSS feed items and return the results
@@ -134,24 +147,47 @@ func (yc *YoutubeClient) PullFeed() (*gofeed.Feed, error) {
 // If the post does not exist, it will be added.
 func (yc *YoutubeClient) CheckForNewPosts(feed *gofeed.Feed) error {
 	for _, item := range feed.Items {
-		article := yc.convertToArticles(item)
+		// Check the cache/db to see if this URI has been seen already
+
+		// if its new, process it.
+
+
+		article := yc.convertToArticles(item, tags)
 		log.Println(article)
 	}
 
 	return nil
 }
 
-func (yc *YoutubeClient) convertToArticles(item *gofeed.Item) model.Articles {
+func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
+	parser, err := yc.GetParser(item.Link)
+	if err != nil { 
+		log.Printf("Unable to process %v, submit this link as an issue.\n", item.Link)
+		
+	}
+
+	tags, err := yc.GetTags(parser)
+	if err != nil {
+		log.Printf("Unable to find the tags on %v, submit this link as an issue.\n", item.Link)
+		continue
+	}
+
+	thumb, err := yc.GetVideoThumbnail(parser)
+	if err != nil { 
+		log.Printf("Unable to find the thumbnail at %v, submit this link as an issue.\n", item.Link)
+		continue
+	}
+
 	var article = model.Articles{
 		SourceID:    yc.SourceID,
-		Tags:        "",
+		Tags:        tags,
 		Title:       item.Title,
 		Url:         item.Link,
 		PubDate:     *item.PublishedParsed,
-		Thumbnail:   item.Image.URL,
+		Thumbnail:   thumb,
 		Description: item.Description,
 		AuthorName:  item.Author.Name,
-		AuthorImage: "",
+		AuthorImage: yc.AvatarUri,
 	}
 	return article
 }
