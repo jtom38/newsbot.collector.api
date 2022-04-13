@@ -29,7 +29,7 @@ func init() {
 	PULLNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
 }
 
-func NewReddit(subreddit string, sourceID uint) RedditClient {
+func NewRedditClient(subreddit string, sourceID uint) RedditClient {
 	rc := RedditClient{
 		subreddit: subreddit,
 		url: fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
