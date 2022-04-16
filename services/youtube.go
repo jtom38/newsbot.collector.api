@@ -54,7 +54,7 @@ func (yc *YoutubeClient) CheckSource() error {
 	feed, err := yc.PullFeed()
 	if err != nil { return err }
 	
-	err = yc.CheckForNewPosts(feed)
+	_, err = yc.CheckForNewPosts(feed)
 	if err != nil { return err }
 	
 	return nil
@@ -128,7 +128,7 @@ func (yc *YoutubeClient) GetVideoThumbnail(parser *goquery.Document) (string, er
 			return res, nil
 		}
 	}
-	return "", errors.New("unable to find the video thumbnail on a youtube video.")
+	return "", errors.New("unable to find the video thumbnail on a youtube video")
 }
 
 // This will pull the RSS feed items and return the results
@@ -145,18 +145,23 @@ func (yc *YoutubeClient) PullFeed() (*gofeed.Feed, error) {
 
 // CheckForNewPosts will talk to the Database to see if it has a record for the posts that have been extracted.
 // If the post does not exist, it will be added.
-func (yc *YoutubeClient) CheckForNewPosts(feed *gofeed.Feed) error {
+func (yc *YoutubeClient) CheckForNewPosts(feed *gofeed.Feed) ([]*gofeed.Item, error) {
+	var newPosts []*gofeed.Item
 	for _, item := range feed.Items {
 		// Check the cache/db to see if this URI has been seen already
+		
+
 
 		// if its new, process it.
+		newPosts = append(newPosts, item)
 
+		// Add the post to local cache
 
-		article := yc.convertToArticles(item, tags)
+		article := yc.ConvertToArticle(item)
 		log.Println(article)
 	}
 
-	return nil
+	return newPosts, nil
 }
 
 func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
@@ -169,13 +174,11 @@ func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
 	tags, err := yc.GetTags(parser)
 	if err != nil {
 		log.Printf("Unable to find the tags on %v, submit this link as an issue.\n", item.Link)
-		continue
 	}
 
 	thumb, err := yc.GetVideoThumbnail(parser)
 	if err != nil { 
 		log.Printf("Unable to find the thumbnail at %v, submit this link as an issue.\n", item.Link)
-		continue
 	}
 
 	var article = model.Articles{
