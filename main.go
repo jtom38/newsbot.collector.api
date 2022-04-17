@@ -15,12 +15,14 @@ import (
 )
 
 func main() {
+	var err error
 	//EnableScheduler()
-	dc := database.NewDatabaseClient()
-	err := dc.Diagnosis.Ping()
-	if err != nil { log.Fatalln(err) }
+	//dc := database.NewDatabaseClient()
+	//err := dc.Diagnosis.Ping()
+	//if err != nil { log.Fatalln(err) }
 
-	CheckReddit()
+	//CheckReddit()
+	CheckYoutube()
 
 	app := chi.NewRouter()
 	app.Use(middleware.Logger)
@@ -41,7 +43,7 @@ func CheckReddit() {
 	sources, err := dc.Sources.FindBySource("reddit")
 	if err != nil { log.Println(err) }
 
-	rc := services.NewReddit(sources[0].Name, sources[0].ID)
+	rc := services.NewRedditClient(sources[0].Name, sources[0].ID)
 	raw, err := rc.GetContent()
 	if err != nil { log.Println(err) }
 	
@@ -54,4 +56,12 @@ func CheckReddit() {
 			if err != nil { log.Println("Failed to post article.")}
 		}
 	}
+}
+
+func CheckYoutube() {
+	// Add call to the db to request youtube sources.
+
+	// Loop though the services, and generate the clients.
+	yt := services.NewYoutubeClient(0, "https://www.youtube.com/user/GameGrumps")
+	yt.CheckSource()
 }
