@@ -18,12 +18,16 @@ type YoutubeClient struct {
 	Url       string
 	ChannelID string
 	AvatarUri string
-	//config YoutubeConfig
 }
 
-type YoutubeConfig struct {
+type YoutubeConfig struct {}
 
-}
+var (
+	ErrThumbnailMissing = errors.New("unable to find the video thumbnail on a youtube video")
+	ErrTagsMissing = errors.New("unable to find the tags on the video")
+	ErrAvatarMissing = errors.New("unable to find the avatar image on the page")
+	ErrChannelIdMissing = errors.New("unable to find the channelId on the requested page")	
+)
 
 const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channel_id="
 
@@ -85,7 +89,7 @@ func (yc *YoutubeClient) GetChannelId(doc *goquery.Document) (string, error) {
 			return yc.ChannelID, nil
 		}
 	}
-	return "", errors.New("unable to find the channelId on the requested page")
+	return "", ErrChannelIdMissing
 }
 
 // This will parse the page to find the current Avatar of the channel.
@@ -98,7 +102,7 @@ func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")
 
 	if *res == "" || res == nil {
-		return AvatarUri, errors.New("unable to find the avatar on the page")
+		return AvatarUri, ErrAvatarMissing
 	}
 		
 	defer browser.Close()
@@ -116,7 +120,7 @@ func (yc *YoutubeClient) GetTags(parser *goquery.Document) (string, error) {
 			return res, nil
 		}
 	}
-	return "", errors.New("unable to find the tags on the video")
+	return "", ErrTagsMissing
 }
 
 func (yc *YoutubeClient) GetVideoThumbnail(parser *goquery.Document) (string, error) {
@@ -128,7 +132,7 @@ func (yc *YoutubeClient) GetVideoThumbnail(parser *goquery.Document) (string, er
 			return res, nil
 		}
 	}
-	return "", errors.New("unable to find the video thumbnail on a youtube video")
+	return "", ErrThumbnailMissing
 }
 
 // This will pull the RSS feed items and return the results
