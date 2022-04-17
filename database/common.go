@@ -18,7 +18,8 @@ type DatabaseClient struct {
 
 // This will generate a new client to interface with the API Database.
 func NewDatabaseClient() DatabaseClient {
-	var dbUri = services.NewConfigClient().GetConfig(services.DB_URI)
+	cc := services.NewConfigClient()
+	dbUri := cc.GetConfig(services.DB_URI)
 
 	var client = DatabaseClient{}
 	client.Diagnosis.rootUri = dbUri
