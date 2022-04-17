@@ -47,8 +47,9 @@ func TestGetAvatarUri(t *testing.T) {
 		0,
 		"https://youtube.com/gamegrumps",
 	)
-	_, err := yc.GetAvatarUri()
+	res, err := yc.GetAvatarUri()
 	if err != nil { panic(err) }
+	if res == "" { panic(services.ErrAvatarMissing)}
 }
 
 func TestGetVideoTags(t *testing.T) {
@@ -106,5 +107,29 @@ func TestCheckSource(t *testing.T) {
 	)
 	err := yc.CheckSource()
 	if err != nil { panic(err) }
+
+}
+
+func TestCheckUriCache(t *testing.T) {
+	yc := services.NewYoutubeClient(
+		0,
+		"https://youtube.com/gamegrumps",
+	)
+	item := "demo"
+
+	services.YoutubeUriCache = append(services.YoutubeUriCache, &item)
+	res := yc.CheckUriCache(&item)
+	if res == false { panic("expected a value to come back")}
+}
+
+func TestCheckUriCacheFails(t *testing.T) {
+	yc := services.NewYoutubeClient(
+		0,
+		"https://youtube.com/gamegrumps",
+	)
+	item := "demo1"
+	
+	res := yc.CheckUriCache(&item)
+	if res == true { panic("expected no value to come back")}
 
 }

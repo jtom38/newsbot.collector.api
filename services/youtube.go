@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	//"strconv"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
@@ -18,11 +19,17 @@ type YoutubeClient struct {
 	Url       string
 	ChannelID string
 	AvatarUri string
+	Config 	  YoutubeConfig
 }
 
-type YoutubeConfig struct {}
+type YoutubeConfig struct {
+	Debug bool
+}
 
 var (
+	// This is a local slice to store what URI's have been seen to remove extra calls to the DB
+	YoutubeUriCache []*string
+
 	ErrThumbnailMissing = errors.New("unable to find the video thumbnail on a youtube video")
 	ErrTagsMissing = errors.New("unable to find the tags on the video")
 	ErrAvatarMissing = errors.New("unable to find the avatar image on the page")
@@ -32,10 +39,18 @@ var (
 const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channel_id="
 
 func NewYoutubeClient(SourceID uint, Url string) YoutubeClient {
-	return YoutubeClient{
+	yc := YoutubeClient{
 		SourceID: SourceID,
 		Url:      Url,
 	}
+	/*
+	cc := NewConfigClient()
+
+	debug, err := strconv.ParseBool(cc.GetConfig(YOUTUBE_DEBUG))
+	if err != nil { panic("'YOUTUBE_DEBUG' was not a bool value")}
+	yc.Config.Debug = debug
+	*/
+	return yc
 }
 
 // CheckSource will go and run all the commands needed to process a source.
@@ -47,19 +62,32 @@ func (yc *YoutubeClient) CheckSource() error {
 	// If we have the value, skip
 	channelId, err := yc.GetChannelId(docParser)
 	if err != nil { return err }
+	if channelId == "" { return ErrChannelIdMissing }
 	yc.ChannelID = channelId
 	
 	// Check the cache/db forthe value.
 	// if we have the value, skip
 	avatar, err := yc.GetAvatarUri()
 	if err != nil { return err }
+	if avatar == "" { return ErrAvatarMissing }
 	yc.AvatarUri = avatar
 
 	feed, err := yc.PullFeed()
 	if err != nil { return err }
 	
-	_, err = yc.CheckForNewPosts(feed)
+	newPosts, err := yc.CheckForNewPosts(feed)
 	if err != nil { return err }
+
+	//TODO post to the API
+	for _, item := range newPosts {
+
+		article := yc.ConvertToArticle(item)
+
+		YoutubeUriCache = append(YoutubeUriCache, &item.Link)
+
+		// Add the post to local cache
+		log.Println(article)
+	}
 	
 	return nil
 }
@@ -104,7 +132,9 @@ func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	if *res == "" || res == nil {
 		return AvatarUri, ErrAvatarMissing
 	}
-		
+	
+	AvatarUri = *res
+
 	defer browser.Close()
 	defer page.Close()
 	return AvatarUri, nil
@@ -152,37 +182,47 @@ func (yc *YoutubeClient) PullFeed() (*gofeed.Feed, error) {
 func (yc *YoutubeClient) CheckForNewPosts(feed *gofeed.Feed) ([]*gofeed.Item, error) {
 	var newPosts []*gofeed.Item
 	for _, item := range feed.Items {
+
 		// Check the cache/db to see if this URI has been seen already
-		
+		uriExists := yc.CheckUriCache(&item.Link)
+		if uriExists { continue }
 
+		//TODO Check the DB if the cache is not aware
+		//TODO If the db knew about it, append it to the local cache
 
-		// if its new, process it.
+		// if its new, append it.
 		newPosts = append(newPosts, item)
-
-		// Add the post to local cache
-
-		article := yc.ConvertToArticle(item)
-		log.Println(article)
 	}
 
 	return newPosts, nil
+}
+
+func (yc *YoutubeClient) CheckUriCache(uri *string) bool {
+	for _, item := range YoutubeUriCache {
+		if item == uri {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
 	parser, err := yc.GetParser(item.Link)
 	if err != nil { 
 		log.Printf("Unable to process %v, submit this link as an issue.\n", item.Link)
-		
 	}
 
 	tags, err := yc.GetTags(parser)
 	if err != nil {
-		log.Printf("Unable to find the tags on %v, submit this link as an issue.\n", item.Link)
+		msg := fmt.Sprintf("%v. %v", ErrTagsMissing, item.Link)
+		log.Println(msg)
 	}
 
 	thumb, err := yc.GetVideoThumbnail(parser)
 	if err != nil { 
-		log.Printf("Unable to find the thumbnail at %v, submit this link as an issue.\n", item.Link)
+		msg := fmt.Sprintf("%v. %v", ErrThumbnailMissing, item.Link)
+		log.Println(msg)
 	}
 
 	var article = model.Articles{
