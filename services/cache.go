@@ -11,7 +11,7 @@ type CacheClient struct{}
 var (
 	cacheStorage []*model.CacheItem
 
-	ErrCacheRecordMissing = errors.New("unable to find the requested record.")
+	ErrCacheRecordMissing = errors.New("unable to find the requested record")
 )
 
 
