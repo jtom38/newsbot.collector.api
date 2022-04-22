@@ -87,6 +87,7 @@ func (fc *FFXIVClient) GetParser() (*goquery.Document, error) {
 	return doc, nil
 }
 
+
 func (fc *FFXIVClient) GetBrowser() (*rod.Browser) {
 	browser := rod.New().MustConnect()
 	return browser
@@ -141,6 +142,7 @@ func (fc *FFXIVClient) ExtractThumbnail(page *rod.Page) (string, error) {
 	
 	title := page.MustElement(".news__header > h1:nth-child(2)").MustText()
 	log.Println(title)
+
 	return thumbnail, nil
 }
 
@@ -152,4 +154,27 @@ func (fc *FFXIVClient) ExtractPubDate(page *rod.Page) (time.Time, error) {
 	if err != nil { return time.Now(), err }
 
 	return PubDate, nil
+}
+
+func (fc *FFXIVClient) ExtractDescription(page *rod.Page) (string, error) {
+	res := page.MustElement(".news__detail__wrapper").MustText()
+	if res == "" { return "", errors.New("unable to locate the description on the post")}
+
+	return res, nil
+}
+
+func (fc *FFXIVClient) ExtractAuthor(page *rod.Page) (string, error) {
+	meta := page.MustElements("head > meta")
+	for _, item := range meta {
+		name, err := item.Property("name")
+		if err != nil { return "", err }
+
+		if name.String() != "author" { continue }
+		content, err := item.Property("content")
+		if err != nil { return "", err }
+		
+		return content.String(), nil
+	}
+	log.Println(meta)
+	return "", errors.New("unable to find the author on the page")
 }

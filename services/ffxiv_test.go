@@ -55,5 +55,37 @@ func TestFfxivExtractPubDate(t *testing.T) {
 
 	_, err = fc.ExtractPubDate(page)
 	if err != nil { panic(err) }
+}
 
+func TestFfxivExtractDescription(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+
+	parser := fc.GetBrowser()
+	defer parser.Close()
+
+	links, err := fc.PullFeed(parser)
+	if err != nil { panic(err) }
+
+	page := fc.GetPage(parser, links[0])
+	defer page.Close()
+
+	_, err = fc.ExtractDescription(page)
+	if err != nil { panic(err) }
+}
+
+func TestFfxivExtractAuthor(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+
+	parser := fc.GetBrowser()
+	defer parser.Close()
+
+	links, err := fc.PullFeed(parser)
+	if err != nil { panic(err) }
+
+	page := fc.GetPage(parser, links[0])
+	defer page.Close()
+
+	author, err := fc.ExtractAuthor(page)
+	if err != nil { panic(err) }
+	if author == "" {panic("failed to locate the author name")}
 }
