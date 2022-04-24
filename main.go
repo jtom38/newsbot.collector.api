@@ -65,3 +65,21 @@ func CheckYoutube() {
 	yt := services.NewYoutubeClient(0, "https://www.youtube.com/user/GameGrumps")
 	yt.CheckSource()
 }
+
+func CheckFfxiv() {
+	
+	fc := services.NewFFXIVClient("na")
+	articles, err := fc.CheckSource()
+
+	// This isnt in a thread yet, so just output to stdout
+	if err != nil { log.Println(err) }
+	
+	dc := database.NewDatabaseClient()
+	for _, item := range articles {		
+		_, err = dc.Articles.FindByUrl(item.Url)
+		if err != nil {
+			err = dc.Articles.Add(item)
+			if err != nil { log.Println("Failed to post article.")}
+		}
+	}
+}
