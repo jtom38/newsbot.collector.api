@@ -5,14 +5,13 @@ import (
 	"errors"
 	"log"
 	"time"
-
-	//"log"
 	"net/http"
-
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
+
 	"github.com/jtom38/newsbot/collector/domain/model"
 )
 
@@ -31,6 +30,8 @@ type FFXIVClient struct {
 	SourceID uint
 	Url string
 	Region string
+
+	cacheGroup string
 }
 
 func NewFFXIVClient(region string) FFXIVClient {
@@ -46,35 +47,72 @@ func NewFFXIVClient(region string) FFXIVClient {
 	return FFXIVClient{
 		Region: region,
 		Url: url,
+		cacheGroup: "ffxiv",
 	}
 }
 
-func (fc *FFXIVClient) CheckSource() error {
+func (fc *FFXIVClient) CheckSource() ([]model.Articles, error) {
+	var articles []model.Articles
+
 	parser := fc.GetBrowser()
 	defer parser.Close()
-	//if err != nil { return err }
 
 	links, err := fc.PullFeed(parser)
-	if err != nil { return err }
+	if err != nil { return articles, err }
+
+	cache := NewCacheClient(fc.cacheGroup)
 
 	for _, link := range links {
-		var article model.Articles
+		// Check cache/db if this link has been seen already, skip
+		_, err := cache.FindByValue(link)
+		if err == nil { continue }
+		
 
 		page := fc.GetPage(parser, link)
 
-		thumb, err := fc.ExtractThumbnail(page)
-		if err != nil { return err }
+		title, err := fc.ExtractTitle(page)
+		if err != nil { return articles, err }
 
+		thumb, err := fc.ExtractThumbnail(page)
+		if err != nil { return articles, err }
 
 		pubDate, err := fc.ExtractPubDate(page)
-		if err != nil { return err }
+		if err != nil { return articles, err }
 
-		article.Thumbnail = thumb
-		article.PubDate = pubDate
+		description, err := fc.ExtractDescription(page)
+		if err != nil { return articles, err }
 
+		authorName, err := fc.ExtractAuthor(page)
+		if err != nil { return articles, err }
+
+		authorImage, err := fc.ExtractAuthorImage(page)
+		if err != nil { return articles, err }
+
+		tags, err := fc.ExtractTags(page)
+		if err != nil { return articles, err } 
+
+		article := model.Articles{
+			SourceID: fc.SourceID,
+			Tags: tags,
+			Title: title,
+			Url: link,
+			PubDate: pubDate,
+			Video: "",
+			VideoHeight: 0,
+			VideoWidth: 0,
+			Thumbnail: thumb,
+			Description: description,
+			AuthorName: authorName,
+			AuthorImage: authorImage,
+		}
+		log.Printf("Collected '%v' from '%v'", article.Title, article.Url)
+
+		cache.Insert(uuid.New().String(), link)
+
+		articles = append(articles, article)
 	}
 
-	return nil
+	return articles, nil
 }
 
 func (fc *FFXIVClient) GetParser() (*goquery.Document, error) {
@@ -86,7 +124,6 @@ func (fc *FFXIVClient) GetParser() (*goquery.Document, error) {
 	if err != nil { return nil, err }
 	return doc, nil
 }
-
 
 func (fc *FFXIVClient) GetBrowser() (*rod.Browser) {
 	browser := rod.New().MustConnect()
@@ -135,7 +172,6 @@ func (rc *FFXIVClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 	return page
 }
 
-
 func (fc *FFXIVClient) ExtractThumbnail(page *rod.Page) (string, error) {
 	thumbnail := page.MustElementX("/html/body/div[3]/div[2]/div[1]/article/div[1]/img").MustProperty("src").String()
 	if thumbnail == "" { return "", errors.New("unable to find thumbnail")}
@@ -175,6 +211,52 @@ func (fc *FFXIVClient) ExtractAuthor(page *rod.Page) (string, error) {
 		
 		return content.String(), nil
 	}
-	log.Println(meta)
+	//log.Println(meta)
 	return "", errors.New("unable to find the author on the page")
 }
+
+func (fc *FFXIVClient) ExtractTags(page *rod.Page) (string, error) {
+	meta := page.MustElements("head > meta")
+	for _, item := range meta {
+		name, err := item.Property("name")
+		if err != nil { return "", err }
+
+		if name.String() != "keywords" { continue }
+		content, err := item.Property("content")
+		if err != nil { return "", err }
+		
+		return content.String(), nil
+	}
+	//log.Println(meta)
+	return "", errors.New("unable to find the author on the page")
+}
+
+func (fc *FFXIVClient) ExtractTitle(page *rod.Page) (string, error) {
+	title, err := page.MustElement("head > title").Text()
+	if err != nil { return "", err }
+
+	if !strings.Contains(title, "|") { return "", errors.New("unable to split the title, missing | in the string")}
+
+	res := strings.Split(title, "|")
+	if title != "" { return res[0], nil }
+	
+	//log.Println(meta)
+	return "", errors.New("unable to find the author on the page")
+}
+
+func (fc *FFXIVClient) ExtractAuthorImage(page *rod.Page) (string, error) {
+	meta := page.MustElements("head > link")
+	for _, item := range meta {
+		name, err := item.Property("rel")
+		if err != nil { return "", err }
+
+		if name.String() != "apple-touch-icon-precomposed" { continue }
+		content, err := item.Property("href")
+		if err != nil { return "", err }
+		
+		return content.String(), nil
+	}
+	//log.Println(meta)
+	return "", errors.New("unable to find the author image on the page")
+}
+

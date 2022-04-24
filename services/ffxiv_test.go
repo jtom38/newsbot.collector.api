@@ -87,5 +87,62 @@ func TestFfxivExtractAuthor(t *testing.T) {
 
 	author, err := fc.ExtractAuthor(page)
 	if err != nil { panic(err) }
-	if author == "" {panic("failed to locate the author name")}
+	if author == "" { panic("failed to locate the author name") }
+}
+
+func TestFfxivExtractTags(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+
+	parser := fc.GetBrowser()
+	defer parser.Close()
+
+	links, err := fc.PullFeed(parser)
+	if err != nil { panic(err) }
+
+	page := fc.GetPage(parser, links[0])
+	defer page.Close()
+
+	res, err := fc.ExtractTags(page)
+	if err != nil { panic(err) }
+	if res == "" {panic("failed to locate the tags")}
+}
+
+func TestFfxivExtractTitle(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+
+	parser := fc.GetBrowser()
+	defer parser.Close()
+
+	links, err := fc.PullFeed(parser)
+	if err != nil { panic(err) }
+
+	page := fc.GetPage(parser, links[0])
+	defer page.Close()
+
+	res, err := fc.ExtractTitle(page)
+	if err != nil { panic(err) }
+	if res == "" { panic("failed to locate the tags") }
+}
+
+func TestFFxivExtractAuthorIamge(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+
+	parser := fc.GetBrowser()
+	defer parser.Close()
+
+	links, err := fc.PullFeed(parser)
+	if err != nil { panic(err) }
+
+	page := fc.GetPage(parser, links[0])
+	defer page.Close()
+
+	res, err := fc.ExtractAuthorImage(page)
+	if err != nil { panic(err) }
+	if res == "" { panic("failed to locate the tags") }
+}
+
+func TestFfxivCheckSource(t *testing.T) {
+	fc := services.NewFFXIVClient("na")
+	fc.CheckSource()
+	
 }
