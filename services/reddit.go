@@ -5,8 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
+	"github.com/go-rod/rod"
 	"github.com/jtom38/newsbot/collector/domain/model"
 )
 
@@ -34,7 +37,25 @@ func NewRedditClient(subreddit string, sourceID uint) RedditClient {
 	rc.config.PullNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
 	rc.config.PullTop = cc.GetConfig(REDDIT_PULL_TOP)
 
+	rc.enableThing()
+
 	return rc
+}
+
+// This is needed for to get modern go to talk to the endpoint.
+// https://www.reddit.com/r/redditdev/comments/t8e8hc/getting_nothing_but_429_responses_when_using_go/
+func (rc RedditClient) enableThing() {
+	os.Setenv("GODEBUG", "http2client=0")
+}
+
+func (rc RedditClient) GetBrowser() *rod.Browser {
+	browser := rod.New().MustConnect()
+	return browser
+}
+
+func (rc RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
+	page := parser.MustPage(url)
+	return page
 }
 
 // GetContent() reaches out to Reddit and pulls the Json data.
@@ -45,9 +66,14 @@ func (rc RedditClient) GetContent() (model.RedditJsonContent, error ) {
 	log.Printf("Collecting results on '%v'", rc.subreddit)
 	content, err := getHttpContent(rc.url)
 	if err != nil { return items, err }
+	if strings.Contains("<h1>whoa there, pardner!</h1>", string(content) ) {
+		return items, errors.New("did not get json data from the server")
+	}
 
 	json.Unmarshal(content, &items)
-	
+	if len(items.Data.Children) == 0 {
+		return items, errors.New("failed to unmarshal the data")
+	}
 	return items, nil
 }
 
