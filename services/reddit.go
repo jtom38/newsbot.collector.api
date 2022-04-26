@@ -37,14 +37,14 @@ func NewRedditClient(subreddit string, sourceID uint) RedditClient {
 	rc.config.PullNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
 	rc.config.PullTop = cc.GetConfig(REDDIT_PULL_TOP)
 
-	rc.enableThing()
+	rc.disableHttp2Client()
 
 	return rc
 }
 
 // This is needed for to get modern go to talk to the endpoint.
 // https://www.reddit.com/r/redditdev/comments/t8e8hc/getting_nothing_but_429_responses_when_using_go/
-func (rc RedditClient) enableThing() {
+func (rc RedditClient) disableHttp2Client() {
 	os.Setenv("GODEBUG", "http2client=0")
 }
 
