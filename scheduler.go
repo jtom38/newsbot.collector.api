@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	
+
 	"github.com/robfig/cron/v3"
 
 	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/services"
+	//"github.com/jtom38/newsbot/collector/services/cache"
+
 )
 
 func Hello(t string) {
@@ -17,7 +19,7 @@ func Hello(t string) {
 func EnableScheduler() {
 	c := cron.New()
 
-	c.AddFunc("*/5 * * * *", func()  { go CheckCache() })	
+	//c.AddFunc("*/5 * * * *", func()  { go CheckCache() })	
 	c.AddFunc("*/30 * * * *", func() { go CheckReddit() })
 	c.AddFunc("*/30 * * * *", func() { go CheckYoutube() })
 	c.AddFunc("* */1 * * *", func()  { go CheckFfxiv() })
@@ -26,8 +28,9 @@ func EnableScheduler() {
 }
 
 func CheckCache() {
-	cache := services.NewCacheAgeMonitor()
-	cache.CheckExpiredEntries()
+	//cache := services.NewCacheAgeMonitor()
+	//cache.CheckExpiredEntries()
+
 }
 
 func CheckReddit() {
