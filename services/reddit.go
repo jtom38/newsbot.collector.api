@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-rod/rod"
 	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/services/config"
 )
 
 type RedditClient struct {
@@ -32,10 +33,10 @@ func NewRedditClient(subreddit string, sourceID uint) RedditClient {
 		url: fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
 		sourceId:  sourceID,
 	}
-	cc := NewConfigClient()
-	rc.config.PullHot = cc.GetConfig(REDDIT_PULL_HOT)
-	rc.config.PullNSFW = cc.GetConfig(REDDIT_PULL_NSFW)
-	rc.config.PullTop = cc.GetConfig(REDDIT_PULL_TOP)
+	cc := config.New()
+	rc.config.PullHot = cc.GetConfig(config.REDDIT_PULL_HOT)
+	rc.config.PullNSFW = cc.GetConfig(config.REDDIT_PULL_NSFW)
+	rc.config.PullTop = cc.GetConfig(config.REDDIT_PULL_TOP)
 
 	rc.disableHttp2Client()
 
