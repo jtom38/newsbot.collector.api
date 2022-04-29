@@ -12,4 +12,5 @@ type CacheItem struct {
 	// youtube, reddit, ect
 	Group   string
 	Expires time.Time
+	IsTainted bool
 }
