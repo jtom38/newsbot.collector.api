@@ -20,6 +20,8 @@ type YoutubeClient struct {
 	ChannelID string
 	AvatarUri string
 	Config 	  YoutubeConfig
+
+	cacheGroup string
 }
 
 type YoutubeConfig struct {
@@ -42,6 +44,7 @@ func NewYoutubeClient(SourceID uint, Url string) YoutubeClient {
 	yc := YoutubeClient{
 		SourceID: SourceID,
 		Url:      Url,
+		cacheGroup: "youtube",
 	}
 	/*
 	cc := NewConfigClient()
@@ -60,6 +63,7 @@ func (yc *YoutubeClient) CheckSource() error {
 
 	// Check cache/db for existing value
 	// If we have the value, skip
+	//channelId, err := yc.extractChannelId()
 	channelId, err := yc.GetChannelId(docParser)
 	if err != nil { return err }
 	if channelId == "" { return ErrChannelIdMissing }
@@ -92,6 +96,16 @@ func (yc *YoutubeClient) CheckSource() error {
 	return nil
 }
 
+func (yc *YoutubeClient) GetBrowser() *rod.Browser {
+	browser := rod.New().MustConnect()
+	return browser
+}
+
+func (yc *YoutubeClient) GetPage(parser *rod.Browser, url string) *rod.Page {
+	page := parser.MustPage(url)
+	return page
+}
+
 func (yc *YoutubeClient) GetParser(uri string) (*goquery.Document, error) {
 	html, err := http.Get(uri)
 	if err != nil {
@@ -119,6 +133,12 @@ func (yc *YoutubeClient) GetChannelId(doc *goquery.Document) (string, error) {
 	}
 	return "", ErrChannelIdMissing
 }
+
+// This pulls the youtube page and finds the ChannelID.
+// This value is required to generate the RSS feed URI
+//func (yc *YoutubeClient) extractChannelId(page *rod.Page) (string, error) {
+
+//}
 
 // This will parse the page to find the current Avatar of the channel.
 func (yc *YoutubeClient) GetAvatarUri() (string, error) {

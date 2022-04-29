@@ -82,10 +82,6 @@ func TestGetChannelTags(t *testing.T) {
 	if err != nil { panic(err) }
 }
 
-func TestConvertToArticle(t *testing.T) {
-
-}
-
 func TestGetVideoThumbnail(t *testing.T) {
 	yc := services.NewYoutubeClient(
 		0,

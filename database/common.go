@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/config"
 )
 
 type DatabaseClient struct {
@@ -18,8 +18,8 @@ type DatabaseClient struct {
 
 // This will generate a new client to interface with the API Database.
 func NewDatabaseClient() DatabaseClient {
-	cc := services.NewConfigClient()
-	dbUri := cc.GetConfig(services.DB_URI)
+	cc := config.New()
+	dbUri := cc.GetConfig(config.DB_URI)
 
 	var client = DatabaseClient{}
 	client.Diagnosis.rootUri = dbUri

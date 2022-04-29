@@ -84,10 +84,11 @@ func (ac *ArticlesClient) Add(item model.Articles) error {
 
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
-	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
+	
 	if resp.StatusCode != 200 {
 		return errors.New("failed to post to the DB")
 	}

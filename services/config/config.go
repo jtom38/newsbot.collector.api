@@ -1,4 +1,4 @@
-package services
+package config
 
 import (
 	"os"
@@ -19,7 +19,7 @@ const (
 
 type ConfigClient struct {}
 
-func NewConfigClient() ConfigClient {
+func New() ConfigClient {
 	_, err := os.Open(".env")
 	if err == nil {
 		loadEnvFile()
