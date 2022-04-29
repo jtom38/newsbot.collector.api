@@ -1,22 +1,18 @@
 package services
 
 import (
-	//"fmt"
 	"errors"
 	"log"
-	"time"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/google/uuid"
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
+	"github.com/google/uuid"
 
 	"github.com/jtom38/newsbot/collector/domain/model"
-)
-
-var (
-
+	"github.com/jtom38/newsbot/collector/services/cache"
 )
 
 const (
@@ -60,7 +56,7 @@ func (fc *FFXIVClient) CheckSource() ([]model.Articles, error) {
 	links, err := fc.PullFeed(parser)
 	if err != nil { return articles, err }
 
-	cache := NewCacheClient(fc.cacheGroup)
+	cache := cache.NewCacheClient(fc.cacheGroup)
 
 	for _, link := range links {
 		// Check cache/db if this link has been seen already, skip

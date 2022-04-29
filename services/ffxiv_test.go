@@ -3,17 +3,17 @@ package services_test
 import (
 	"testing"
 
-	"github.com/jtom38/newsbot/collector/services"
+	ffxiv "github.com/jtom38/newsbot/collector/services"
 )
 
 func TestFfxivGetParser(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 	_, err := fc.GetParser()
 	if err != nil { panic(err) }
 }
 
 func TestFfxivPullFeed(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -25,7 +25,7 @@ func TestFfxivPullFeed(t *testing.T) {
 }
 
 func TestFfxivExtractThumbnail(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -42,7 +42,7 @@ func TestFfxivExtractThumbnail(t *testing.T) {
 }
 
 func TestFfxivExtractPubDate(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -58,7 +58,7 @@ func TestFfxivExtractPubDate(t *testing.T) {
 }
 
 func TestFfxivExtractDescription(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -74,7 +74,7 @@ func TestFfxivExtractDescription(t *testing.T) {
 }
 
 func TestFfxivExtractAuthor(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -91,7 +91,7 @@ func TestFfxivExtractAuthor(t *testing.T) {
 }
 
 func TestFfxivExtractTags(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -108,7 +108,7 @@ func TestFfxivExtractTags(t *testing.T) {
 }
 
 func TestFfxivExtractTitle(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -125,7 +125,7 @@ func TestFfxivExtractTitle(t *testing.T) {
 }
 
 func TestFFxivExtractAuthorIamge(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -142,7 +142,7 @@ func TestFFxivExtractAuthorIamge(t *testing.T) {
 }
 
 func TestFfxivCheckSource(t *testing.T) {
-	fc := services.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient("na")
 	fc.CheckSource()
 	
 }
