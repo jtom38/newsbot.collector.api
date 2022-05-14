@@ -72,6 +72,11 @@ func initTwitchApi(ClientId string, ClientSecret string) (helix.Client, error) {
 	return *api, nil
 }
 
+// This will let you replace the bound source record to keep the same session alive.
+func (tc TwitchClient) ReplaceSourceRecord(source model.Sources) {
+	tc.SourceRecord = source
+}
+
 // Invokes Logon request to the API
 func (tc TwitchClient) Login() error {
 	token, err := tc.api.RequestAppAccessToken([]string{twitchScopes})
@@ -83,49 +88,51 @@ func (tc TwitchClient) Login() error {
 	return nil
 }
 
-func (tc TwitchClient) GetContent() error {
+func (tc TwitchClient) GetContent() ([]model.Articles, error) {
+	var items []model.Articles
+
 	user, err := tc.GetUserDetails()
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	posts, err := tc.GetPosts(user)
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	for _, video := range posts {
 		article := model.Articles{}
 
 		article.AuthorName, err = tc.ExtractAuthor(video)
-		if err != nil { return err }
+		if err != nil { return items, err }
 		
 		article.AuthorImage, err = tc.ExtractAuthorImage(user)
-		if err != nil { return err }
+		if err != nil { return items, err }
 
 		article.Description, err = tc.ExtractDescription(video)
-		if err != nil {return err }
+		if err != nil {return items, err }
 
 		article.PubDate, err = tc.ExtractPubDate(video)
-		if err != nil { return err }
+		if err != nil { return items, err }
 
 		article.SourceID = tc.SourceRecord.ID
 		article.Tags, err = tc.ExtractTags(video, user)
-		if err != nil { return err }
+		if err != nil { return items, err }
 
 		article.Thumbnail, err = tc.ExtractThumbnail(video)
-		if err != nil { return err }
+		if err != nil { return items, err }
 
 		article.Title, err = tc.ExtractTitle(video)
-		if err != nil { return err }
+		if err != nil { return items, err }
 		
 		article.Url, err = tc.ExtractUrl(video)
-		if err != nil { return err }
+		if err != nil { return items, err }
 
-		//article.Video, err 
+		items = append(items, article)
 	}
 
-	return nil
+	return items, nil
 }
 
 func (tc TwitchClient) GetUserDetails() (helix.User, error) {
@@ -197,10 +204,9 @@ func (tc TwitchClient) ExtractDescription(post helix.Video) (string, error) {
 
 // Extracts the avatar of the author with some validation.
 func (tc TwitchClient) ExtractAuthorImage(user helix.User) (string, error) {
-	if user.OfflineImageURL == "" {
-		return "", errors.New("")
-	}
-	return user.OfflineImageURL, nil
+	if user.ProfileImageURL == "" { return "", ErrMissingAuthorImage }
+	if !strings.Contains(user.ProfileImageURL, "-profile_image-") { return "", ErrInvalidAuthorImage }
+	return user.ProfileImageURL, nil
 }
 
 // Generate tags based on the video metadata.
@@ -219,5 +225,6 @@ func (tc TwitchClient) ExtractTitle(post helix.Video) (string, error) {
 }
 
 func (tc TwitchClient) ExtractUrl(post helix.Video) (string, error) {
-	return "", nil
+	if post.URL == "" { return "", ErrMissingUrl }
+	return post.URL, nil
 }
