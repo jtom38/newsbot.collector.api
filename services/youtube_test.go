@@ -49,7 +49,7 @@ func TestGetAvatarUri(t *testing.T) {
 	)
 	res, err := yc.GetAvatarUri()
 	if err != nil { panic(err) }
-	if res == "" { panic(services.ErrMessingAuthorImage)}
+	if res == "" { panic(services.ErrMissingAuthorImage)}
 }
 
 func TestGetVideoTags(t *testing.T) {

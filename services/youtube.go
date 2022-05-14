@@ -22,7 +22,7 @@ type YoutubeClient struct {
 	AvatarUri string
 
 	// config
-	debug bool
+	//debug bool
 
 	// cache config
 	cacheGroup string
@@ -78,7 +78,7 @@ func (yc *YoutubeClient) CheckSource() error {
 		return err
 	}
 	if avatar == "" {
-		return ErrMessingAuthorImage
+		return ErrMissingAuthorImage
 	}
 	yc.AvatarUri = avatar
 
@@ -160,7 +160,7 @@ func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")
 
 	if *res == "" || res == nil {
-		return AvatarUri, ErrMessingAuthorImage
+		return AvatarUri, ErrMissingAuthorImage
 	}
 
 	AvatarUri = *res
