@@ -33,7 +33,7 @@ func TestTwitchLogin(t *testing.T) {
 }
 
 // reach out and confirms that the API returns posts made by the user.
-func TestReturnsUserPosts(t *testing.T) {
+func TestTwitchReturnsUserPosts(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {
 		t.Error(err)
@@ -58,7 +58,7 @@ func TestReturnsUserPosts(t *testing.T) {
 	}
 }
 
-func TestReturnsNothingDueToInvalidUserName(t *testing.T) {
+func TestTwitchReturnsNothingDueToInvalidUserName(t *testing.T) {
 	tc, err := services.NewTwitchClient(invalidRecord)
 	if err != nil {
 		t.Error(err)
@@ -83,7 +83,7 @@ func TestReturnsNothingDueToInvalidUserName(t *testing.T) {
 	}
 }
 
-func TestReturnsVideoAuthor(t *testing.T) {
+func TestTwitchReturnsVideoAuthor(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {
 		t.Error(err)
@@ -108,7 +108,7 @@ func TestReturnsVideoAuthor(t *testing.T) {
 	}
 }
 
-func TestReturnsThumbnail(t *testing.T) {
+func TestTwitchReturnsThumbnail(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {t.Error(err) }
 
@@ -126,7 +126,7 @@ func TestReturnsThumbnail(t *testing.T) {
 	if value == "" { t.Error("uable to parse username") }
 }
 
-func TestReturnsPubDate(t *testing.T) {
+func TestTwitchReturnsPubDate(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil { t.Error(err) }
 
@@ -144,7 +144,7 @@ func TestReturnsPubDate(t *testing.T) {
 	if err != nil { t.Error(err) }
 }
 
-func TestReturnsDescription(t *testing.T) {
+func TestTwitchReturnsDescription(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {
 		t.Error(err)
@@ -171,7 +171,7 @@ func TestReturnsDescription(t *testing.T) {
 	}
 }
 
-func TestReturnsAuthorImage(t *testing.T) {
+func TestTwitchReturnsAuthorImage(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {t.Error(err) }
 
@@ -185,7 +185,7 @@ func TestReturnsAuthorImage(t *testing.T) {
 	if err != nil { t.Error(err) }
 }
 
-func TestReturnsTags(t *testing.T) {
+func TestTwitchReturnsTags(t *testing.T) {
 
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {
@@ -209,7 +209,7 @@ func TestReturnsTags(t *testing.T) {
 	if err != nil { t.Error(err) }
 }
 
-func TestReturnsTitle(t *testing.T) {
+func TestTwitchReturnsTitle(t *testing.T) {
 	tc, err := services.NewTwitchClient(sourceRecord)
 	if err != nil {
 		t.Error(err)
@@ -231,4 +231,35 @@ func TestReturnsTitle(t *testing.T) {
 	res, err := tc.ExtractTitle(posts[0])
 	if err != nil { t.Error(err) }
 	if res == "" { t.Error("expected a filled string but got nil")}
+}
+
+func TestTwitchReturnsUrl(t *testing.T) {
+	tc, err := services.NewTwitchClient(sourceRecord)
+	if err != nil { t.Error(err) }
+
+	err = tc.Login()
+	if err != nil { t.Error(err) }
+
+	user, err := tc.GetUserDetails()
+	if err != nil { t.Error(err) }
+
+	posts, err := tc.GetPosts(user)
+	if err != nil { t.Error(err) }
+
+	res, err := tc.ExtractUrl(posts[0])
+	if err != nil { t.Error(err) }
+	if res == "" { t.Error("expected a filled string but got nil")}
+}
+
+func TestTwitchGetContent(t *testing.T) {
+	tc, err := services.NewTwitchClient(sourceRecord)
+	if err != nil { t.Error(err) }
+
+	err = tc.Login()
+	if err != nil { t.Error(err) }
+	
+	posts, err := tc.GetContent()
+	if err != nil {t.Error(err) }
+	if len(posts) == 0 { t.Error("posts came back with 0 posts") }
+	if len(posts) != 20 { t.Error("expected 20 posts") } 
 }
