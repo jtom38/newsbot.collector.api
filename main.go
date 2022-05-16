@@ -8,14 +8,14 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/jtom38/newsbot/collector/routes"
+	"github.com/jtom38/newsbot/collector/services/cron"
 )
 
 func main() {
 	//dc := database.NewDatabaseClient()
 	//err := dc.Diagnosis.Ping()
 	//if err != nil { log.Fatalln(err) }
-
-	EnableScheduler()
+	cron.EnableScheduler()
 
 	app := chi.NewRouter()
 	app.Use(middleware.Logger)
