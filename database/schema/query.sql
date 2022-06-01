@@ -105,5 +105,8 @@ Values
 -- name: GetSourceByID :one
 Select * From Sources where ID = $1 Limit 1;
 
+-- name: GetSourcesBySource :many
+Select * From Sources where Source = $1;
+
 -- name: DeleteSource :exec
 DELETE From sources where id = $1;

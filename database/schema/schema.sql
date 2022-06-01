@@ -1,15 +1,15 @@
 CREATE TABLE Articles (
 	ID 			uuid PRIMARY KEY,
-	SourceId 	uuid not null,
-	Tags 		TEXT,
-	Title 		TEXT,
-	Url 		TEXT,
-	PubDate 	timestamp,
+	SourceId 	uuid NOT null,
+	Tags 		TEXT NOT NULL,
+	Title 		TEXT NOT NULL,
+	Url 		TEXT NOT NULL,
+	PubDate 	timestamp NOT NULL,
 	Video 		TEXT,
-	VideoHeight int,
-	VideoWidth 	int,
-	Thumbnail 	TEXT,
-	Description TEXT,
+	VideoHeight int NOT NULL,
+	VideoWidth 	int NOT NULL,
+	Thumbnail 	TEXT NOT NULL,
+	Description TEXT NOT NULL,
 	AuthorName 	TEXT,
 	AuthorImage TEXT
 );
@@ -26,7 +26,7 @@ CREATE Table DiscordWebHooks (
 	Url 	TEXT,
 	Server 	TEXT,
 	Channel TEXT,
-	Enabled BIT
+	Enabled BOOLEAN
 );
 
 CREATE Table Icons (
@@ -49,7 +49,7 @@ Create Table Sources (
 	Source 	TEXT,
 	Type 	TEXT,
 	Value 	TEXT,
-	Enabled BIT,
+	Enabled BOOLEAN,
 	Url 	TEXT,
 	Tags 	TEXT
 );

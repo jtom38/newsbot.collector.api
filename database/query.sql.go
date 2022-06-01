@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -22,15 +23,15 @@ Values
 type CreateArticleParams struct {
 	ID          uuid.UUID
 	Sourceid    uuid.UUID
-	Tags        sql.NullString
-	Title       sql.NullString
-	Url         sql.NullString
-	Pubdate     sql.NullTime
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
 	Video       sql.NullString
-	Videoheight sql.NullInt32
-	Videowidth  sql.NullInt32
-	Thumbnail   sql.NullString
-	Description sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
 	Authorname  sql.NullString
 	Authorimage sql.NullString
 }
@@ -86,7 +87,7 @@ type CreateDiscordWebHookParams struct {
 	Url     sql.NullString
 	Server  sql.NullString
 	Channel sql.NullString
-	Enabled interface{}
+	Enabled sql.NullBool
 }
 
 // DiscordWebHooks
@@ -172,7 +173,7 @@ type CreateSourceParams struct {
 	Source  sql.NullString
 	Type    sql.NullString
 	Value   sql.NullString
-	Enabled interface{}
+	Enabled sql.NullBool
 	Url     sql.NullString
 	Tags    sql.NullString
 }
@@ -270,7 +271,7 @@ Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, 
 Where Url = $1 LIMIT 1
 `
 
-func (q *Queries) GetArticleByUrl(ctx context.Context, url sql.NullString) (Article, error) {
+func (q *Queries) GetArticleByUrl(ctx context.Context, url string) (Article, error) {
 	row := q.db.QueryRowContext(ctx, getArticleByUrl, url)
 	var i Article
 	err := row.Scan(
@@ -480,4 +481,41 @@ func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, erro
 		&i.Tags,
 	)
 	return i, err
+}
+
+const getSourcesBySource = `-- name: GetSourcesBySource :many
+Select id, site, name, source, type, value, enabled, url, tags From Sources where Source = $1
+`
+
+func (q *Queries) GetSourcesBySource(ctx context.Context, source sql.NullString) ([]Source, error) {
+	rows, err := q.db.QueryContext(ctx, getSourcesBySource, source)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Source
+	for rows.Next() {
+		var i Source
+		if err := rows.Scan(
+			&i.ID,
+			&i.Site,
+			&i.Name,
+			&i.Source,
+			&i.Type,
+			&i.Value,
+			&i.Enabled,
+			&i.Url,
+			&i.Tags,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

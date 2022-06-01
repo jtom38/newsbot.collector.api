@@ -29,7 +29,7 @@ CREATE Table DiscordWebHooks (
 	Url 	TEXT,
 	Server 	TEXT,
 	Channel TEXT,
-	Enabled BIT
+	Enabled BOOLEAN
 );
 
 CREATE Table Icons (
@@ -52,7 +52,7 @@ Create Table Sources (
 	Source 	TEXT,
 	Type 	TEXT,
 	Value 	TEXT,
-	Enabled BIT,
+	Enabled BOOLEAN,
 	Url 	TEXT,
 	Tags 	TEXT
 );

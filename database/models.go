@@ -6,6 +6,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -13,15 +14,15 @@ import (
 type Article struct {
 	ID          uuid.UUID
 	Sourceid    uuid.UUID
-	Tags        sql.NullString
-	Title       sql.NullString
-	Url         sql.NullString
-	Pubdate     sql.NullTime
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
 	Video       sql.NullString
-	Videoheight sql.NullInt32
-	Videowidth  sql.NullInt32
-	Thumbnail   sql.NullString
-	Description sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
 	Authorname  sql.NullString
 	Authorimage sql.NullString
 }
@@ -38,7 +39,7 @@ type Discordwebhook struct {
 	Url     sql.NullString
 	Server  sql.NullString
 	Channel sql.NullString
-	Enabled interface{}
+	Enabled sql.NullBool
 }
 
 type Icon struct {
@@ -61,7 +62,7 @@ type Source struct {
 	Source  sql.NullString
 	Type    sql.NullString
 	Value   sql.NullString
-	Enabled interface{}
+	Enabled sql.NullBool
 	Url     sql.NullString
 	Tags    sql.NullString
 }
