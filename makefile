@@ -11,3 +11,6 @@ docker-build: ## Generates the docker image
 
 migrate-dev: ## Apply sql migrations to dev db
 	goose -dir "./database/migrations" postgres "user=postgres password=postgres dbname=postgres sslmode=disable" up 
+
+migrate-dev-down: ## revert sql migrations to dev db
+	goose -dir "./database/migrations" postgres "user=postgres password=postgres dbname=postgres sslmode=disable" down 
