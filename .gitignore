@@ -1,4 +1,5 @@
 .env
+dev.session.sql
 
 # Binaries for programs and plugins
 *.exe
