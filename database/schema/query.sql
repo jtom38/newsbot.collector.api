@@ -43,7 +43,7 @@ Values
 Select * from DiscordWebHooks
 Where ID = $1 LIMIT 1;
 
--- name: GetDiscordWebHooksByServer :many
+-- name: ListDiscordWebHooksByServer :many
 Select * From DiscordWebHooks
 Where Server = $1;
 
@@ -105,7 +105,7 @@ Values
 -- name: GetSourceByID :one
 Select * From Sources where ID = $1 Limit 1;
 
--- name: GetSourcesBySource :many
+-- name: ListSourcesBySource :many
 Select * From Sources where Source = $1;
 
 -- name: DeleteSource :exec

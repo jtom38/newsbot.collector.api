@@ -17,3 +17,9 @@ func TestCheckReddit(t *testing.T) {
 	cron.OpenDatabase(ctx)
 	cron.CheckReddit(ctx)
 }
+
+func TestCheckYouTube(t *testing.T) {
+	ctx := context.Background()
+	cron.OpenDatabase(ctx)
+	cron.CheckYoutube(ctx)
+}

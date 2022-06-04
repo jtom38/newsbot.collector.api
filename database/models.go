@@ -34,18 +34,18 @@ type Discordqueue struct {
 
 type Discordwebhook struct {
 	ID      uuid.UUID
-	Name    sql.NullString
+	Name    string
 	Key     sql.NullString
-	Url     sql.NullString
-	Server  sql.NullString
-	Channel sql.NullString
-	Enabled sql.NullBool
+	Url     string
+	Server  string
+	Channel string
+	Enabled bool
 }
 
 type Icon struct {
 	ID       uuid.UUID
-	Filename sql.NullString
-	Site     sql.NullString
+	Filename string
+	Site     string
 }
 
 type Setting struct {
@@ -57,12 +57,12 @@ type Setting struct {
 
 type Source struct {
 	ID      uuid.UUID
-	Site    sql.NullString
-	Name    sql.NullString
-	Source  sql.NullString
-	Type    sql.NullString
+	Site    string
+	Name    string
+	Source  string
+	Type    string
 	Value   sql.NullString
-	Enabled sql.NullBool
-	Url     sql.NullString
-	Tags    sql.NullString
+	Enabled bool
+	Url     string
+	Tags    string
 }

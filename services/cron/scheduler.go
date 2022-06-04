@@ -49,42 +49,39 @@ func OpenDatabase(ctx context.Context) error {
 	return err
 }
 
+// This is the main entry point to query all the reddit services
 func CheckReddit(ctx context.Context) {
-	sources, err := _queries.GetAllSources(ctx)
-	//sources, err := _queries.GetSourcesBySource(ctx, sql.NullString{String: "reddit"})
+	sources, err := _queries.ListSourcesBySource(ctx, "reddit")
 	if err != nil {
-		panic(err)
+		log.Printf("No defines sources for reddit to query - %v\r", err)
 	}
 
 	for _, source := range sources {
-		rc := services.NewRedditClient(source.Name.String, source.ID)
-
+		rc := services.NewRedditClient(source)
 		raw, err := rc.GetContent()
 		if err != nil {
 			log.Println(err)
 		}
-
 		redditArticles := rc.ConvertToArticles(raw)
-
-		for _, item := range redditArticles {
-			_, err := _queries.GetArticleByUrl(ctx, item.Url)
-			if err != nil {
-				err = postArticle(ctx, item)
-				if err != nil {
-					log.Println("Failed to post article.")
-				}
-			}
-		}
-		time.Sleep(30 * time.Second)
+		checkPosts(ctx, redditArticles)
 	}
 }
 
-func CheckYoutube() {
+func CheckYoutube(ctx context.Context) {
 	// Add call to the db to request youtube sources.
+	sources, err := _queries.ListSourcesBySource(ctx, "youtube")
+	if err != nil {
+		log.Printf("Youtube - No sources found to query - %v\r", err)
+	}
 
-	// Loop though the services, and generate the clients.
-	yt := services.NewYoutubeClient(0, "https://www.youtube.com/user/GameGrumps")
-	yt.CheckSource()
+	for _, source := range sources {
+		yc := services.NewYoutubeClient(source)
+		raw, err := yc.GetContent()
+		if err != nil {
+			log.Println(err)
+		}
+		checkPosts(ctx, raw)
+	}
 }
 
 func CheckFfxiv() {
@@ -149,6 +146,21 @@ func CheckTwitch() error {
 	//}
 
 	return nil
+}
+
+func checkPosts(ctx context.Context, posts []database.Article ) {
+	for _, item := range posts {
+		_, err := _queries.GetArticleByUrl(ctx, item.Url)
+		if err != nil {
+			err = postArticle(ctx, item)
+			if err != nil {
+				log.Printf("Reddit - Failed to post article - %v - %v.\r", item.Url, err)
+			} else {
+				log.Printf("Reddit - Posted article - %v\r", item.Url)
+			}
+		}
+	}
+	time.Sleep(30 * time.Second)
 }
 
 func postArticle(ctx context.Context, item database.Article) error {

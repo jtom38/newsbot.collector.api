@@ -82,12 +82,12 @@ Values
 
 type CreateDiscordWebHookParams struct {
 	ID      uuid.UUID
-	Name    sql.NullString
+	Name    string
 	Key     sql.NullString
-	Url     sql.NullString
-	Server  sql.NullString
-	Channel sql.NullString
-	Enabled sql.NullBool
+	Url     string
+	Server  string
+	Channel string
+	Enabled bool
 }
 
 // DiscordWebHooks
@@ -114,8 +114,8 @@ VALUES
 
 type CreateIconParams struct {
 	ID       uuid.UUID
-	Filename sql.NullString
-	Site     sql.NullString
+	Filename string
+	Site     string
 }
 
 // Icons
@@ -168,14 +168,14 @@ Values
 
 type CreateSourceParams struct {
 	ID      uuid.UUID
-	Site    sql.NullString
-	Name    sql.NullString
-	Source  sql.NullString
-	Type    sql.NullString
+	Site    string
+	Name    string
+	Source  string
+	Type    string
 	Value   sql.NullString
-	Enabled sql.NullBool
-	Url     sql.NullString
-	Tags    sql.NullString
+	Enabled bool
+	Url     string
+	Tags    string
 }
 
 // Sources
@@ -351,42 +351,6 @@ func (q *Queries) GetDiscordWebHooksByID(ctx context.Context, id uuid.UUID) (Dis
 	return i, err
 }
 
-const getDiscordWebHooksByServer = `-- name: GetDiscordWebHooksByServer :many
-Select id, name, key, url, server, channel, enabled From DiscordWebHooks
-Where Server = $1
-`
-
-func (q *Queries) GetDiscordWebHooksByServer(ctx context.Context, server sql.NullString) ([]Discordwebhook, error) {
-	rows, err := q.db.QueryContext(ctx, getDiscordWebHooksByServer, server)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Discordwebhook
-	for rows.Next() {
-		var i Discordwebhook
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Key,
-			&i.Url,
-			&i.Server,
-			&i.Channel,
-			&i.Enabled,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getIconByID = `-- name: GetIconByID :one
 Select id, filename, site FROM Icons
 Where ID = $1 Limit 1
@@ -404,7 +368,7 @@ Select id, filename, site FROM Icons
 Where Site = $1 Limit 1
 `
 
-func (q *Queries) GetIconBySite(ctx context.Context, site sql.NullString) (Icon, error) {
+func (q *Queries) GetIconBySite(ctx context.Context, site string) (Icon, error) {
 	row := q.db.QueryRowContext(ctx, getIconBySite, site)
 	var i Icon
 	err := row.Scan(&i.ID, &i.Filename, &i.Site)
@@ -483,12 +447,48 @@ func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, erro
 	return i, err
 }
 
-const getSourcesBySource = `-- name: GetSourcesBySource :many
+const listDiscordWebHooksByServer = `-- name: ListDiscordWebHooksByServer :many
+Select id, name, key, url, server, channel, enabled From DiscordWebHooks
+Where Server = $1
+`
+
+func (q *Queries) ListDiscordWebHooksByServer(ctx context.Context, server string) ([]Discordwebhook, error) {
+	rows, err := q.db.QueryContext(ctx, listDiscordWebHooksByServer, server)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discordwebhook
+	for rows.Next() {
+		var i Discordwebhook
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Key,
+			&i.Url,
+			&i.Server,
+			&i.Channel,
+			&i.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSourcesBySource = `-- name: ListSourcesBySource :many
 Select id, site, name, source, type, value, enabled, url, tags From Sources where Source = $1
 `
 
-func (q *Queries) GetSourcesBySource(ctx context.Context, source sql.NullString) ([]Source, error) {
-	rows, err := q.db.QueryContext(ctx, getSourcesBySource, source)
+func (q *Queries) ListSourcesBySource(ctx context.Context, source string) ([]Source, error) {
+	rows, err := q.db.QueryContext(ctx, listSourcesBySource, source)
 	if err != nil {
 		return nil, err
 	}
