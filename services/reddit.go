@@ -11,17 +11,14 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
-	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/domain/model"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
 type RedditClient struct {
-	subreddit string
-	url       string
-	sourceId  uuid.UUID
-	config    RedditConfig
+	config RedditConfig
+	record database.Source
 }
 
 type RedditConfig struct {
@@ -30,11 +27,9 @@ type RedditConfig struct {
 	PullNSFW string
 }
 
-func NewRedditClient(subreddit string, sourceID uuid.UUID) RedditClient {
+func NewRedditClient(Record database.Source) RedditClient {
 	rc := RedditClient{
-		subreddit: subreddit,
-		url:       fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
-		sourceId:  sourceID,
+		record: Record,
 	}
 	cc := config.New()
 	rc.config.PullHot = cc.GetConfig(config.REDDIT_PULL_HOT)
@@ -67,8 +62,8 @@ func (rc RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 func (rc RedditClient) GetContent() (model.RedditJsonContent, error) {
 	var items model.RedditJsonContent = model.RedditJsonContent{}
 
-	log.Printf("Collecting results on '%v'", rc.subreddit)
-	content, err := getHttpContent(rc.url)
+	log.Printf("Collecting results on '%v'", rc.record.Name)
+	content, err := getHttpContent(rc.record.Url)
 	if err != nil {
 		return items, err
 	}
@@ -128,9 +123,9 @@ func (rc RedditClient) convertToArticle(source model.RedditPost) (database.Artic
 
 func (rc RedditClient) convertPicturePost(source model.RedditPost) database.Article {
 	var item = database.Article{
-		Sourceid:    rc.sourceId,
+		Sourceid:    rc.record.ID,
 		Title:       source.Title,
-		Tags:        "a",
+		Tags:        fmt.Sprintf("%v", rc.record.Tags),
 		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
 		Pubdate:     time.Now(),
 		Video:       sql.NullString{String: "null"},
@@ -146,7 +141,7 @@ func (rc RedditClient) convertPicturePost(source model.RedditPost) database.Arti
 
 func (rc RedditClient) convertTextPost(source model.RedditPost) database.Article {
 	var item = database.Article{
-		Sourceid:    rc.sourceId,
+		Sourceid:    rc.record.ID,
 		Tags:        "a",
 		Title:       source.Title,
 		Pubdate:     time.Now(),
@@ -161,7 +156,7 @@ func (rc RedditClient) convertTextPost(source model.RedditPost) database.Article
 
 func (rc RedditClient) convertVideoPost(source model.RedditPost) database.Article {
 	var item = database.Article{
-		Sourceid:    rc.sourceId,
+		Sourceid:    rc.record.ID,
 		Tags:        "a",
 		Title:       source.Title,
 		Pubdate:     time.Now(),
@@ -177,13 +172,13 @@ func (rc RedditClient) convertVideoPost(source model.RedditPost) database.Articl
 // This post is nothing more then a redirect to another location.
 func (rc *RedditClient) convertRedirectPost(source model.RedditPost) database.Article {
 	var item = database.Article{
-		Sourceid:    rc.sourceId,
+		Sourceid:    rc.record.ID,
 		Tags:        "a",
 		Title:       source.Title,
 		Pubdate:     time.Now(),
 		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
 		Videoheight: 0,
-		Videowidth: 0,
+		Videowidth:  0,
 		Authorname:  sql.NullString{String: source.Author},
 		Description: source.UrlOverriddenByDest,
 	}
