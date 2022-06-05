@@ -57,13 +57,19 @@ func (rc RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 	return page
 }
 
+//func (rc RedditClient) 
+
 // GetContent() reaches out to Reddit and pulls the Json data.
 // It will then convert the data to a struct and return the struct.
 func (rc RedditClient) GetContent() (model.RedditJsonContent, error) {
 	var items model.RedditJsonContent = model.RedditJsonContent{}
 
+	// TODO Wire this to support the config options
+	Url := fmt.Sprintf("%v.json", rc.record.Url)
+
 	log.Printf("Collecting results on '%v'", rc.record.Name)
-	content, err := getHttpContent(rc.record.Url)
+
+	content, err := getHttpContent(Url)
 	if err != nil {
 		return items, err
 	}

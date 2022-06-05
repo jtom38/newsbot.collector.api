@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/google/uuid"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/services/cache"
 )
 
@@ -23,32 +24,23 @@ const (
 )
 
 type FFXIVClient struct {
-	SourceID uint
-	Url string
-	Region string
+	record database.Source
+	//SourceID uint
+	//Url string
+	//Region string
 
 	cacheGroup string
 }
 
-func NewFFXIVClient(region string) FFXIVClient {
-	var url string
-
-	switch region {
-		case "na": 
-		url = FFXIV_NA_FEED_URL	
-		case "jp":
-		url = FFXIV_JP_FEED_URL
-	}
-
+func NewFFXIVClient(Record database.Source) FFXIVClient {
 	return FFXIVClient{
-		Region: region,
-		Url: url,
+		record: Record,
 		cacheGroup: "ffxiv",
 	}
 }
 
-func (fc *FFXIVClient) CheckSource() ([]model.Articles, error) {
-	var articles []model.Articles
+func (fc *FFXIVClient) CheckSource() ([]database.Article, error) {
+	var articles []database.Article
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -87,19 +79,18 @@ func (fc *FFXIVClient) CheckSource() ([]model.Articles, error) {
 		tags, err := fc.ExtractTags(page)
 		if err != nil { return articles, err } 
 
-		article := model.Articles{
-			SourceID: fc.SourceID,
+		article := database.Article{
+			Sourceid: fc.record.ID,
 			Tags: tags,
 			Title: title,
 			Url: link,
-			PubDate: pubDate,
-			Video: "",
-			VideoHeight: 0,
-			VideoWidth: 0,
+			Pubdate: pubDate,
+			Videoheight: 0,
+			Videowidth: 0,
 			Thumbnail: thumb,
 			Description: description,
-			AuthorName: authorName,
-			AuthorImage: authorImage,
+			Authorname: sql.NullString{String: authorName},
+			Authorimage: sql.NullString{String: authorImage},
 		}
 		log.Printf("Collected '%v' from '%v'", article.Title, article.Url)
 
@@ -112,7 +103,7 @@ func (fc *FFXIVClient) CheckSource() ([]model.Articles, error) {
 }
 
 func (fc *FFXIVClient) GetParser() (*goquery.Document, error) {
-	html, err := http.Get(fc.Url)
+	html, err := http.Get(fc.record.Url)
 	if err != nil { return nil, err }
 	defer html.Body.Close()
 	
@@ -129,7 +120,7 @@ func (fc *FFXIVClient) GetBrowser() (*rod.Browser) {
 func (fc *FFXIVClient) PullFeed(parser *rod.Browser) ([]string, error) {
 	var links []string
 
-	page := parser.MustPage(fc.Url)
+	page := parser.MustPage(fc.record.Url)
 	defer page.Close()
 
 	// find the list by xpath

@@ -1,20 +1,19 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	//"log"
-
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/services/config"
 	"github.com/nicklaw5/helix/v2"
 )
 
 type TwitchClient struct {
-	SourceRecord model.Sources
+	SourceRecord database.Source
 
 	// config
 	monitorClips string
@@ -31,7 +30,7 @@ var (
 	twitchScopes = "user:read:email"
 )
 
-func NewTwitchClient(source model.Sources) (TwitchClient, error) {
+func NewTwitchClient() (TwitchClient, error) {
 	c := config.New()
 
 	id := c.GetConfig(config.TWITCH_CLIENT_ID)
@@ -50,7 +49,7 @@ func NewTwitchClient(source model.Sources) (TwitchClient, error) {
 	}
 
 	client := TwitchClient{
-		SourceRecord: source,
+		//SourceRecord: &source,
 		monitorClips: c.GetConfig(config.TWITCH_MONITOR_CLIPS),
 		monitorVod:   c.GetConfig(config.TWITCH_MONITOR_VOD),
 		api:          &api,
@@ -73,7 +72,7 @@ func initTwitchApi(ClientId string, ClientSecret string) (helix.Client, error) {
 }
 
 // This will let you replace the bound source record to keep the same session alive.
-func (tc TwitchClient) ReplaceSourceRecord(source model.Sources) {
+func (tc *TwitchClient) ReplaceSourceRecord(source database.Source) {
 	tc.SourceRecord = source
 }
 
@@ -88,8 +87,8 @@ func (tc TwitchClient) Login() error {
 	return nil
 }
 
-func (tc TwitchClient) GetContent() ([]model.Articles, error) {
-	var items []model.Articles
+func (tc TwitchClient) GetContent() ([]database.Article, error) {
+	var items []database.Article
 
 	user, err := tc.GetUserDetails()
 	if err != nil {
@@ -102,21 +101,23 @@ func (tc TwitchClient) GetContent() ([]model.Articles, error) {
 	}
 
 	for _, video := range posts {
-		article := model.Articles{}
+		var article database.Article
 
-		article.AuthorName, err = tc.ExtractAuthor(video)
+		AuthorName, err := tc.ExtractAuthor(video)
 		if err != nil { return items, err }
+		article.Authorname = sql.NullString{String: AuthorName}
 		
-		article.AuthorImage, err = tc.ExtractAuthorImage(user)
+		Authorimage, err := tc.ExtractAuthorImage(user)
 		if err != nil { return items, err }
+		article.Authorimage = sql.NullString{String: Authorimage}
 
 		article.Description, err = tc.ExtractDescription(video)
 		if err != nil {return items, err }
 
-		article.PubDate, err = tc.ExtractPubDate(video)
+		article.Pubdate, err = tc.ExtractPubDate(video)
 		if err != nil { return items, err }
 
-		article.SourceID = tc.SourceRecord.ID
+		article.Sourceid = tc.SourceRecord.ID
 		article.Tags, err = tc.ExtractTags(video, user)
 		if err != nil { return items, err }
 
