@@ -10,12 +10,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/robfig/cron/v3"
 
-	//"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/domain/model"
 	"github.com/jtom38/newsbot/collector/services"
 	"github.com/jtom38/newsbot/collector/services/config"
-	//"github.com/jtom38/newsbot/collector/services/cache"
 )
 
 var _env config.ConfigClient
@@ -57,6 +54,9 @@ func CheckReddit(ctx context.Context) {
 	}
 
 	for _, source := range sources {
+		if !source.Enabled {
+			continue
+		}
 		rc := services.NewRedditClient(source)
 		raw, err := rc.GetContent()
 		if err != nil {
@@ -75,6 +75,9 @@ func CheckYoutube(ctx context.Context) {
 	}
 
 	for _, source := range sources {
+		if !source.Enabled {
+			continue
+		}
 		yc := services.NewYoutubeClient(source)
 		raw, err := yc.GetContent()
 		if err != nil {
@@ -84,71 +87,52 @@ func CheckYoutube(ctx context.Context) {
 	}
 }
 
-func CheckFfxiv() {
-	fc := services.NewFFXIVClient("na")
-	_, err := fc.CheckSource()
-
-	// This isnt in a thread yet, so just output to stdout
+func CheckFfxiv(ctx context.Context) {
+	sources, err := _queries.ListSourcesBySource(ctx, "ffxiv")
 	if err != nil {
-		log.Println(err)
+		log.Printf("Final Fantasy XIV - No sources found to query - %v\r", err)
 	}
 
-	/*
-		dc := database.NewDatabaseClient()
-		for _, item := range articles {
-			_, err = dc.Articles.FindByUrl(item.Url)
-			if err != nil {
-				err = dc.Articles.Add(item)
-				if err != nil { log.Println("Failed to post article.")}
-			}
+	for _, source := range sources {
+		if !source.Enabled {
+			continue
 		}
-	*/
+		fc := services.NewFFXIVClient(source)
+		items, err := fc.CheckSource()
+		if err != nil {
+			log.Println(err)
+		}
+		checkPosts(ctx, items)
+	}
 }
 
-func CheckTwitch() error {
-	// TODO Wire this for the DB
-	// just a mock object for now
-	//dc := database.NewDatabaseClient()
-
-	//sources, err := dc.Sources.FindBySource("Twitch")
-	//if err != nil { return err }
-
-	source := model.Sources{
-		ID:   1,
-		Name: "Nintendo",
-	}
-	client, err := services.NewTwitchClient(source)
+func CheckTwitch(ctx context.Context) error {
+	sources, err := _queries.ListSourcesBySource(ctx, "twitch")
 	if err != nil {
-		log.Println(err)
+		log.Printf("Twitch - No sources found to query - %v\r", err)
 	}
-
-	err = client.Login()
+	
+	tc, err := services.NewTwitchClient()
 	if err != nil {
 		return err
 	}
 
-	//for _, source := range sources {
-	client.ReplaceSourceRecord(source)
-
-	_, err = client.GetContent()
-	if err != nil {
-		return err
-	}
-	/*
-		for _, item := range posts {
-			_, err = dc.Articles.FindByUrl(item.Url)
-			if err != nil {
-				err = dc.Articles.Add(item)
-				if err != nil { log.Println("Failed to post article.")}
-			}
+	for _, source := range sources {
+		if !source.Enabled {
+			continue
 		}
-	*/
-	//}
+		tc.ReplaceSourceRecord(source)
+		items, err := tc.GetContent()
+		if err != nil {
+			log.Println(err)
+		}
+		checkPosts(ctx, items)
+	}
 
 	return nil
 }
 
-func checkPosts(ctx context.Context, posts []database.Article ) {
+func checkPosts(ctx context.Context, posts []database.Article) {
 	for _, item := range posts {
 		_, err := _queries.GetArticleByUrl(ctx, item.Url)
 		if err != nil {

@@ -23,3 +23,15 @@ func TestCheckYouTube(t *testing.T) {
 	cron.OpenDatabase(ctx)
 	cron.CheckYoutube(ctx)
 }
+
+func TestCheckTwitch(t *testing.T) {
+	ctx := context.Background()
+	err := cron.OpenDatabase(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+	err = cron.CheckTwitch(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+}
