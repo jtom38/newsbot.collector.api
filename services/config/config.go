@@ -9,6 +9,8 @@ import (
 
 const (
 	DB_URI string	= "DB_URI"
+	
+	Sql_Connection_String string = "SQL_CONNECTION_STRING"
 
 	REDDIT_PULL_TOP = "REDDIT_PULL_TOP"
 	REDDIT_PULL_HOT = "REDDIT_PULL_HOT"

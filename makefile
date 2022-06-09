@@ -5,7 +5,12 @@ help: ## Shows this help command
 build: ## builds the application with the current go runtime
 	go build .
 	
-
 docker-build: ## Generates the docker image
 	docker build -t "newsbot.collector.api" .
 	docker image ls | grep newsbot.collector.api
+
+migrate-dev: ## Apply sql migrations to dev db
+	goose -dir "./database/migrations" postgres "user=postgres password=postgres dbname=postgres sslmode=disable" up 
+
+migrate-dev-down: ## revert sql migrations to dev db
+	goose -dir "./database/migrations" postgres "user=postgres password=postgres dbname=postgres sslmode=disable" down 

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"log"
@@ -12,14 +13,15 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/mmcdole/gofeed"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/database"
 )
 
 type YoutubeClient struct {
-	SourceID  uint
-	Url       string
-	ChannelID string
-	AvatarUri string
+	record database.Source
+	
+	// internal variables at time of collection
+	channelID string
+	avatarUri string
 
 	// config
 	//debug bool
@@ -36,10 +38,9 @@ var (
 
 const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channel_id="
 
-func NewYoutubeClient(SourceID uint, Url string) YoutubeClient {
+func NewYoutubeClient(Record database.Source) YoutubeClient {
 	yc := YoutubeClient{
-		SourceID:   SourceID,
-		Url:        Url,
+		record: Record,
 		cacheGroup: "youtube",
 	}
 	/*
@@ -53,10 +54,11 @@ func NewYoutubeClient(SourceID uint, Url string) YoutubeClient {
 }
 
 // CheckSource will go and run all the commands needed to process a source.
-func (yc *YoutubeClient) CheckSource() error {
-	docParser, err := yc.GetParser(yc.Url)
+func (yc *YoutubeClient) GetContent() ([]database.Article, error) {
+	var items []database.Article
+	docParser, err := yc.GetParser(yc.record.Url)
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	// Check cache/db for existing value
@@ -64,38 +66,38 @@ func (yc *YoutubeClient) CheckSource() error {
 	//channelId, err := yc.extractChannelId()
 	channelId, err := yc.GetChannelId(docParser)
 	if err != nil {
-		return err
+		return items, err
 	}
 	if channelId == "" {
-		return ErrYoutubeChannelIdMissing
+		return items, ErrYoutubeChannelIdMissing
 	}
-	yc.ChannelID = channelId
+	yc.channelID = channelId
 
 	// Check the cache/db forthe value.
 	// if we have the value, skip
 	avatar, err := yc.GetAvatarUri()
 	if err != nil {
-		return err
+		return items, err
 	}
 	if avatar == "" {
-		return ErrMissingAuthorImage
+		return items, ErrMissingAuthorImage
 	}
-	yc.AvatarUri = avatar
+	yc.avatarUri = avatar
 
 	feed, err := yc.PullFeed()
 	if err != nil {
-		return err
+		return items, err
 	}
 
 	newPosts, err := yc.CheckForNewPosts(feed)
 	if err != nil {
-		return err
+		return items, err
 	}
 
-	//TODO post to the API
 	for _, item := range newPosts {
 
 		article := yc.ConvertToArticle(item)
+		items = append(items, article)
 
 		YoutubeUriCache = append(YoutubeUriCache, &item.Link)
 
@@ -103,7 +105,7 @@ func (yc *YoutubeClient) CheckSource() error {
 		log.Println(article)
 	}
 
-	return nil
+	return items, nil
 }
 
 func (yc *YoutubeClient) GetBrowser() *rod.Browser {
@@ -137,8 +139,8 @@ func (yc *YoutubeClient) GetChannelId(doc *goquery.Document) (string, error) {
 	for _, item := range meta.Nodes {
 
 		if item.Attr[0].Val == "channelId" {
-			yc.ChannelID = item.Attr[1].Val
-			return yc.ChannelID, nil
+			yc.channelID = item.Attr[1].Val
+			return yc.channelID, nil
 		}
 	}
 	return "", ErrYoutubeChannelIdMissing
@@ -155,7 +157,7 @@ func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	var AvatarUri string
 
 	browser := rod.New().MustConnect()
-	page := browser.MustPage(yc.Url)
+	page := browser.MustPage(yc.record.Url)
 
 	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")
 
@@ -197,7 +199,7 @@ func (yc *YoutubeClient) GetVideoThumbnail(parser *goquery.Document) (string, er
 
 // This will pull the RSS feed items and return the results
 func (yc *YoutubeClient) PullFeed() (*gofeed.Feed, error) {
-	feedUri := fmt.Sprintf("%v%v", YOUTUBE_FEED_URL, yc.ChannelID)
+	feedUri := fmt.Sprintf("%v%v", YOUTUBE_FEED_URL, yc.channelID)
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedUri)
 	if err != nil {
@@ -239,7 +241,7 @@ func (yc *YoutubeClient) CheckUriCache(uri *string) bool {
 	return false
 }
 
-func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
+func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) database.Article {
 	parser, err := yc.GetParser(item.Link)
 	if err != nil {
 		log.Printf("Unable to process %v, submit this link as an issue.\n", item.Link)
@@ -257,16 +259,16 @@ func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) model.Articles {
 		log.Println(msg)
 	}
 
-	var article = model.Articles{
-		SourceID:    yc.SourceID,
+	var article = database.Article{
+		Sourceid:    yc.record.ID,
 		Tags:        tags,
 		Title:       item.Title,
 		Url:         item.Link,
-		PubDate:     *item.PublishedParsed,
+		Pubdate:     *item.PublishedParsed,
 		Thumbnail:   thumb,
 		Description: item.Description,
-		AuthorName:  item.Author.Name,
-		AuthorImage: yc.AvatarUri,
+		Authorname:  sql.NullString{String: item.Author.Name},
+		Authorimage: sql.NullString{String: yc.avatarUri},
 	}
 	return article
 }

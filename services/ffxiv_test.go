@@ -3,17 +3,28 @@ package services_test
 import (
 	"testing"
 
+	"github.com/google/uuid"
+	"github.com/jtom38/newsbot/collector/database"
 	ffxiv "github.com/jtom38/newsbot/collector/services"
 )
 
+var FFXIVRecord database.Source = database.Source{
+	ID: uuid.New(),
+	Site: "ffxiv",
+	Name: "Final Fantasy XIV - NA",
+	Source: "ffxiv",
+	Url: "https://na.finalfantasyxiv.com/lodestone/",
+	Tags: "ffxiv, final, fantasy, xiv, na, lodestone",
+}
+
 func TestFfxivGetParser(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 	_, err := fc.GetParser()
 	if err != nil { panic(err) }
 }
 
 func TestFfxivPullFeed(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -25,7 +36,7 @@ func TestFfxivPullFeed(t *testing.T) {
 }
 
 func TestFfxivExtractThumbnail(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -42,7 +53,7 @@ func TestFfxivExtractThumbnail(t *testing.T) {
 }
 
 func TestFfxivExtractPubDate(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -58,7 +69,7 @@ func TestFfxivExtractPubDate(t *testing.T) {
 }
 
 func TestFfxivExtractDescription(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -74,7 +85,7 @@ func TestFfxivExtractDescription(t *testing.T) {
 }
 
 func TestFfxivExtractAuthor(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -91,7 +102,7 @@ func TestFfxivExtractAuthor(t *testing.T) {
 }
 
 func TestFfxivExtractTags(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -108,7 +119,7 @@ func TestFfxivExtractTags(t *testing.T) {
 }
 
 func TestFfxivExtractTitle(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -125,7 +136,7 @@ func TestFfxivExtractTitle(t *testing.T) {
 }
 
 func TestFFxivExtractAuthorIamge(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 
 	parser := fc.GetBrowser()
 	defer parser.Close()
@@ -142,7 +153,7 @@ func TestFFxivExtractAuthorIamge(t *testing.T) {
 }
 
 func TestFfxivCheckSource(t *testing.T) {
-	fc := ffxiv.NewFFXIVClient("na")
+	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 	fc.CheckSource()
 	
 }

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,28 +11,25 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
+	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/domain/model"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
 type RedditClient struct {
-	subreddit string
-	url string
-	sourceId uint
 	config RedditConfig
+	record database.Source
 }
 
 type RedditConfig struct {
-	PullTop string
-	PullHot string
+	PullTop  string
+	PullHot  string
 	PullNSFW string
 }
 
-func NewRedditClient(subreddit string, sourceID uint) RedditClient {
+func NewRedditClient(Record database.Source) RedditClient {
 	rc := RedditClient{
-		subreddit: subreddit,
-		url: fmt.Sprintf("https://www.reddit.com/r/%v.json", subreddit),
-		sourceId:  sourceID,
+		record: Record,
 	}
 	cc := config.New()
 	rc.config.PullHot = cc.GetConfig(config.REDDIT_PULL_HOT)
@@ -59,15 +57,23 @@ func (rc RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 	return page
 }
 
+//func (rc RedditClient) 
+
 // GetContent() reaches out to Reddit and pulls the Json data.
 // It will then convert the data to a struct and return the struct.
-func (rc RedditClient) GetContent() (model.RedditJsonContent, error ) {
+func (rc RedditClient) GetContent() (model.RedditJsonContent, error) {
 	var items model.RedditJsonContent = model.RedditJsonContent{}
 
-	log.Printf("Collecting results on '%v'", rc.subreddit)
-	content, err := getHttpContent(rc.url)
-	if err != nil { return items, err }
-	if strings.Contains("<h1>whoa there, pardner!</h1>", string(content) ) {
+	// TODO Wire this to support the config options
+	Url := fmt.Sprintf("%v.json", rc.record.Url)
+
+	log.Printf("Collecting results on '%v'", rc.record.Name)
+
+	content, err := getHttpContent(Url)
+	if err != nil {
+		return items, err
+	}
+	if strings.Contains("<h1>whoa there, pardner!</h1>", string(content)) {
 		return items, errors.New("did not get json data from the server")
 	}
 
@@ -78,12 +84,15 @@ func (rc RedditClient) GetContent() (model.RedditJsonContent, error ) {
 	return items, nil
 }
 
-func (rc RedditClient) ConvertToArticles(items model.RedditJsonContent) []model.Articles {
-	var redditArticles []model.Articles
+func (rc RedditClient) ConvertToArticles(items model.RedditJsonContent) []database.Article {
+	var redditArticles []database.Article
 	for _, item := range items.Data.Children {
-		var article model.Articles
+		var article database.Article
 		article, err := rc.convertToArticle(item.Data)
-		if err != nil { log.Println(err); continue }
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 		redditArticles = append(redditArticles, article)
 	}
 	return redditArticles
@@ -91,14 +100,13 @@ func (rc RedditClient) ConvertToArticles(items model.RedditJsonContent) []model.
 
 // ConvertToArticle() will take the reddit model struct and convert them over to Article structs.
 // This data can be passed to the database.
-func (rc RedditClient) convertToArticle(source model.RedditPost) (model.Articles, error) {
-	var item model.Articles
+func (rc RedditClient) convertToArticle(source model.RedditPost) (database.Article, error) {
+	var item database.Article
 
-	
-	if source.Content == "" && source.Url != ""{
+	if source.Content == "" && source.Url != "" {
 		item = rc.convertPicturePost(source)
 	}
-	
+
 	if source.Media.RedditVideo.FallBackUrl != "" {
 		item = rc.convertVideoPost(source)
 	}
@@ -119,57 +127,65 @@ func (rc RedditClient) convertToArticle(source model.RedditPost) (model.Articles
 	return item, nil
 }
 
-func (rc RedditClient) convertPicturePost(source model.RedditPost) model.Articles {
-	var item = model.Articles{
-		SourceID: rc.sourceId,
-		Tags: "a",
-		Title: source.Title,
-		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
-		PubDate: time.Now(),
-		Video: "null",
-		VideoHeight: 0,
-		VideoWidth: 0,
-		Thumbnail: source.Thumbnail,
+func (rc RedditClient) convertPicturePost(source model.RedditPost) database.Article {
+	var item = database.Article{
+		Sourceid:    rc.record.ID,
+		Title:       source.Title,
+		Tags:        fmt.Sprintf("%v", rc.record.Tags),
+		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		Pubdate:     time.Now(),
+		Video:       sql.NullString{String: "null"},
+		Videoheight: 0,
+		Videowidth:  0,
+		Thumbnail:   source.Thumbnail,
 		Description: source.Content,
-		AuthorName: source.Author,
-		AuthorImage: "null",
+		Authorname:  sql.NullString{String: source.Author},
+		Authorimage: sql.NullString{String: "null"},
 	}
 	return item
 }
 
-func (rc RedditClient) convertTextPost(source model.RedditPost) model.Articles {
-	var item = model.Articles{
-		SourceID: rc.sourceId,
-		Tags: "a",
-		Title: source.Title,
-		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
-		AuthorName: source.Author,
+func (rc RedditClient) convertTextPost(source model.RedditPost) database.Article {
+	var item = database.Article{
+		Sourceid:    rc.record.ID,
+		Tags:        "a",
+		Title:       source.Title,
+		Pubdate:     time.Now(),
+		Videoheight: 0,
+		Videowidth:  0,
+		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		Authorname:  sql.NullString{String: source.Author},
 		Description: source.Content,
-		
 	}
 	return item
 }
 
-func (rc RedditClient) convertVideoPost(source model.RedditPost) model.Articles {
-	var item = model.Articles{
-		SourceID: rc.sourceId,
-		Tags: "a",
-		Title: source.Title,
-		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
-		AuthorName: source.Author,
+func (rc RedditClient) convertVideoPost(source model.RedditPost) database.Article {
+	var item = database.Article{
+		Sourceid:    rc.record.ID,
+		Tags:        "a",
+		Title:       source.Title,
+		Pubdate:     time.Now(),
+		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		Videoheight: 0,
+		Videowidth:  0,
+		Authorname:  sql.NullString{String: source.Author},
 		Description: source.Media.RedditVideo.FallBackUrl,
 	}
 	return item
 }
 
 // This post is nothing more then a redirect to another location.
-func (rc *RedditClient) convertRedirectPost(source model.RedditPost) model.Articles {
-	var item = model.Articles{
-		SourceID: rc.sourceId,
-		Tags: "a",
-		Title: source.Title,
-		Url: fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
-		AuthorName: source.Author,
+func (rc *RedditClient) convertRedirectPost(source model.RedditPost) database.Article {
+	var item = database.Article{
+		Sourceid:    rc.record.ID,
+		Tags:        "a",
+		Title:       source.Title,
+		Pubdate:     time.Now(),
+		Url:         fmt.Sprintf("https://www.reddit.com%v", source.Permalink),
+		Videoheight: 0,
+		Videowidth:  0,
+		Authorname:  sql.NullString{String: source.Author},
 		Description: source.UrlOverriddenByDest,
 	}
 	return item

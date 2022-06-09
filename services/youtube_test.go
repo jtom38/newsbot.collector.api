@@ -3,24 +3,28 @@ package services_test
 import (
 	"testing"
 
+	"github.com/google/uuid"
+	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/services"
 )
 
+var YouTubeRecord database.Source = database.Source{
+	ID: uuid.New(),
+	Name: "dadjokes",
+	Source: "reddit",
+	Site: "reddit",
+	Url: "https://youtube.com/gamegrumps",
+}
+
 func TestGetPageParser(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
-	_, err := yc.GetParser(yc.Url)
+	yc := services.NewYoutubeClient(YouTubeRecord)
+	_, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 }
 
 func TestGetChannelId(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
-	parser, err := yc.GetParser(yc.Url)
+	yc := services.NewYoutubeClient(YouTubeRecord)
+	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 
 	_, err = yc.GetChannelId(parser)
@@ -28,11 +32,8 @@ func TestGetChannelId(t *testing.T) {
 }
 
 func TestPullFeed(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
-	parser, err := yc.GetParser(yc.Url)
+	yc := services.NewYoutubeClient(YouTubeRecord)
+	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 
 	_, err = yc.GetChannelId(parser)
@@ -43,20 +44,14 @@ func TestPullFeed(t *testing.T) {
 }
 
 func TestGetAvatarUri(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 	res, err := yc.GetAvatarUri()
 	if err != nil { panic(err) }
 	if res == "" { panic(services.ErrMissingAuthorImage)}
 }
 
 func TestGetVideoTags(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 
 	var videoUri = "https://www.youtube.com/watch?v=k_sQEXOBe68"
 
@@ -69,12 +64,9 @@ func TestGetVideoTags(t *testing.T) {
 }
 
 func TestGetChannelTags(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 
-	parser, err := yc.GetParser(yc.Url)
+	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 
 	tags, err := yc.GetTags(parser)
@@ -83,10 +75,7 @@ func TestGetChannelTags(t *testing.T) {
 }
 
 func TestGetVideoThumbnail(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 	parser, err := yc.GetParser("https://www.youtube.com/watch?v=k_sQEXOBe68")
 	if err != nil {panic(err) }
 
@@ -97,20 +86,13 @@ func TestGetVideoThumbnail(t *testing.T) {
 }
 
 func TestCheckSource(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
-	err := yc.CheckSource()
+	yc := services.NewYoutubeClient(YouTubeRecord)
+	_, err := yc.GetContent()
 	if err != nil { panic(err) }
-
 }
 
 func TestCheckUriCache(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 	item := "demo"
 
 	services.YoutubeUriCache = append(services.YoutubeUriCache, &item)
@@ -119,10 +101,7 @@ func TestCheckUriCache(t *testing.T) {
 }
 
 func TestCheckUriCacheFails(t *testing.T) {
-	yc := services.NewYoutubeClient(
-		0,
-		"https://youtube.com/gamegrumps",
-	)
+	yc := services.NewYoutubeClient(YouTubeRecord)
 	item := "demo1"
 	
 	res := yc.CheckUriCache(&item)

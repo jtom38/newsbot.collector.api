@@ -1,4 +1,4 @@
-package database
+package databaseRest
 
 import (
 	"fmt"
