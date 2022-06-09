@@ -1,4 +1,4 @@
- module github.com/jtom38/newsbot/collector
+module github.com/jtom38/newsbot/collector
 
 go 1.18
 

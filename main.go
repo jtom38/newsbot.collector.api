@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -12,10 +13,9 @@ import (
 )
 
 func main() {
-	//dc := database.NewDatabaseClient()
-	//err := dc.Diagnosis.Ping()
-	//if err != nil { log.Fatalln(err) }
-	cron.EnableScheduler()
+	ctx := context.Background()
+
+	cron.EnableScheduler(ctx)
 
 	app := chi.NewRouter()
 	app.Use(middleware.Logger)
