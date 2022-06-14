@@ -105,6 +105,9 @@ Values
 -- name: GetSourceByID :one
 Select * From Sources where ID = $1 Limit 1;
 
+-- name: ListSources :many
+Select * From Sources Limit $1;
+
 -- name: ListSourcesBySource :many
 Select * From Sources where Source = $1;
 

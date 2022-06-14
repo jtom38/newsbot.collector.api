@@ -483,6 +483,43 @@ func (q *Queries) ListDiscordWebHooksByServer(ctx context.Context, server string
 	return items, nil
 }
 
+const listSources = `-- name: ListSources :many
+Select id, site, name, source, type, value, enabled, url, tags From Sources Limit $1
+`
+
+func (q *Queries) ListSources(ctx context.Context, limit int32) ([]Source, error) {
+	rows, err := q.db.QueryContext(ctx, listSources, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Source
+	for rows.Next() {
+		var i Source
+		if err := rows.Scan(
+			&i.ID,
+			&i.Site,
+			&i.Name,
+			&i.Source,
+			&i.Type,
+			&i.Value,
+			&i.Enabled,
+			&i.Url,
+			&i.Tags,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSourcesBySource = `-- name: ListSourcesBySource :many
 Select id, site, name, source, type, value, enabled, url, tags From Sources where Source = $1
 `
