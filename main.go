@@ -2,31 +2,29 @@ package main
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"net/http"
-
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-
+	
+	_ "github.com/jtom38/newsbot/collector/docs"
 	"github.com/jtom38/newsbot/collector/routes"
 	"github.com/jtom38/newsbot/collector/services/cron"
 )
 
+
+
+// @title     NewsBot collector
+// @version   0.1
+// @BasePath  /api
 func main() {
 	ctx := context.Background()
+	c := cron.New(ctx)
+	c.Start()
 
-	cron.EnableScheduler(ctx)
+	server := routes.NewServer(ctx)
 
-	app := chi.NewRouter()
-	app.Use(middleware.Logger)
-	app.Use(middleware.Recoverer)
-
-	//app.Mount("/swagger", httpSwagger.WrapHandler)
-	app.Mount("/api", routes.RootRoutes())
-	
-	log.Println("API is online and waiting for requests.")
-	log.Println("API: http://localhost:8081/api")
-	//log.Println("Swagger: http://localhost:8080/swagger/index.html")
-	err := http.ListenAndServe(":8081", app)
-	if err != nil { log.Fatalln(err) }
+	fmt.Println("API is online and waiting for requests.")
+	fmt.Println("API: http://localhost:8081/api")
+	fmt.Println("Swagger: http://localhost:8081/swagger/index.html")
+	err := http.ListenAndServe(":8081", server.Router)
+	if err != nil { panic(err) }
 }
