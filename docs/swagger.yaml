@@ -1,0 +1,98 @@
+basePath: /api
+info:
+  contact: {}
+  title: NewsBot collector
+  version: "0.1"
+paths:
+  /config/sources:
+    get:
+      parameters:
+      - description: top
+        in: query
+        name: top
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses: {}
+      summary: Lists the top 50 records
+      tags:
+      - config
+      - source
+  /config/sources/:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new reddit source to monitor.
+      tags:
+      - config
+      - source
+      - reddit
+  /config/sources/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Deletes a record by ID
+      tags:
+      - config
+      - source
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a single entity by ID
+      tags:
+      - config
+      - source
+  /hello/{who}:
+    get:
+      parameters:
+      - description: Who
+        in: path
+        name: who
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses: {}
+      summary: Responds back with "Hello x" depending on param passed in.
+      tags:
+      - debug
+  /helloworld:
+    get:
+      produces:
+      - text/plain
+      responses: {}
+      summary: Responds back with "Hello world!"
+      tags:
+      - debug
+  /ping:
+    get:
+      produces:
+      - text/plain
+      responses: {}
+      summary: Sends back "pong".  Good to test with.
+      tags:
+      - debug
+swagger: "2.0"
