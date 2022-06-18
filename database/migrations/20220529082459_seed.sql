@@ -33,7 +33,7 @@ INSERT INTO sources VALUES
 
 -- Twitch Entries 
 INSERT INTO sources VALUES 
-(uuid_generate_v4(), 'twitch', 'Nintendo', 'twitch', 'api', 'a', TRUE, 'https://store.steampowered.com/feeds/news/app/1675200/?cc=US&l=english&snr=1_2108_9__2107', 'rss, steampowered, steam, deck, steam deck');
+(uuid_generate_v4(), 'twitch', 'Nintendo', 'twitch', 'api', 'a', TRUE, 'https://twitch.tv/nintendo', 'twitch, nintendo');
 
 -- +goose StatementEnd
 

@@ -64,11 +64,22 @@ func (s *Server) MountRoutes() {
 	s.Router.Get("/api/hello/{who}", helloWho)
 	s.Router.Get("/api/ping", ping)
 
-	/* Sources Routes */
+	/* Article Routes */
+	s.Router.Get("/api/config/articles", s.listArticles)
+	s.Router.Route("/api/config/articles/{ID}", func(r chi.Router) {
+		r.Get("/", s.getArticleById)
+		
+	})
+
+	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
-	s.Router.Post("/api/config/sources", s.postSources)
+	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
+	s.Router.Post("/api/config/sources/new/youtube", s.newYoutubeSource)
+	s.Router.Post("/api/config/sources/new/twitch", s.newTwitchSource)
 	s.Router.Route("/api/config/sources/{ID}", func(r chi.Router) {
 		r.Get("/", s.getSources)
 		r.Delete("/", s.deleteSources)
+		r.Post("/disable", s.disableSource)
+		r.Post("/enable", s.enableSource)
 	})
 }

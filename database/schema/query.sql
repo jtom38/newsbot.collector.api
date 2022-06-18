@@ -7,6 +7,22 @@ WHERE ID = $1 LIMIT 1;
 Select * from Articles
 Where Url = $1 LIMIT 1;
 
+-- name: ListArticles :many
+Select * From articles Limit $1;
+
+-- name: GetArticlesBySource :many
+select * from articles
+INNER join sources on articles.sourceid=Sources.ID
+where site = $1;
+
+-- name: GetArticlesBySourceName :many
+select 
+articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name
+From articles
+Left Join sources
+On articles.sourceid = sources.id
+Where name = $1;
+
 -- name: CreateArticle :exec
 INSERT INTO Articles 
 (ID, SourceId, Tags, Title, Url, PubDate, Video, VideoHeight, VideoWidth, Thumbnail, Description, AuthorName, AuthorImage)
@@ -113,3 +129,9 @@ Select * From Sources where Source = $1;
 
 -- name: DeleteSource :exec
 DELETE From sources where id = $1;
+
+-- name: DisableSource :exec
+Update Sources Set Enabled = FALSE where ID = $1;
+
+-- name: EnableSource :exec
+Update Sources Set Enabled = TRUE where ID = $1;

@@ -239,6 +239,24 @@ func (q *Queries) DeleteSource(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const disableSource = `-- name: DisableSource :exec
+Update Sources Set Enabled = FALSE where ID = $1
+`
+
+func (q *Queries) DisableSource(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, disableSource, id)
+	return err
+}
+
+const enableSource = `-- name: EnableSource :exec
+Update Sources Set Enabled = TRUE where ID = $1
+`
+
+func (q *Queries) EnableSource(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, enableSource, id)
+	return err
+}
+
 const getArticleByID = `-- name: GetArticleByID :one
 Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage from Articles
 WHERE ID = $1 LIMIT 1
@@ -290,6 +308,149 @@ func (q *Queries) GetArticleByUrl(ctx context.Context, url string) (Article, err
 		&i.Authorimage,
 	)
 	return i, err
+}
+
+const getArticlesBySource = `-- name: GetArticlesBySource :many
+select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags from articles
+INNER join sources on articles.sourceid=Sources.ID
+where site = $1
+`
+
+type GetArticlesBySourceRow struct {
+	ID          uuid.UUID
+	Sourceid    uuid.UUID
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
+	Video       sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
+	Authorname  sql.NullString
+	Authorimage sql.NullString
+	ID_2        uuid.UUID
+	Site        string
+	Name        string
+	Source      string
+	Type        string
+	Value       sql.NullString
+	Enabled     bool
+	Url_2       string
+	Tags_2      string
+}
+
+func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetArticlesBySourceRow, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySource, site)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetArticlesBySourceRow
+	for rows.Next() {
+		var i GetArticlesBySourceRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+			&i.ID_2,
+			&i.Site,
+			&i.Name,
+			&i.Source,
+			&i.Type,
+			&i.Value,
+			&i.Enabled,
+			&i.Url_2,
+			&i.Tags_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getArticlesBySourceName = `-- name: GetArticlesBySourceName :many
+select 
+articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name
+From articles
+Left Join sources
+On articles.sourceid = sources.id
+Where name = $1
+`
+
+type GetArticlesBySourceNameRow struct {
+	ID          uuid.UUID
+	Sourceid    uuid.UUID
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
+	Video       sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
+	Authorname  sql.NullString
+	Authorimage sql.NullString
+	Source      sql.NullString
+	Name        sql.NullString
+}
+
+func (q *Queries) GetArticlesBySourceName(ctx context.Context, name string) ([]GetArticlesBySourceNameRow, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySourceName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetArticlesBySourceNameRow
+	for rows.Next() {
+		var i GetArticlesBySourceNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+			&i.Source,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getDiscordQueueByID = `-- name: GetDiscordQueueByID :one
@@ -445,6 +606,47 @@ func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, erro
 		&i.Tags,
 	)
 	return i, err
+}
+
+const listArticles = `-- name: ListArticles :many
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles Limit $1
+`
+
+func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listArticles, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listDiscordWebHooksByServer = `-- name: ListDiscordWebHooksByServer :many
