@@ -45,11 +45,11 @@ func New(ctx context.Context) *Cron {
 	}
 	c.Db = queries
 
-	//c.AddFunc("*/5 * * * *", func()  { go CheckCache() })
-	//c.AddFunc("* */1 * * *", func() { go CheckReddit(ctx) })
-	//c.AddFunc("* */1 * * *", func() { go CheckYoutube() })
-	//c.AddFunc("* */1 * * *", func() { go CheckFfxiv() })
-	//c.AddFunc("* */1 * * *", func() { go CheckTwitch() })
+	//timer.AddFunc("*/5 * * * *", func()  { go CheckCache() })
+	//timer.AddFunc("* */30 * * *", func() { go c.CheckReddit(ctx) })
+	//timer.AddFunc("* */1 * * *", func() { go CheckYoutube() })
+	//timer.AddFunc("* */1 * * *", func() { go CheckFfxiv() })
+	//timer.AddFunc("* */1 * * *", func() { go CheckTwitch() })
 	c.timer = timer
 	return c
 }
