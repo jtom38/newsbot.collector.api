@@ -16,6 +16,41 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/config/articles": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "articles"
+                ],
+                "summary": "Lists the top 50 records",
+                "responses": {}
+            }
+        },
+        "/config/articles/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "articles"
+                ],
+                "summary": "Returns an article based on defined ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "uuid",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/config/sources": {
             "get": {
                 "produces": [
@@ -26,19 +61,10 @@ const docTemplate = `{
                     "source"
                 ],
                 "summary": "Lists the top 50 records",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "top",
-                        "name": "top",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
                 "responses": {}
             }
         },
-        "/config/sources/": {
+        "/config/sources/new/reddit": {
             "post": {
                 "tags": [
                     "config",
@@ -58,6 +84,74 @@ const docTemplate = `{
                         "type": "string",
                         "description": "url",
                         "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/new/twitch": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source",
+                    "twitch"
+                ],
+                "summary": "Creates a new twitch source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags",
+                        "name": "tags",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/new/youtube": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source",
+                    "youtube"
+                ],
+                "summary": "Creates a new youtube source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags",
+                        "name": "tags",
                         "in": "query",
                         "required": true
                     }
@@ -91,7 +185,45 @@ const docTemplate = `{
                     "config",
                     "source"
                 ],
-                "summary": "Deletes a record by ID",
+                "summary": "Deletes a record by ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/{id}/disable": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Disables a source from processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/{id}/enable": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Enables a source to continue processing.",
                 "parameters": [
                     {
                         "type": "string",

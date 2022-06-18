@@ -4,14 +4,32 @@ info:
   title: NewsBot collector
   version: "0.1"
 paths:
-  /config/sources:
+  /config/articles:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Lists the top 50 records
+      tags:
+      - config
+      - articles
+  /config/articles/{id}:
     get:
       parameters:
-      - description: top
-        in: query
-        name: top
+      - description: uuid
+        in: path
+        name: id
         required: true
-        type: integer
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns an article based on defined ID.
+      tags:
+      - config
+      - articles
+  /config/sources:
+    get:
       produces:
       - application/json
       responses: {}
@@ -19,7 +37,60 @@ paths:
       tags:
       - config
       - source
-  /config/sources/:
+  /config/sources/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Deletes a record by ID.
+      tags:
+      - config
+      - source
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a single entity by ID
+      tags:
+      - config
+      - source
+  /config/sources/{id}/disable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Disables a source from processing.
+      tags:
+      - config
+      - source
+  /config/sources/{id}/enable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Enables a source to continue processing.
+      tags:
+      - config
+      - source
+  /config/sources/new/reddit:
     post:
       parameters:
       - description: name
@@ -38,33 +109,54 @@ paths:
       - config
       - source
       - reddit
-  /config/sources/{id}:
-    delete:
+  /config/sources/new/twitch:
+    post:
       parameters:
-      - description: id
-        in: path
-        name: id
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
         required: true
         type: string
       responses: {}
-      summary: Deletes a record by ID
+      summary: Creates a new twitch source to monitor.
       tags:
       - config
       - source
-    get:
+      - twitch
+  /config/sources/new/youtube:
+    post:
       parameters:
-      - description: uuid
-        in: path
-        name: id
+      - description: name
+        in: query
+        name: name
         required: true
         type: string
-      produces:
-      - application/json
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
+        required: true
+        type: string
       responses: {}
-      summary: Returns a single entity by ID
+      summary: Creates a new youtube source to monitor.
       tags:
       - config
       - source
+      - youtube
   /hello/{who}:
     get:
       parameters:
