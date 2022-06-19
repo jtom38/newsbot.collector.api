@@ -16,26 +16,45 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/config/articles": {
+        "/articles": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "config",
                     "articles"
                 ],
                 "summary": "Lists the top 50 records",
                 "responses": {}
             }
         },
-        "/config/articles/{id}": {
+        "/articles/by/sourceid/{id}": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "config",
+                    "articles"
+                ],
+                "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source ID UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/articles/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
                     "articles"
                 ],
                 "summary": "Returns an article based on defined ID.",

@@ -4,16 +4,15 @@ info:
   title: NewsBot collector
   version: "0.1"
 paths:
-  /config/articles:
+  /articles:
     get:
       produces:
       - application/json
       responses: {}
       summary: Lists the top 50 records
       tags:
-      - config
       - articles
-  /config/articles/{id}:
+  /articles/{id}:
     get:
       parameters:
       - description: uuid
@@ -26,7 +25,21 @@ paths:
       responses: {}
       summary: Returns an article based on defined ID.
       tags:
-      - config
+      - articles
+  /articles/by/sourceid/{id}:
+    get:
+      parameters:
+      - description: Source ID UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Finds the articles based on the SourceID provided.  Returns the top
+        50.
+      tags:
       - articles
   /config/sources:
     get:
