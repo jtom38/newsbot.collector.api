@@ -51,7 +51,6 @@ Delete From DiscordQueue Where ID = $1;
 -- name: GetDiscordQueueItems :many
 Select * from DiscordQueue LIMIT $1;
 
-
 /* DiscordWebHooks */
 -- name: CreateDiscordWebHook :exec
 Insert Into DiscordWebHooks
@@ -66,6 +65,9 @@ Where ID = $1 LIMIT 1;
 -- name: ListDiscordWebHooksByServer :many
 Select * From DiscordWebHooks
 Where Server = $1;
+
+-- name: ListDiscordWebhooks :many
+Select * From discordwebhooks LIMIT $1;
 
 -- name: DeleteDiscordWebHooks :exec
 Delete From discordwebhooks Where ID = $1;
@@ -139,3 +141,24 @@ Update Sources Set Enabled = FALSE where ID = $1;
 
 -- name: EnableSource :exec
 Update Sources Set Enabled = TRUE where ID = $1;
+
+
+/* Subscriptions */
+
+-- name: CreateSubscription :exec
+Insert Into subscriptions (ID, DiscordWebHookId, SourceId) Values ($1, $2, $3);
+
+-- name: ListSubscriptions :many
+Select * From subscriptions Limit $1;
+
+-- name: QuerySubscriptions :many
+Select * From subscriptions Where discordwebhookid = $1 and sourceid = $2;
+
+-- name: GetSubscriptionsBySourceID :many
+Select * From subscriptions Where sourceid = $1;
+
+-- name: GetSubscriptionsByDiscordWebHookId :many
+Select * from subscriptions Where discordwebhookid = $1;
+
+-- name: DeleteSubscription :exec
+Delete From subscriptions Where discordwebhookid = $1 and sourceid = $2;

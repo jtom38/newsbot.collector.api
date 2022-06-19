@@ -66,3 +66,9 @@ type Source struct {
 	Url     string
 	Tags    string
 }
+
+type Subscription struct {
+	ID               uuid.UUID
+	Discordwebhookid uuid.UUID
+	Sourceid         uuid.UUID
+}
