@@ -65,11 +65,11 @@ func (s *Server) MountRoutes() {
 	s.Router.Get("/api/ping", ping)
 
 	/* Article Routes */
-	s.Router.Get("/api/config/articles", s.listArticles)
-	s.Router.Route("/api/config/articles/{ID}", func(r chi.Router) {
+	s.Router.Get("/api/articles", s.listArticles)
+	s.Router.Route("/api/articles/{ID}", func(r chi.Router) {
 		r.Get("/", s.getArticleById)
-		
 	})
+	s.Router.Get("/api/articles/by/sourceid", s.GetArticlesBySourceId)
 
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
