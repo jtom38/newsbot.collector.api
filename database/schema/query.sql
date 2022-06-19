@@ -15,6 +15,10 @@ select * from articles
 INNER join sources on articles.sourceid=Sources.ID
 where site = $1;
 
+-- name: GetArticlesBySourceId :many
+Select * From articles
+Where sourceid = $1 Limit 50;
+
 -- name: GetArticlesBySourceName :many
 select 
 articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name

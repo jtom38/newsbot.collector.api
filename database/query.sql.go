@@ -387,6 +387,48 @@ func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetAr
 	return items, nil
 }
 
+const getArticlesBySourceId = `-- name: GetArticlesBySourceId :many
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles
+Where sourceid = $1 Limit 50
+`
+
+func (q *Queries) GetArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySourceId, sourceid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getArticlesBySourceName = `-- name: GetArticlesBySourceName :many
 select 
 articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name
