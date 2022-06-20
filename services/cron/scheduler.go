@@ -15,40 +15,56 @@ import (
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
-var _env config.ConfigClient
-var _connString string
-var _queries *database.Queries
-
-func EnableScheduler(ctx context.Context) {
-	c := cron.New()
-	OpenDatabase(ctx)
-
-	//c.AddFunc("*/5 * * * *", func()  { go CheckCache() })
-	c.AddFunc("* */1 * * *", func() { go CheckReddit(ctx) })
-	//c.AddFunc("* */1 * * *", func() { go CheckYoutube() })
-	//c.AddFunc("* */1 * * *", func() { go CheckFfxiv() })
-	//c.AddFunc("* */1 * * *", func() { go CheckTwitch() })
-
-	c.Start()
+type Cron struct {
+	Db *database.Queries
+	ctx *context.Context
+	timer *cron.Cron
 }
 
-// Open the connection to the database and share it with the package so all of them are able to share.
-func OpenDatabase(ctx context.Context) error {
-	_env = config.New()
-	_connString = _env.GetConfig(config.Sql_Connection_String)
-	db, err := sql.Open("postgres", _connString)
+func openDatabase() (*database.Queries, error) {
+	_env := config.New()
+	connString := _env.GetConfig(config.Sql_Connection_String)
+	db, err := sql.Open("postgres", connString)
 	if err != nil {
 		panic(err)
 	}
 
 	queries := database.New(db)
-	_queries = queries
-	return err
+	return queries, err
+}
+
+func New(ctx context.Context) *Cron {
+	c := &Cron{
+		ctx:  &ctx,
+	}
+
+	timer := cron.New()
+	queries, err := openDatabase()
+	if err != nil {
+		panic(err)
+	}
+	c.Db = queries
+
+	//timer.AddFunc("*/5 * * * *", func()  { go CheckCache() })
+	//timer.AddFunc("* */30 * * *", func() { go c.CheckReddit(ctx) })
+	//timer.AddFunc("* */1 * * *", func() { go CheckYoutube() })
+	//timer.AddFunc("* */1 * * *", func() { go CheckFfxiv() })
+	//timer.AddFunc("* */1 * * *", func() { go CheckTwitch() })
+	c.timer = timer
+	return c
+}
+
+func (c *Cron) Start() {
+	c.timer.Start()
+}
+
+func (c *Cron) Stop() {
+	c.timer.Stop()
 }
 
 // This is the main entry point to query all the reddit services
-func CheckReddit(ctx context.Context) {
-	sources, err := _queries.ListSourcesBySource(ctx, "reddit")
+func (c *Cron) CheckReddit(ctx context.Context) {
+	sources, err := c.Db.ListSourcesBySource(*c.ctx, "reddit")
 	if err != nil {
 		log.Printf("No defines sources for reddit to query - %v\r", err)
 	}
@@ -63,13 +79,13 @@ func CheckReddit(ctx context.Context) {
 			log.Println(err)
 		}
 		redditArticles := rc.ConvertToArticles(raw)
-		checkPosts(ctx, redditArticles)
+		c.checkPosts(*c.ctx, redditArticles)
 	}
 }
 
-func CheckYoutube(ctx context.Context) {
+func (c *Cron) CheckYoutube(ctx context.Context) {
 	// Add call to the db to request youtube sources.
-	sources, err := _queries.ListSourcesBySource(ctx, "youtube")
+	sources, err := c.Db.ListSourcesBySource(*c.ctx, "youtube")
 	if err != nil {
 		log.Printf("Youtube - No sources found to query - %v\r", err)
 	}
@@ -83,12 +99,12 @@ func CheckYoutube(ctx context.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		checkPosts(ctx, raw)
+		c.checkPosts(*c.ctx, raw)
 	}
 }
 
-func CheckFfxiv(ctx context.Context) {
-	sources, err := _queries.ListSourcesBySource(ctx, "ffxiv")
+func (c *Cron) CheckFfxiv(ctx context.Context) {
+	sources, err := c.Db.ListSourcesBySource(*c.ctx, "ffxiv")
 	if err != nil {
 		log.Printf("Final Fantasy XIV - No sources found to query - %v\r", err)
 	}
@@ -102,12 +118,12 @@ func CheckFfxiv(ctx context.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		checkPosts(ctx, items)
+		c.checkPosts(*c.ctx, items)
 	}
 }
 
-func CheckTwitch(ctx context.Context) error {
-	sources, err := _queries.ListSourcesBySource(ctx, "twitch")
+func (c *Cron) CheckTwitch(ctx context.Context) error {
+	sources, err := c.Db.ListSourcesBySource(*c.ctx, "twitch")
 	if err != nil {
 		log.Printf("Twitch - No sources found to query - %v\r", err)
 	}
@@ -126,17 +142,17 @@ func CheckTwitch(ctx context.Context) error {
 		if err != nil {
 			log.Println(err)
 		}
-		checkPosts(ctx, items)
+		c.checkPosts(*c.ctx, items)
 	}
 
 	return nil
 }
 
-func checkPosts(ctx context.Context, posts []database.Article) {
+func (c *Cron) checkPosts(ctx context.Context, posts []database.Article) {
 	for _, item := range posts {
-		_, err := _queries.GetArticleByUrl(ctx, item.Url)
+		_, err := c.Db.GetArticleByUrl(*c.ctx, item.Url)
 		if err != nil {
-			err = postArticle(ctx, item)
+			err = c.postArticle(ctx, item)
 			if err != nil {
 				log.Printf("Reddit - Failed to post article - %v - %v.\r", item.Url, err)
 			} else {
@@ -147,8 +163,8 @@ func checkPosts(ctx context.Context, posts []database.Article) {
 	time.Sleep(30 * time.Second)
 }
 
-func postArticle(ctx context.Context, item database.Article) error {
-	err := _queries.CreateArticle(ctx, database.CreateArticleParams{
+func (c *Cron) postArticle(ctx context.Context, item database.Article) error {
+	err := c.Db.CreateArticle(*c.ctx, database.CreateArticleParams{
 		ID:          uuid.New(),
 		Sourceid:    item.Sourceid,
 		Tags:        item.Tags,

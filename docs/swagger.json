@@ -1,0 +1,458 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "NewsBot collector",
+        "contact": {},
+        "version": "0.1"
+    },
+    "basePath": "/api",
+    "paths": {
+        "/articles": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Lists the top 50 records",
+                "responses": {}
+            }
+        },
+        "/articles/by/sourceid/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source ID UUID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/articles/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "articles"
+                ],
+                "summary": "Returns an article based on defined ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "uuid",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Lists the top 50 records",
+                "responses": {}
+            }
+        },
+        "/config/sources/new/reddit": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source",
+                    "reddit"
+                ],
+                "summary": "Creates a new reddit source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/new/twitch": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source",
+                    "twitch"
+                ],
+                "summary": "Creates a new twitch source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags",
+                        "name": "tags",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/new/youtube": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source",
+                    "youtube"
+                ],
+                "summary": "Creates a new youtube source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "tags",
+                        "name": "tags",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Returns a single entity by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "uuid",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Deletes a record by ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/{id}/disable": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Disables a source from processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/config/sources/{id}/enable": {
+            "post": {
+                "tags": [
+                    "config",
+                    "source"
+                ],
+                "summary": "Enables a source to continue processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/queue": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "debug",
+                    "Discord",
+                    "Queue"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/discord/webhooks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/byId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/new": {
+            "post": {
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Creates a new record for a discord web hook to post data to.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Server name",
+                        "name": "server",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Channel name.",
+                        "name": "channel",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/hello/{who}": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "debug"
+                ],
+                "summary": "Responds back with \"Hello x\" depending on param passed in.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Who",
+                        "name": "who",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/helloworld": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "debug"
+                ],
+                "summary": "Responds back with \"Hello world!\"",
+                "responses": {}
+            }
+        },
+        "/ping": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "debug"
+                ],
+                "summary": "Sends back \"pong\".  Good to test with.",
+                "responses": {}
+            }
+        },
+        "/settings/{key}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Returns a object based on the Key that was given/",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Settings Key value",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/subscriptions/byDiscordId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/bySourceId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}

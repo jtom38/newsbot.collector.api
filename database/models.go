@@ -34,8 +34,6 @@ type Discordqueue struct {
 
 type Discordwebhook struct {
 	ID      uuid.UUID
-	Name    string
-	Key     sql.NullString
 	Url     string
 	Server  string
 	Channel string
@@ -65,4 +63,10 @@ type Source struct {
 	Enabled bool
 	Url     string
 	Tags    string
+}
+
+type Subscription struct {
+	ID               uuid.UUID
+	Discordwebhookid uuid.UUID
+	Sourceid         uuid.UUID
 }

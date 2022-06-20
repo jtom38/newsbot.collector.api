@@ -21,8 +21,6 @@ CREATE Table DiscordQueue (
 
 CREATE Table DiscordWebHooks (
 	ID 		uuid PRIMARY KEY,
-	Name 	TEXT NOT NULL, -- Defines webhook purpose
-	Key 	TEXT,
 	Url 	TEXT NOT NULL, -- Webhook Url
 	Server 	TEXT NOT NULL, -- Defines the server its bound it. Used for refrence
 	Channel TEXT NOT NULL, -- Defines the channel its bound to.  Used for refrence
@@ -54,3 +52,9 @@ Create Table Sources (
 	Tags 	TEXT NOT NULL
 );
 
+/* This table is used to track what the Web Hook wants to have sent by Source */;
+Create TABLE Subscriptions (
+	ID 					uuid Primary Key,
+	DiscordWebHookID  	uuid Not Null,
+	SourceID         	uuid Not Null
+);

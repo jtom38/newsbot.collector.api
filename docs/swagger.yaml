@@ -1,0 +1,316 @@
+basePath: /api
+info:
+  contact: {}
+  title: NewsBot collector
+  version: "0.1"
+paths:
+  /articles:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Lists the top 50 records
+      tags:
+      - articles
+  /articles/{id}:
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns an article based on defined ID.
+      tags:
+      - articles
+  /articles/by/sourceid/{id}:
+    get:
+      parameters:
+      - description: Source ID UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Finds the articles based on the SourceID provided.  Returns the top
+        50.
+      tags:
+      - articles
+  /config/sources:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Lists the top 50 records
+      tags:
+      - config
+      - source
+  /config/sources/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Deletes a record by ID.
+      tags:
+      - config
+      - source
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a single entity by ID
+      tags:
+      - config
+      - source
+  /config/sources/{id}/disable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Disables a source from processing.
+      tags:
+      - config
+      - source
+  /config/sources/{id}/enable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Enables a source to continue processing.
+      tags:
+      - config
+      - source
+  /config/sources/new/reddit:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new reddit source to monitor.
+      tags:
+      - config
+      - source
+      - reddit
+  /config/sources/new/twitch:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new twitch source to monitor.
+      tags:
+      - config
+      - source
+      - twitch
+  /config/sources/new/youtube:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: tags
+        in: query
+        name: tags
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new youtube source to monitor.
+      tags:
+      - config
+      - source
+      - youtube
+  /discord/queue:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - debug
+      - Discord
+      - Queue
+  /discord/webhooks:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Discord
+      - Webhooks
+  /discord/webhooks/byId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Discord
+      - Webhooks
+  /discord/webhooks/new:
+    post:
+      parameters:
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: Server name
+        in: query
+        name: server
+        required: true
+        type: string
+      - description: Channel name.
+        in: query
+        name: channel
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new record for a discord web hook to post data to.
+      tags:
+      - config
+      - Discord
+      - Webhooks
+  /hello/{who}:
+    get:
+      parameters:
+      - description: Who
+        in: path
+        name: who
+        required: true
+        type: string
+      produces:
+      - text/plain
+      responses: {}
+      summary: Responds back with "Hello x" depending on param passed in.
+      tags:
+      - debug
+  /helloworld:
+    get:
+      produces:
+      - text/plain
+      responses: {}
+      summary: Responds back with "Hello world!"
+      tags:
+      - debug
+  /ping:
+    get:
+      produces:
+      - text/plain
+      responses: {}
+      summary: Sends back "pong".  Good to test with.
+      tags:
+      - debug
+  /settings/{key}:
+    get:
+      parameters:
+      - description: Settings Key value
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a object based on the Key that was given/
+      tags:
+      - settings
+  /subscriptions:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
+  /subscriptions/byDiscordId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
+  /subscriptions/bySourceId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
+swagger: "2.0"

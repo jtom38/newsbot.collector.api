@@ -75,15 +75,13 @@ func (q *Queries) CreateDiscordQueue(ctx context.Context, arg CreateDiscordQueue
 
 const createDiscordWebHook = `-- name: CreateDiscordWebHook :exec
 Insert Into DiscordWebHooks
-(ID, Name, Key, Url, Server, Channel, Enabled)
+(ID, Url, Server, Channel, Enabled)
 Values
-($1, $2, $3, $4, $5, $6, $7)
+($1, $2, $3, $4, $5)
 `
 
 type CreateDiscordWebHookParams struct {
 	ID      uuid.UUID
-	Name    string
-	Key     sql.NullString
 	Url     string
 	Server  string
 	Channel string
@@ -94,8 +92,6 @@ type CreateDiscordWebHookParams struct {
 func (q *Queries) CreateDiscordWebHook(ctx context.Context, arg CreateDiscordWebHookParams) error {
 	_, err := q.db.ExecContext(ctx, createDiscordWebHook,
 		arg.ID,
-		arg.Name,
-		arg.Key,
 		arg.Url,
 		arg.Server,
 		arg.Channel,
@@ -194,6 +190,23 @@ func (q *Queries) CreateSource(ctx context.Context, arg CreateSourceParams) erro
 	return err
 }
 
+const createSubscription = `-- name: CreateSubscription :exec
+
+Insert Into subscriptions (ID, DiscordWebHookId, SourceId) Values ($1, $2, $3)
+`
+
+type CreateSubscriptionParams struct {
+	ID               uuid.UUID
+	Discordwebhookid uuid.UUID
+	Sourceid         uuid.UUID
+}
+
+// Subscriptions
+func (q *Queries) CreateSubscription(ctx context.Context, arg CreateSubscriptionParams) error {
+	_, err := q.db.ExecContext(ctx, createSubscription, arg.ID, arg.Discordwebhookid, arg.Sourceid)
+	return err
+}
+
 const deleteDiscordQueueItem = `-- name: DeleteDiscordQueueItem :exec
 Delete From DiscordQueue Where ID = $1
 `
@@ -236,6 +249,38 @@ DELETE From sources where id = $1
 
 func (q *Queries) DeleteSource(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, deleteSource, id)
+	return err
+}
+
+const deleteSubscription = `-- name: DeleteSubscription :exec
+Delete From subscriptions Where discordwebhookid = $1 and sourceid = $2
+`
+
+type DeleteSubscriptionParams struct {
+	Discordwebhookid uuid.UUID
+	Sourceid         uuid.UUID
+}
+
+func (q *Queries) DeleteSubscription(ctx context.Context, arg DeleteSubscriptionParams) error {
+	_, err := q.db.ExecContext(ctx, deleteSubscription, arg.Discordwebhookid, arg.Sourceid)
+	return err
+}
+
+const disableSource = `-- name: DisableSource :exec
+Update Sources Set Enabled = FALSE where ID = $1
+`
+
+func (q *Queries) DisableSource(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, disableSource, id)
+	return err
+}
+
+const enableSource = `-- name: EnableSource :exec
+Update Sources Set Enabled = TRUE where ID = $1
+`
+
+func (q *Queries) EnableSource(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, enableSource, id)
 	return err
 }
 
@@ -292,6 +337,191 @@ func (q *Queries) GetArticleByUrl(ctx context.Context, url string) (Article, err
 	return i, err
 }
 
+const getArticlesBySource = `-- name: GetArticlesBySource :many
+select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags from articles
+INNER join sources on articles.sourceid=Sources.ID
+where site = $1
+`
+
+type GetArticlesBySourceRow struct {
+	ID          uuid.UUID
+	Sourceid    uuid.UUID
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
+	Video       sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
+	Authorname  sql.NullString
+	Authorimage sql.NullString
+	ID_2        uuid.UUID
+	Site        string
+	Name        string
+	Source      string
+	Type        string
+	Value       sql.NullString
+	Enabled     bool
+	Url_2       string
+	Tags_2      string
+}
+
+func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetArticlesBySourceRow, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySource, site)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetArticlesBySourceRow
+	for rows.Next() {
+		var i GetArticlesBySourceRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+			&i.ID_2,
+			&i.Site,
+			&i.Name,
+			&i.Source,
+			&i.Type,
+			&i.Value,
+			&i.Enabled,
+			&i.Url_2,
+			&i.Tags_2,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getArticlesBySourceId = `-- name: GetArticlesBySourceId :many
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles
+Where sourceid = $1 Limit 50
+`
+
+func (q *Queries) GetArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySourceId, sourceid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getArticlesBySourceName = `-- name: GetArticlesBySourceName :many
+select 
+articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name
+From articles
+Left Join sources
+On articles.sourceid = sources.id
+Where name = $1
+`
+
+type GetArticlesBySourceNameRow struct {
+	ID          uuid.UUID
+	Sourceid    uuid.UUID
+	Tags        string
+	Title       string
+	Url         string
+	Pubdate     time.Time
+	Video       sql.NullString
+	Videoheight int32
+	Videowidth  int32
+	Thumbnail   string
+	Description string
+	Authorname  sql.NullString
+	Authorimage sql.NullString
+	Source      sql.NullString
+	Name        sql.NullString
+}
+
+func (q *Queries) GetArticlesBySourceName(ctx context.Context, name string) ([]GetArticlesBySourceNameRow, error) {
+	rows, err := q.db.QueryContext(ctx, getArticlesBySourceName, name)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetArticlesBySourceNameRow
+	for rows.Next() {
+		var i GetArticlesBySourceNameRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+			&i.Source,
+			&i.Name,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getDiscordQueueByID = `-- name: GetDiscordQueueByID :one
 Select id, articleid from DiscordQueue
 Where ID = $1 LIMIT 1
@@ -332,7 +562,7 @@ func (q *Queries) GetDiscordQueueItems(ctx context.Context, limit int32) ([]Disc
 }
 
 const getDiscordWebHooksByID = `-- name: GetDiscordWebHooksByID :one
-Select id, name, key, url, server, channel, enabled from DiscordWebHooks
+Select id, url, server, channel, enabled from DiscordWebHooks
 Where ID = $1 LIMIT 1
 `
 
@@ -341,8 +571,6 @@ func (q *Queries) GetDiscordWebHooksByID(ctx context.Context, id uuid.UUID) (Dis
 	var i Discordwebhook
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
-		&i.Key,
 		&i.Url,
 		&i.Server,
 		&i.Channel,
@@ -447,8 +675,103 @@ func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, erro
 	return i, err
 }
 
+const getSubscriptionsByDiscordWebHookId = `-- name: GetSubscriptionsByDiscordWebHookId :many
+Select id, discordwebhookid, sourceid from subscriptions Where discordwebhookid = $1
+`
+
+func (q *Queries) GetSubscriptionsByDiscordWebHookId(ctx context.Context, discordwebhookid uuid.UUID) ([]Subscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscriptionsByDiscordWebHookId, discordwebhookid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscription
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(&i.ID, &i.Discordwebhookid, &i.Sourceid); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSubscriptionsBySourceID = `-- name: GetSubscriptionsBySourceID :many
+Select id, discordwebhookid, sourceid From subscriptions Where sourceid = $1
+`
+
+func (q *Queries) GetSubscriptionsBySourceID(ctx context.Context, sourceid uuid.UUID) ([]Subscription, error) {
+	rows, err := q.db.QueryContext(ctx, getSubscriptionsBySourceID, sourceid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscription
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(&i.ID, &i.Discordwebhookid, &i.Sourceid); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listArticles = `-- name: ListArticles :many
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles Limit $1
+`
+
+func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listArticles, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDiscordWebHooksByServer = `-- name: ListDiscordWebHooksByServer :many
-Select id, name, key, url, server, channel, enabled From DiscordWebHooks
+Select id, url, server, channel, enabled From DiscordWebHooks
 Where Server = $1
 `
 
@@ -463,12 +786,80 @@ func (q *Queries) ListDiscordWebHooksByServer(ctx context.Context, server string
 		var i Discordwebhook
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
-			&i.Key,
 			&i.Url,
 			&i.Server,
 			&i.Channel,
 			&i.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDiscordWebhooks = `-- name: ListDiscordWebhooks :many
+Select id, url, server, channel, enabled From discordwebhooks LIMIT $1
+`
+
+func (q *Queries) ListDiscordWebhooks(ctx context.Context, limit int32) ([]Discordwebhook, error) {
+	rows, err := q.db.QueryContext(ctx, listDiscordWebhooks, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discordwebhook
+	for rows.Next() {
+		var i Discordwebhook
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.Server,
+			&i.Channel,
+			&i.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSources = `-- name: ListSources :many
+Select id, site, name, source, type, value, enabled, url, tags From Sources Limit $1
+`
+
+func (q *Queries) ListSources(ctx context.Context, limit int32) ([]Source, error) {
+	rows, err := q.db.QueryContext(ctx, listSources, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Source
+	for rows.Next() {
+		var i Source
+		if err := rows.Scan(
+			&i.ID,
+			&i.Site,
+			&i.Name,
+			&i.Source,
+			&i.Type,
+			&i.Value,
+			&i.Enabled,
+			&i.Url,
+			&i.Tags,
 		); err != nil {
 			return nil, err
 		}
@@ -507,6 +898,65 @@ func (q *Queries) ListSourcesBySource(ctx context.Context, source string) ([]Sou
 			&i.Url,
 			&i.Tags,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSubscriptions = `-- name: ListSubscriptions :many
+Select id, discordwebhookid, sourceid From subscriptions Limit $1
+`
+
+func (q *Queries) ListSubscriptions(ctx context.Context, limit int32) ([]Subscription, error) {
+	rows, err := q.db.QueryContext(ctx, listSubscriptions, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscription
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(&i.ID, &i.Discordwebhookid, &i.Sourceid); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const querySubscriptions = `-- name: QuerySubscriptions :many
+Select id, discordwebhookid, sourceid From subscriptions Where discordwebhookid = $1 and sourceid = $2
+`
+
+type QuerySubscriptionsParams struct {
+	Discordwebhookid uuid.UUID
+	Sourceid         uuid.UUID
+}
+
+func (q *Queries) QuerySubscriptions(ctx context.Context, arg QuerySubscriptionsParams) ([]Subscription, error) {
+	rows, err := q.db.QueryContext(ctx, querySubscriptions, arg.Discordwebhookid, arg.Sourceid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscription
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(&i.ID, &i.Discordwebhookid, &i.Sourceid); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
