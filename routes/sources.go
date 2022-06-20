@@ -29,16 +29,14 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 	*/
 
 	res, err := s.Db.ListSources(*s.ctx, 50)
-
 	if err != nil {
-		log.Panicln(err)
+		http.Error(w, "url is missing a value", http.StatusBadRequest)
 		return
 	}
 
-	//dtos := convertToSourcesDtoSlice(items)
 	bResult, err := json.Marshal(res)
 	if err != nil {
-		log.Panicln(err)
+		http.Error(w, "unable to convert to json", http.StatusBadRequest)
 		return
 	}
 
@@ -57,11 +55,13 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		panic(err)
+		http.Error(w, "id is not a uuid", http.StatusBadRequest)
+		return
 	}
 
 	res, err := s.Db.GetSourceByID(*s.ctx, uuid)
 	if err != nil {
+		http.Error(w, "invalid id was given", http.StatusBadRequest)
 		panic(err)
 	}
 

@@ -255,6 +255,91 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/discord/queue": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "debug",
+                    "Discord",
+                    "Queue"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/discord/webhooks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/byId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/new": {
+            "post": {
+                "tags": [
+                    "config",
+                    "Discord",
+                    "Webhooks"
+                ],
+                "summary": "Creates a new record for a discord web hook to post data to.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Server name",
+                        "name": "server",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Channel name.",
+                        "name": "channel",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/hello/{who}": {
             "get": {
                 "produces": [
@@ -297,6 +382,84 @@ const docTemplate = `{
                     "debug"
                 ],
                 "summary": "Sends back \"pong\".  Good to test with.",
+                "responses": {}
+            }
+        },
+        "/settings/{key}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "settings"
+                ],
+                "summary": "Returns a object based on the Key that was given/",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Settings Key value",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {}
+            }
+        },
+        "/subscriptions/byDiscordId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/bySourceId": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "config",
+                    "Subscriptions"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {}
             }
         }

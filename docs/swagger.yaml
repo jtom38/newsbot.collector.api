@@ -170,6 +170,66 @@ paths:
       - config
       - source
       - youtube
+  /discord/queue:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - debug
+      - Discord
+      - Queue
+  /discord/webhooks:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Discord
+      - Webhooks
+  /discord/webhooks/byId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Discord
+      - Webhooks
+  /discord/webhooks/new:
+    post:
+      parameters:
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      - description: Server name
+        in: query
+        name: server
+        required: true
+        type: string
+      - description: Channel name.
+        in: query
+        name: channel
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new record for a discord web hook to post data to.
+      tags:
+      - config
+      - Discord
+      - Webhooks
   /hello/{who}:
     get:
       parameters:
@@ -200,4 +260,57 @@ paths:
       summary: Sends back "pong".  Good to test with.
       tags:
       - debug
+  /settings/{key}:
+    get:
+      parameters:
+      - description: Settings Key value
+        in: path
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a object based on the Key that was given/
+      tags:
+      - settings
+  /subscriptions:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
+  /subscriptions/byDiscordId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
+  /subscriptions/bySourceId:
+    get:
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - config
+      - Subscriptions
 swagger: "2.0"

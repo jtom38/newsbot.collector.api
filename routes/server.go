@@ -20,6 +20,13 @@ type Server struct {
 	ctx *context.Context
 }
 
+var (
+	ErrIdValueMissing string = "id value is missing"
+	ErrValueNotUuid string = "a value given was expected to be a uuid but was not correct."
+	ErrNoRecordFound string = "no record was found."
+	ErrUnableToConvertToJson string = "Unable to convert to json"
+)
+
 func NewServer(ctx context.Context) *Server {
 	s := &Server{
 		ctx: &ctx,
@@ -77,7 +84,7 @@ func (s *Server) MountRoutes() {
 	/* Discord WebHooks */
 	s.Router.Post("/api/discord/webhooks/new", s.NewDiscordWebHook)
 	s.Router.Get("/api/discord/webhooks", s.GetDiscordWebHooks)
-	s.Router.Get("/api/discord/webhooks/byid", s.GetDiscordWebHooksById)
+	s.Router.Get("/api/discord/webhooks/byId", s.GetDiscordWebHooksById)
 
 	/* Settings */
 	s.Router.Get("/api/settings", s.getSettings)
@@ -93,4 +100,9 @@ func (s *Server) MountRoutes() {
 		r.Post("/disable", s.disableSource)
 		r.Post("/enable", s.enableSource)
 	})
+
+	/* Subscriptions */
+	s.Router.Get("/api/subscriptions", s.ListSubscriptions)
+	s.Router.Get("/api/subscriptions/byDiscordId", s.GetSubscriptionsByDiscordId)
+	s.Router.Get("/api/subscriptions/bySourceId", s.GetSubscriptionsBySourceId)
 }

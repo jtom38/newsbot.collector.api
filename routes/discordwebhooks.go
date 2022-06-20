@@ -13,7 +13,7 @@ import (
 // GetDiscordWebHooks
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     config, Discord Webhooks
+// @Tags     config, Discord, Webhooks
 // @Router   /discord/webhooks [get]
 func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -36,20 +36,34 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 // GetDiscorWebHooksById
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     config, Discord Webhooks
+// @Param    id  query  string  true  "id"
+// @Tags     config, Discord, Webhooks
 // @Router   /discord/webhooks/byId [get]
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	res, err := s.Db.ListDiscordWebhooks(*s.ctx, 100)
+	query := r.URL.Query()
+	_id := query["id"][0]
+	if _id == "" {
+		http.Error(w, "id is missing", http.StatusBadRequest)
+		return
+	}
+
+	uuid, err := uuid.Parse(_id)
 	if err != nil {
-		w.Write([]byte(err.Error()))
-		panic(err)
+		http.Error(w, "unable to parse id value", http.StatusBadRequest)
+		return
+	}
+	
+	res, err := s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	if err != nil {
+		http.Error(w, "no record found", http.StatusBadRequest)
+		return
 	}
 
 	bres, err := json.Marshal(res)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		http.Error(w, "unable to convert to json", http.StatusBadRequest)
 		panic(err)
 	}
 
@@ -61,7 +75,7 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 // @Param    url      query  string  true  "url"
 // @Param    server   query  string  true  "Server name"
 // @Param    channel  query  string  true  "Channel name."
-// @Tags     config, Discord Webhooks
+// @Tags     config, Discord, Webhooks
 // @Router   /discord/webhooks/new [post]
 func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()

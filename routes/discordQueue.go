@@ -8,8 +8,8 @@ import (
 // GetDiscordQueue
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     DiscordQueue
-// @Router   /discord/queue/ [get]
+// @Tags     debug, Discord, Queue
+// @Router   /discord/queue [get]
 func (s *Server) GetDiscordQueue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	
