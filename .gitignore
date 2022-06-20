@@ -1,6 +1,8 @@
 .env
 dev.session.sql
 
+.vscode
+
 # Binaries for programs and plugins
 *.exe
 *.exe~
