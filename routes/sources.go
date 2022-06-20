@@ -53,7 +53,6 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 // @Tags     config, source
 // @Router   /config/sources/{id} [get]
 func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
-	//var item model.Sources
 	id := chi.URLParam(r, "ID")
 
 	uuid, err := uuid.Parse(id)
@@ -65,11 +64,6 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-
-	//itemId := fmt.Sprint(item.ID)
-	//if id != itemId {
-	//	log.Panicln("Unable to find the requested record.  Either unable to access SQL or the record does not exist.")
-	//}
 
 	bResult, err := json.Marshal(res)
 	if err != nil {

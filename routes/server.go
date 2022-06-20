@@ -71,6 +71,17 @@ func (s *Server) MountRoutes() {
 	})
 	s.Router.Get("/api/articles/by/sourceid", s.GetArticlesBySourceId)
 
+	/* Discord Queue */
+	s.Router.Get("/api/discord/queue", s.GetDiscordQueue)
+
+	/* Discord WebHooks */
+	s.Router.Post("/api/discord/webhooks/new", s.NewDiscordWebHook)
+	s.Router.Get("/api/discord/webhooks", s.GetDiscordWebHooks)
+	s.Router.Get("/api/discord/webhooks/byid", s.GetDiscordWebHooksById)
+
+	/* Settings */
+	s.Router.Get("/api/settings", s.getSettings)
+	
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
 	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
