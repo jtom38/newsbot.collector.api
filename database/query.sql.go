@@ -75,15 +75,13 @@ func (q *Queries) CreateDiscordQueue(ctx context.Context, arg CreateDiscordQueue
 
 const createDiscordWebHook = `-- name: CreateDiscordWebHook :exec
 Insert Into DiscordWebHooks
-(ID, Name, Key, Url, Server, Channel, Enabled)
+(ID, Url, Server, Channel, Enabled)
 Values
-($1, $2, $3, $4, $5, $6, $7)
+($1, $2, $3, $4, $5)
 `
 
 type CreateDiscordWebHookParams struct {
 	ID      uuid.UUID
-	Name    string
-	Key     sql.NullString
 	Url     string
 	Server  string
 	Channel string
@@ -94,8 +92,6 @@ type CreateDiscordWebHookParams struct {
 func (q *Queries) CreateDiscordWebHook(ctx context.Context, arg CreateDiscordWebHookParams) error {
 	_, err := q.db.ExecContext(ctx, createDiscordWebHook,
 		arg.ID,
-		arg.Name,
-		arg.Key,
 		arg.Url,
 		arg.Server,
 		arg.Channel,
@@ -566,7 +562,7 @@ func (q *Queries) GetDiscordQueueItems(ctx context.Context, limit int32) ([]Disc
 }
 
 const getDiscordWebHooksByID = `-- name: GetDiscordWebHooksByID :one
-Select id, name, key, url, server, channel, enabled from DiscordWebHooks
+Select id, url, server, channel, enabled from DiscordWebHooks
 Where ID = $1 LIMIT 1
 `
 
@@ -575,8 +571,6 @@ func (q *Queries) GetDiscordWebHooksByID(ctx context.Context, id uuid.UUID) (Dis
 	var i Discordwebhook
 	err := row.Scan(
 		&i.ID,
-		&i.Name,
-		&i.Key,
 		&i.Url,
 		&i.Server,
 		&i.Channel,
@@ -777,7 +771,7 @@ func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, err
 }
 
 const listDiscordWebHooksByServer = `-- name: ListDiscordWebHooksByServer :many
-Select id, name, key, url, server, channel, enabled From DiscordWebHooks
+Select id, url, server, channel, enabled From DiscordWebHooks
 Where Server = $1
 `
 
@@ -792,8 +786,6 @@ func (q *Queries) ListDiscordWebHooksByServer(ctx context.Context, server string
 		var i Discordwebhook
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
-			&i.Key,
 			&i.Url,
 			&i.Server,
 			&i.Channel,
@@ -813,7 +805,7 @@ func (q *Queries) ListDiscordWebHooksByServer(ctx context.Context, server string
 }
 
 const listDiscordWebhooks = `-- name: ListDiscordWebhooks :many
-Select id, name, key, url, server, channel, enabled From discordwebhooks LIMIT $1
+Select id, url, server, channel, enabled From discordwebhooks LIMIT $1
 `
 
 func (q *Queries) ListDiscordWebhooks(ctx context.Context, limit int32) ([]Discordwebhook, error) {
@@ -827,8 +819,6 @@ func (q *Queries) ListDiscordWebhooks(ctx context.Context, limit int32) ([]Disco
 		var i Discordwebhook
 		if err := rows.Scan(
 			&i.ID,
-			&i.Name,
-			&i.Key,
 			&i.Url,
 			&i.Server,
 			&i.Channel,

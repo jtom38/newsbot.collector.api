@@ -54,9 +54,9 @@ Select * from DiscordQueue LIMIT $1;
 /* DiscordWebHooks */
 -- name: CreateDiscordWebHook :exec
 Insert Into DiscordWebHooks
-(ID, Name, Key, Url, Server, Channel, Enabled)
+(ID, Url, Server, Channel, Enabled)
 Values
-($1, $2, $3, $4, $5, $6, $7);
+($1, $2, $3, $4, $5);
 
 -- name: GetDiscordWebHooksByID :one
 Select * from DiscordWebHooks
