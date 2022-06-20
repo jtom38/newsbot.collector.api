@@ -27,13 +27,6 @@ CREATE Table DiscordWebHooks (
 	Enabled BOOLEAN NOT NULL
 );
 
-/* This table is used to track what the Web Hook wants to have sent by Source */;
-Create TABLE Subscriptions (
-	ID 					uuid Primary Key,
-	DiscordWebHookID  	uuid Not Null,
-	SourceID         	uuid Not Null
-);
-
 CREATE Table Icons (
 	ID 			uuid PRIMARY Key,
 	FileName 	TEXT NOT NULL,
@@ -59,3 +52,9 @@ Create Table Sources (
 	Tags 	TEXT NOT NULL
 );
 
+/* This table is used to track what the Web Hook wants to have sent by Source */;
+Create TABLE Subscriptions (
+	ID 					uuid Primary Key,
+	DiscordWebHookID  	uuid Not Null,
+	SourceID         	uuid Not Null
+);
