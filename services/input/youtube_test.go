@@ -1,11 +1,11 @@
-package services_test
+package input_test
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/input"
 )
 
 var YouTubeRecord database.Source = database.Source{
@@ -17,13 +17,13 @@ var YouTubeRecord database.Source = database.Source{
 }
 
 func TestGetPageParser(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	_, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 }
 
 func TestGetChannelId(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 
@@ -32,7 +32,7 @@ func TestGetChannelId(t *testing.T) {
 }
 
 func TestPullFeed(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
 
@@ -44,14 +44,14 @@ func TestPullFeed(t *testing.T) {
 }
 
 func TestGetAvatarUri(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	res, err := yc.GetAvatarUri()
 	if err != nil { panic(err) }
-	if res == "" { panic(services.ErrMissingAuthorImage)}
+	if res == "" { panic(input.ErrMissingAuthorImage)}
 }
 
 func TestGetVideoTags(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 
 	var videoUri = "https://www.youtube.com/watch?v=k_sQEXOBe68"
 
@@ -64,7 +64,7 @@ func TestGetVideoTags(t *testing.T) {
 }
 
 func TestGetChannelTags(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 
 	parser, err := yc.GetParser(YouTubeRecord.Url)
 	if err != nil { panic(err) }
@@ -75,7 +75,7 @@ func TestGetChannelTags(t *testing.T) {
 }
 
 func TestGetVideoThumbnail(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	parser, err := yc.GetParser("https://www.youtube.com/watch?v=k_sQEXOBe68")
 	if err != nil {panic(err) }
 
@@ -86,22 +86,22 @@ func TestGetVideoThumbnail(t *testing.T) {
 }
 
 func TestCheckSource(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	_, err := yc.GetContent()
 	if err != nil { panic(err) }
 }
 
 func TestCheckUriCache(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	item := "demo"
 
-	services.YoutubeUriCache = append(services.YoutubeUriCache, &item)
+	input.YoutubeUriCache = append(input.YoutubeUriCache, &item)
 	res := yc.CheckUriCache(&item)
 	if res == false { panic("expected a value to come back")}
 }
 
 func TestCheckUriCacheFails(t *testing.T) {
-	yc := services.NewYoutubeClient(YouTubeRecord)
+	yc := input.NewYoutubeClient(YouTubeRecord)
 	item := "demo1"
 	
 	res := yc.CheckUriCache(&item)

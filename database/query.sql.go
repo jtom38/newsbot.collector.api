@@ -534,33 +534,6 @@ func (q *Queries) GetDiscordQueueByID(ctx context.Context, id uuid.UUID) (Discor
 	return i, err
 }
 
-const getDiscordQueueItems = `-- name: GetDiscordQueueItems :many
-Select id, articleid from DiscordQueue LIMIT $1
-`
-
-func (q *Queries) GetDiscordQueueItems(ctx context.Context, limit int32) ([]Discordqueue, error) {
-	rows, err := q.db.QueryContext(ctx, getDiscordQueueItems, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Discordqueue
-	for rows.Next() {
-		var i Discordqueue
-		if err := rows.Scan(&i.ID, &i.Articleid); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getDiscordWebHooksByID = `-- name: GetDiscordWebHooksByID :one
 Select id, url, server, channel, enabled from DiscordWebHooks
 Where ID = $1 LIMIT 1
@@ -770,6 +743,33 @@ func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, err
 	return items, nil
 }
 
+const listDiscordQueueItems = `-- name: ListDiscordQueueItems :many
+Select id, articleid from DiscordQueue LIMIT $1
+`
+
+func (q *Queries) ListDiscordQueueItems(ctx context.Context, limit int32) ([]Discordqueue, error) {
+	rows, err := q.db.QueryContext(ctx, listDiscordQueueItems, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discordqueue
+	for rows.Next() {
+		var i Discordqueue
+		if err := rows.Scan(&i.ID, &i.Articleid); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDiscordWebHooksByServer = `-- name: ListDiscordWebHooksByServer :many
 Select id, url, server, channel, enabled From DiscordWebHooks
 Where Server = $1
@@ -917,6 +917,33 @@ Select id, discordwebhookid, sourceid From subscriptions Limit $1
 
 func (q *Queries) ListSubscriptions(ctx context.Context, limit int32) ([]Subscription, error) {
 	rows, err := q.db.QueryContext(ctx, listSubscriptions, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Subscription
+	for rows.Next() {
+		var i Subscription
+		if err := rows.Scan(&i.ID, &i.Discordwebhookid, &i.Sourceid); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listSubscriptionsBySourceId = `-- name: ListSubscriptionsBySourceId :many
+Select id, discordwebhookid, sourceid From subscriptions where sourceid = $1
+`
+
+func (q *Queries) ListSubscriptionsBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Subscription, error) {
+	rows, err := q.db.QueryContext(ctx, listSubscriptionsBySourceId, sourceid)
 	if err != nil {
 		return nil, err
 	}

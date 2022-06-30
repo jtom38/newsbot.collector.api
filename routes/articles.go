@@ -65,15 +65,18 @@ func (s *Server) getArticleById(w http.ResponseWriter, r *http.Request) {
 // TODO add page support
 // GetArticlesBySourceID
 // @Summary  Finds the articles based on the SourceID provided.  Returns the top 50.
-// @Param    id  path  string  true  "Source ID UUID"
+// @Param    id  query  string  true  "Source ID UUID"
 // @Produce  application/json
 // @Tags     articles
-// @Router   /articles/by/sourceid/{id} [get]
+// @Router   /articles/by/sourceid [get]
 func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	id := chi.URLParam(r, "ID")
-	uuid, err := uuid.Parse(id)
+	r.URL.Query()
+	query := r.URL.Query()
+	_id := query["id"][0]
+
+	uuid, err := uuid.Parse(_id)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		panic(err)

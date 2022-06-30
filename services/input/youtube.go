@@ -1,4 +1,4 @@
-package services
+package input
 
 import (
 	"database/sql"
@@ -102,7 +102,7 @@ func (yc *YoutubeClient) GetContent() ([]database.Article, error) {
 		YoutubeUriCache = append(YoutubeUriCache, &item.Link)
 
 		// Add the post to local cache
-		log.Println(article)
+		//log.Println(article)
 	}
 
 	return items, nil

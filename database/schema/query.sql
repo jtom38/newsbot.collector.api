@@ -48,7 +48,7 @@ Where ID = $1 LIMIT 1;
 -- name: DeleteDiscordQueueItem :exec
 Delete From DiscordQueue Where ID = $1;
 
--- name: GetDiscordQueueItems :many
+-- name: ListDiscordQueueItems :many
 Select * from DiscordQueue LIMIT $1;
 
 /* DiscordWebHooks */
@@ -150,6 +150,9 @@ Insert Into subscriptions (ID, DiscordWebHookId, SourceId) Values ($1, $2, $3);
 
 -- name: ListSubscriptions :many
 Select * From subscriptions Limit $1;
+
+-- name: ListSubscriptionsBySourceId :many
+Select * From subscriptions where sourceid = $1;
 
 -- name: QuerySubscriptions :many
 Select * From subscriptions Where discordwebhookid = $1 and sourceid = $2;
