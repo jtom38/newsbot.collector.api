@@ -28,7 +28,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/articles/by/sourceid/{id}": {
+        "/articles/by/sourceid": {
             "get": {
                 "produces": [
                     "application/json"
@@ -42,7 +42,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Source ID UUID",
                         "name": "id",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     }
                 ],

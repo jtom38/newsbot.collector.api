@@ -26,11 +26,11 @@ paths:
       summary: Returns an article based on defined ID.
       tags:
       - articles
-  /articles/by/sourceid/{id}:
+  /articles/by/sourceid:
     get:
       parameters:
       - description: Source ID UUID
-        in: path
+        in: query
         name: id
         required: true
         type: string
