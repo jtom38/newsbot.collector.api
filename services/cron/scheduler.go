@@ -98,7 +98,7 @@ func (c *Cron) CheckReddit() {
 			continue
 		}
 		log.Printf("[Reddit] Checking '%v'...", source.Name)
-		rc := services.NewRedditClient(source)
+		rc := input.NewRedditClient(source)
 		raw, err := rc.GetContent()
 		if err != nil {
 			log.Println(err)
@@ -121,7 +121,7 @@ func (c *Cron) CheckYoutube() {
 			continue
 		}
 		log.Printf("[YouTube] Checking '%v'...", source.Name)
-		yc := services.NewYoutubeClient(source)
+		yc := input.NewYoutubeClient(source)
 		raw, err := yc.GetContent()
 		if err != nil {
 			log.Println(err)
@@ -141,7 +141,7 @@ func (c *Cron) CheckFfxiv() {
 		if !source.Enabled {
 			continue
 		}
-		fc := services.NewFFXIVClient(source)
+		fc := input.NewFFXIVClient(source)
 		items, err := fc.CheckSource()
 		if err != nil {
 			log.Println(err)
@@ -157,7 +157,7 @@ func (c *Cron) CheckTwitch() error {
 		log.Printf("[Twitch] No sources found to query - %v\r", err)
 	}
 
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		return err
 	}
