@@ -1,11 +1,11 @@
-package services_test
+package input_test
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/input"
 )
 
 var RedditRecord database.Source = database.Source{
@@ -19,7 +19,7 @@ var RedditRecord database.Source = database.Source{
 
 func TestGetContent(t *testing.T) {
 	//This test is flaky right now due to the http changes in 1.17
-	rc := services.NewRedditClient(RedditRecord)
+	rc := input.NewRedditClient(RedditRecord)
 	raw, err := rc.GetContent()
 	if err != nil {
 		t.Error(err)

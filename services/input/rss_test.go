@@ -1,10 +1,10 @@
-package services_test
+package input_test
 
 import (
 	"testing"
 
 	"github.com/jtom38/newsbot/collector/domain/model"
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/input"
 )
 
 var rssRecord = model.Sources {
@@ -14,11 +14,11 @@ var rssRecord = model.Sources {
 }
 
 func TestRssClientConstructor(t *testing.T) {
-	services.NewRssClient(rssRecord)
+	input.NewRssClient(rssRecord)
 }
 
 func TestRssGetFeed(t *testing.T) {
-	client := services.NewRssClient(rssRecord)
+	client := input.NewRssClient(rssRecord)
 	feed, err := client.PullFeed()
 	if err != nil { t.Error(err) }
 	if len(feed.Items) >= 0 { t.Error("failed to collect items from the fees")}

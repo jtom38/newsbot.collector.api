@@ -1,4 +1,4 @@
-package services_test
+package input_test
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/input"
 )
 
 var TwitchSourceRecord = database.Source {
@@ -22,7 +22,7 @@ var TwitchInvalidRecord = database.Source {
 }
 
 func TestTwitchLogin(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -36,7 +36,7 @@ func TestTwitchLogin(t *testing.T) {
 
 // reach out and confirms that the API returns posts made by the user.
 func TestTwitchReturnsUserPosts(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -62,7 +62,7 @@ func TestTwitchReturnsUserPosts(t *testing.T) {
 }
 
 func TestTwitchReturnsNothingDueToInvalidUserName(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -88,7 +88,7 @@ func TestTwitchReturnsNothingDueToInvalidUserName(t *testing.T) {
 }
 
 func TestTwitchReturnsVideoAuthor(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -114,7 +114,7 @@ func TestTwitchReturnsVideoAuthor(t *testing.T) {
 }
 
 func TestTwitchReturnsThumbnail(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {t.Error(err) }
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
@@ -133,7 +133,7 @@ func TestTwitchReturnsThumbnail(t *testing.T) {
 }
 
 func TestTwitchReturnsPubDate(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil { t.Error(err) }
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
@@ -152,7 +152,7 @@ func TestTwitchReturnsPubDate(t *testing.T) {
 }
 
 func TestTwitchReturnsDescription(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -180,7 +180,7 @@ func TestTwitchReturnsDescription(t *testing.T) {
 }
 
 func TestTwitchReturnsAuthorImage(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {t.Error(err) }
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
@@ -195,7 +195,7 @@ func TestTwitchReturnsAuthorImage(t *testing.T) {
 }
 
 func TestTwitchReturnsTags(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -219,7 +219,7 @@ func TestTwitchReturnsTags(t *testing.T) {
 }
 
 func TestTwitchReturnsTitle(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil {
 		t.Error(err)
 	}
@@ -244,7 +244,7 @@ func TestTwitchReturnsTitle(t *testing.T) {
 }
 
 func TestTwitchReturnsUrl(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil { t.Error(err) }
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
@@ -263,7 +263,7 @@ func TestTwitchReturnsUrl(t *testing.T) {
 }
 
 func TestTwitchGetContent(t *testing.T) {
-	tc, err := services.NewTwitchClient()
+	tc, err := input.NewTwitchClient()
 	if err != nil { t.Error(err) }
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 

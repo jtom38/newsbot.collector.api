@@ -1,11 +1,11 @@
-package services_test
+package input_test
 
 import (
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
-	ffxiv "github.com/jtom38/newsbot/collector/services"
+	ffxiv "github.com/jtom38/newsbot/collector/services/input"
 )
 
 var FFXIVRecord database.Source = database.Source{
