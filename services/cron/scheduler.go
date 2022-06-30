@@ -11,13 +11,14 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/services"
+	"github.com/jtom38/newsbot/collector/services/input"
 	"github.com/jtom38/newsbot/collector/services/config"
+	"github.com/jtom38/newsbot/collector/services/output"
 )
 
 type Cron struct {
-	Db *database.Queries
-	ctx *context.Context
+	Db    *database.Queries
+	ctx   *context.Context
 	timer *cron.Cron
 }
 
@@ -35,7 +36,7 @@ func openDatabase() (*database.Queries, error) {
 
 func New(ctx context.Context) *Cron {
 	c := &Cron{
-		ctx:  &ctx,
+		ctx: &ctx,
 	}
 
 	timer := cron.New()
@@ -46,10 +47,33 @@ func New(ctx context.Context) *Cron {
 	c.Db = queries
 
 	//timer.AddFunc("*/5 * * * *", func()  { go CheckCache() })
-	//timer.AddFunc("* */30 * * *", func() { go c.CheckReddit(ctx) })
-	//timer.AddFunc("* */1 * * *", func() { go CheckYoutube() })
-	//timer.AddFunc("* */1 * * *", func() { go CheckFfxiv() })
-	//timer.AddFunc("* */1 * * *", func() { go CheckTwitch() })
+	features := config.New()
+
+	res, _ := features.GetFeature(config.FEATURE_ENABLE_REDDIT_BACKEND)
+	if res {
+		timer.AddFunc("*/5 * * * *", func() { go c.CheckReddit() })
+		log.Print("Reddit backend was enabled")
+		//go c.CheckReddit()
+	}
+
+	res, _ = features.GetFeature(config.FEATURE_ENABLE_YOUTUBE_BACKEND)
+	if res {
+		timer.AddFunc("*/5 * * * *", func() { go c.CheckYoutube() })
+		log.Print("YouTube backend was enabled")
+	}
+
+	res, _ = features.GetFeature(config.FEATURE_ENABLE_FFXIV_BACKEND)
+	if res {
+		timer.AddFunc("* */1 * * *", func() { go c.CheckFfxiv() })
+		log.Print("FFXIV backend was enabled")
+	}
+
+	res, _ = features.GetFeature(config.FEATURE_ENABLE_TWITCH_BACKEND)
+	if res {
+		timer.AddFunc("* */1 * * *", func() { go c.CheckTwitch() })
+		log.Print("Twitch backend was enabled")
+	}
+	
 	c.timer = timer
 	return c
 }
@@ -63,50 +87,54 @@ func (c *Cron) Stop() {
 }
 
 // This is the main entry point to query all the reddit services
-func (c *Cron) CheckReddit(ctx context.Context) {
+func (c *Cron) CheckReddit() {
 	sources, err := c.Db.ListSourcesBySource(*c.ctx, "reddit")
 	if err != nil {
-		log.Printf("No defines sources for reddit to query - %v\r", err)
+		log.Printf("[Reddit] No sources found to query - %v\r", err)
 	}
 
 	for _, source := range sources {
 		if !source.Enabled {
 			continue
 		}
+		log.Printf("[Reddit] Checking '%v'...", source.Name)
 		rc := services.NewRedditClient(source)
 		raw, err := rc.GetContent()
 		if err != nil {
 			log.Println(err)
 		}
 		redditArticles := rc.ConvertToArticles(raw)
-		c.checkPosts(*c.ctx, redditArticles)
+		c.checkPosts(redditArticles, "Reddit")
 	}
+	log.Print("[Reddit] Done!")
 }
 
-func (c *Cron) CheckYoutube(ctx context.Context) {
+func (c *Cron) CheckYoutube() {
 	// Add call to the db to request youtube sources.
 	sources, err := c.Db.ListSourcesBySource(*c.ctx, "youtube")
 	if err != nil {
-		log.Printf("Youtube - No sources found to query - %v\r", err)
+		log.Printf("[Youtube] No sources found to query - %v\r", err)
 	}
 
 	for _, source := range sources {
 		if !source.Enabled {
 			continue
 		}
+		log.Printf("[YouTube] Checking '%v'...", source.Name)
 		yc := services.NewYoutubeClient(source)
 		raw, err := yc.GetContent()
 		if err != nil {
 			log.Println(err)
 		}
-		c.checkPosts(*c.ctx, raw)
+		c.checkPosts(raw, "YouTube")
 	}
+	log.Print("[YouTube] Done!")
 }
 
-func (c *Cron) CheckFfxiv(ctx context.Context) {
+func (c *Cron) CheckFfxiv() {
 	sources, err := c.Db.ListSourcesBySource(*c.ctx, "ffxiv")
 	if err != nil {
-		log.Printf("Final Fantasy XIV - No sources found to query - %v\r", err)
+		log.Printf("[FFXIV] No sources found to query - %v\r", err)
 	}
 
 	for _, source := range sources {
@@ -118,16 +146,17 @@ func (c *Cron) CheckFfxiv(ctx context.Context) {
 		if err != nil {
 			log.Println(err)
 		}
-		c.checkPosts(*c.ctx, items)
+		c.checkPosts(items, "FFXIV")
 	}
+	log.Printf("[FFXIV Done!]")
 }
 
-func (c *Cron) CheckTwitch(ctx context.Context) error {
+func (c *Cron) CheckTwitch() error {
 	sources, err := c.Db.ListSourcesBySource(*c.ctx, "twitch")
 	if err != nil {
-		log.Printf("Twitch - No sources found to query - %v\r", err)
+		log.Printf("[Twitch] No sources found to query - %v\r", err)
 	}
-	
+
 	tc, err := services.NewTwitchClient()
 	if err != nil {
 		return err
@@ -137,33 +166,96 @@ func (c *Cron) CheckTwitch(ctx context.Context) error {
 		if !source.Enabled {
 			continue
 		}
+		log.Printf("[Twitch] Checking '%v'...", source.Name)
 		tc.ReplaceSourceRecord(source)
 		items, err := tc.GetContent()
 		if err != nil {
 			log.Println(err)
 		}
-		c.checkPosts(*c.ctx, items)
+		c.checkPosts(items, "Twitch")
+	}
+
+	log.Print("[Twitch] Done!")
+	return nil
+}
+
+func (c *Cron) CheckDiscordQueue() error {
+	// Get items from the table
+	queueItems, err := c.Db.ListDiscordQueueItems(*c.ctx, 50)
+	if err != nil {
+		return err
+	}
+
+	for _, queue := range(queueItems) {
+		// Get the articleByID
+		article, err := c.Db.GetArticleByID(*c.ctx, queue.Articleid)
+		if err != nil {
+			return err
+		}
+
+		// Get the SourceByID
+		//source, err := c.Db.GetSourceByID(*c.ctx, article.Sourceid)
+		//if err != nil {
+		//	return err
+		//}
+
+		var endpoints []string
+		// List Subscription by SourceID
+		subs, err := c.Db.ListSubscriptionsBySourceId(*c.ctx, article.Sourceid)
+		if err != nil {
+			return err
+		}
+
+		// Get the webhhooks to send to
+		for _, sub := range(subs) {
+			webhook, err := c.Db.GetDiscordWebHooksByID(*c.ctx, sub.Discordwebhookid)
+			if err != nil {
+				return err
+			}
+
+			// store them in an array
+			endpoints = append(endpoints, webhook.Url)
+		}
+
+		// Create Discord Message
+		dwh := output.NewDiscordWebHookMessage(endpoints, article)
+		err = dwh.GeneratePayload()
+		if err != nil {
+			return err
+		}
+		
+		// Send Message
+		err = dwh.SendPayload()
+		if err != nil {
+			return err
+		}
+
+		// Remove the item from the queue, given we sent our notification.
+		err = c.Db.DeleteDiscordQueueItem(*c.ctx, queue.ID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (c *Cron) checkPosts(ctx context.Context, posts []database.Article) {
+func (c *Cron) checkPosts(posts []database.Article, sourceName string) {
 	for _, item := range posts {
 		_, err := c.Db.GetArticleByUrl(*c.ctx, item.Url)
 		if err != nil {
-			err = c.postArticle(ctx, item)
+			err = c.postArticle(item)
 			if err != nil {
-				log.Printf("Reddit - Failed to post article - %v - %v.\r", item.Url, err)
+				log.Printf("[%v] Failed to post article - %v - %v.\r", sourceName, item.Url, err)
 			} else {
-				log.Printf("Reddit - Posted article - %v\r", item.Url)
+				log.Printf("[%v] Posted article - %v\r", sourceName, item.Url)
 			}
 		}
 	}
 	time.Sleep(30 * time.Second)
 }
 
-func (c *Cron) postArticle(ctx context.Context, item database.Article) error {
+func (c *Cron) postArticle(item database.Article) error {
 	err := c.Db.CreateArticle(*c.ctx, database.CreateArticleParams{
 		ID:          uuid.New(),
 		Sourceid:    item.Sourceid,
