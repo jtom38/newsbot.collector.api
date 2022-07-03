@@ -3,6 +3,7 @@ package cron
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"time"
 
@@ -11,8 +12,8 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/services/input"
 	"github.com/jtom38/newsbot/collector/services/config"
+	"github.com/jtom38/newsbot/collector/services/input"
 	"github.com/jtom38/newsbot/collector/services/output"
 )
 
@@ -73,7 +74,10 @@ func New(ctx context.Context) *Cron {
 		timer.AddFunc("* */1 * * *", func() { go c.CheckTwitch() })
 		log.Print("Twitch backend was enabled")
 	}
-	
+
+	timer.AddFunc("*/5 * * * *", func() { go c.CheckDiscordQueue() })
+	log.Print("Discord Output was enabled")
+
 	c.timer = timer
 	return c
 }
@@ -186,7 +190,7 @@ func (c *Cron) CheckDiscordQueue() error {
 		return err
 	}
 
-	for _, queue := range(queueItems) {
+	for _, queue := range queueItems {
 		// Get the articleByID
 		article, err := c.Db.GetArticleByID(*c.ctx, queue.Articleid)
 		if err != nil {
@@ -207,7 +211,7 @@ func (c *Cron) CheckDiscordQueue() error {
 		}
 
 		// Get the webhhooks to send to
-		for _, sub := range(subs) {
+		for _, sub := range subs {
 			webhook, err := c.Db.GetDiscordWebHooksByID(*c.ctx, sub.Discordwebhookid)
 			if err != nil {
 				return err
@@ -218,16 +222,21 @@ func (c *Cron) CheckDiscordQueue() error {
 		}
 
 		// Create Discord Message
-		dwh := output.NewDiscordWebHookMessage(endpoints, article)
-		err = dwh.GeneratePayload()
+		dwh := output.NewDiscordWebHookMessage(article)
+		msg, err := dwh.GeneratePayload()
 		if err != nil {
 			return err
 		}
-		
-		// Send Message
-		err = dwh.SendPayload()
-		if err != nil {
-			return err
+
+		log.Print(msg)
+
+		// Send Message(s)
+		for _, i := range endpoints {
+			err = dwh.SendPayload(msg, i)
+
+			if err != nil {
+				return err
+			}
 		}
 
 		// Remove the item from the queue, given we sent our notification.
@@ -240,24 +249,31 @@ func (c *Cron) CheckDiscordQueue() error {
 	return nil
 }
 
-func (c *Cron) checkPosts(posts []database.Article, sourceName string) {
+func (c *Cron) checkPosts(posts []database.Article, sourceName string) error {
 	for _, item := range posts {
 		_, err := c.Db.GetArticleByUrl(*c.ctx, item.Url)
 		if err != nil {
-			err = c.postArticle(item)
+			id := uuid.New()
+
+			err := c.postArticle(id, item)
 			if err != nil {
-				log.Printf("[%v] Failed to post article - %v - %v.\r", sourceName, item.Url, err)
-			} else {
-				log.Printf("[%v] Posted article - %v\r", sourceName, item.Url)
+				return fmt.Errorf("[%v] Failed to post article - %v - %v.\r", sourceName, item.Url, err)
 			}
+
+			err = c.addToDiscordQueue(id)
+			if err != nil {
+				return err
+			}
+
 		}
 	}
 	time.Sleep(30 * time.Second)
+	return nil
 }
 
-func (c *Cron) postArticle(item database.Article) error {
+func (c *Cron) postArticle(id uuid.UUID,item database.Article) error {
 	err := c.Db.CreateArticle(*c.ctx, database.CreateArticleParams{
-		ID:          uuid.New(),
+		ID:          id,
 		Sourceid:    item.Sourceid,
 		Tags:        item.Tags,
 		Title:       item.Title,
@@ -272,4 +288,15 @@ func (c *Cron) postArticle(item database.Article) error {
 		Authorimage: item.Authorimage,
 	})
 	return err
+}
+
+func (c *Cron) addToDiscordQueue(Id uuid.UUID) error {
+	err := c.Db.CreateDiscordQueue(*c.ctx, database.CreateDiscordQueueParams{
+		ID: uuid.New(),
+		Articleid: Id,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
