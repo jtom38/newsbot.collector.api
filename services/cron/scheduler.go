@@ -53,30 +53,30 @@ func New(ctx context.Context) *Cron {
 	res, _ := features.GetFeature(config.FEATURE_ENABLE_REDDIT_BACKEND)
 	if res {
 		timer.AddFunc("*/5 * * * *", func() { go c.CheckReddit() })
-		log.Print("Reddit backend was enabled")
+		log.Print("[Input] Reddit backend was enabled")
 		//go c.CheckReddit()
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_YOUTUBE_BACKEND)
 	if res {
 		timer.AddFunc("*/5 * * * *", func() { go c.CheckYoutube() })
-		log.Print("YouTube backend was enabled")
+		log.Print("[Input] YouTube backend was enabled")
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_FFXIV_BACKEND)
 	if res {
 		timer.AddFunc("* */1 * * *", func() { go c.CheckFfxiv() })
-		log.Print("FFXIV backend was enabled")
+		log.Print("[Input] FFXIV backend was enabled")
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_TWITCH_BACKEND)
 	if res {
 		timer.AddFunc("* */1 * * *", func() { go c.CheckTwitch() })
-		log.Print("Twitch backend was enabled")
+		log.Print("[Input] Twitch backend was enabled")
 	}
 
 	timer.AddFunc("*/5 * * * *", func() { go c.CheckDiscordQueue() })
-	log.Print("Discord Output was enabled")
+	log.Print("[Output] Discord Output was enabled")
 
 	c.timer = timer
 	return c
@@ -197,17 +197,21 @@ func (c *Cron) CheckDiscordQueue() error {
 			return err
 		}
 
-		// Get the SourceByID
-		//source, err := c.Db.GetSourceByID(*c.ctx, article.Sourceid)
-		//if err != nil {
-		//	return err
-		//}
-
 		var endpoints []string
 		// List Subscription by SourceID
 		subs, err := c.Db.ListSubscriptionsBySourceId(*c.ctx, article.Sourceid)
 		if err != nil {
 			return err
+		}
+
+		// if no one is subscribed to it, remove it from the index.
+		if len(subs) == 0 {
+			log.Printf("No subscriptions found bound to '%v' so it was removed.", article.Sourceid)
+			err = c.Db.DeleteDiscordQueueItem(*c.ctx, queue.ID)
+			if err != nil {
+				return err
+			}
+			continue
 		}
 
 		// Get the webhhooks to send to
@@ -227,8 +231,6 @@ func (c *Cron) CheckDiscordQueue() error {
 		if err != nil {
 			return err
 		}
-
-		log.Print(msg)
 
 		// Send Message(s)
 		for _, i := range endpoints {
