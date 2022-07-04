@@ -170,26 +170,6 @@ paths:
       - Config
       - Source
       - YouTube
-  /config/subscription/new/discordwebhook:
-    post:
-      parameters:
-      - description: discordWebHookId
-        in: query
-        name: discordWebHookId
-        required: true
-        type: string
-      - description: sourceId
-        in: query
-        name: sourceId
-        required: true
-        type: string
-      responses: {}
-      summary: Creates a new subscription to link a post from a Source to a DiscordWebHook.
-      tags:
-      - Config
-      - Source
-      - Discord
-      - Subscription
   /discord/queue:
     get:
       produces:
@@ -332,5 +312,25 @@ paths:
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Config
+      - Subscription
+  /subscriptions/new/discordwebhook:
+    post:
+      parameters:
+      - description: discordWebHookId
+        in: query
+        name: discordWebHookId
+        required: true
+        type: string
+      - description: sourceId
+        in: query
+        name: sourceId
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new subscription to link a post from a Source to a DiscordWebHook.
+      tags:
+      - Config
+      - Source
+      - Discord
       - Subscription
 swagger: "2.0"

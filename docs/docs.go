@@ -255,34 +255,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/config/subscription/new/discordwebhook": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source",
-                    "Discord",
-                    "Subscription"
-                ],
-                "summary": "Creates a new subscription to link a post from a Source to a DiscordWebHook.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "discordWebHookId",
-                        "name": "discordWebHookId",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "sourceId",
-                        "name": "sourceId",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/discord/queue": {
             "get": {
                 "produces": [
@@ -484,6 +456,34 @@ const docTemplate = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/new/discordwebhook": {
+            "post": {
+                "tags": [
+                    "Config",
+                    "Source",
+                    "Discord",
+                    "Subscription"
+                ],
+                "summary": "Creates a new subscription to link a post from a Source to a DiscordWebHook.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "discordWebHookId",
+                        "name": "discordWebHookId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "sourceId",
+                        "name": "sourceId",
                         "in": "query",
                         "required": true
                     }
