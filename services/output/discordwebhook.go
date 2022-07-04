@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"strings"
 
-	//"time"
-
 	"github.com/jtom38/newsbot/collector/database"
 )
 
