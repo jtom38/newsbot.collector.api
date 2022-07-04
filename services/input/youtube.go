@@ -121,7 +121,7 @@ func (yc *YoutubeClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 func (yc *YoutubeClient) GetParser(uri string) (*goquery.Document, error) {
 	html, err := http.Get(uri)
 	if err != nil {
-		log.Println(err)
+		log.Printf("[YouTube] %v", err)
 	}
 	defer html.Body.Close()
 
@@ -244,19 +244,19 @@ func (yc *YoutubeClient) CheckUriCache(uri *string) bool {
 func (yc *YoutubeClient) ConvertToArticle(item *gofeed.Item) database.Article {
 	parser, err := yc.GetParser(item.Link)
 	if err != nil {
-		log.Printf("Unable to process %v, submit this link as an issue.\n", item.Link)
+		log.Printf("[YouTube] Unable to process %v, submit this link as an issue.\n", item.Link)
 	}
 
 	tags, err := yc.GetTags(parser)
 	if err != nil {
 		msg := fmt.Sprintf("%v. %v", err, item.Link)
-		log.Println(msg)
+		log.Printf("[YouTube] %v", msg)
 	}
 
 	thumb, err := yc.GetVideoThumbnail(parser)
 	if err != nil {
 		msg := fmt.Sprintf("%v. %v", err, item.Link)
-		log.Println(msg)
+		log.Printf("[YouTube] %v", msg)
 	}
 
 	var article = database.Article{

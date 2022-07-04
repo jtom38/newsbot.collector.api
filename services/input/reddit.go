@@ -67,7 +67,7 @@ func (rc RedditClient) GetContent() (model.RedditJsonContent, error) {
 	// TODO Wire this to support the config options
 	Url := fmt.Sprintf("%v.json", rc.record.Url)
 
-	log.Printf("Collecting results on '%v'", rc.record.Name)
+	log.Printf("[Reddit] Collecting results on '%v'", rc.record.Name)
 
 	content, err := getHttpContent(Url)
 	if err != nil {
@@ -90,7 +90,7 @@ func (rc RedditClient) ConvertToArticles(items model.RedditJsonContent) []databa
 		var article database.Article
 		article, err := rc.convertToArticle(item.Data)
 		if err != nil {
-			log.Println(err)
+			log.Printf("[Reddit] %v", err)
 			continue
 		}
 		redditArticles = append(redditArticles, article)
@@ -119,8 +119,8 @@ func (rc RedditClient) convertToArticle(source model.RedditPost) (database.Artic
 		item = rc.convertRedirectPost(source)
 	}
 
-	if item.Description == "" {
-		var err = errors.New("reddit post failed to parse correctly")
+	if item.Description == "" && item.Title == "" {
+		var err = errors.New("post failed to parse correctly")
 		return item, err
 	}
 
