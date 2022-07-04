@@ -164,4 +164,4 @@ Select * From subscriptions Where sourceid = $1;
 Select * from subscriptions Where discordwebhookid = $1;
 
 -- name: DeleteSubscription :exec
-Delete From subscriptions Where discordwebhookid = $1 and sourceid = $2;
+Delete From subscriptions Where id = $1;

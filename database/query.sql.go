@@ -253,16 +253,11 @@ func (q *Queries) DeleteSource(ctx context.Context, id uuid.UUID) error {
 }
 
 const deleteSubscription = `-- name: DeleteSubscription :exec
-Delete From subscriptions Where discordwebhookid = $1 and sourceid = $2
+Delete From subscriptions Where id = $1
 `
 
-type DeleteSubscriptionParams struct {
-	Discordwebhookid uuid.UUID
-	Sourceid         uuid.UUID
-}
-
-func (q *Queries) DeleteSubscription(ctx context.Context, arg DeleteSubscriptionParams) error {
-	_, err := q.db.ExecContext(ctx, deleteSubscription, arg.Discordwebhookid, arg.Sourceid)
+func (q *Queries) DeleteSubscription(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, deleteSubscription, id)
 	return err
 }
 
