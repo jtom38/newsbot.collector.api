@@ -5,12 +5,13 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/jtom38/newsbot/collector/database"
 )
 
 // GetSubscriptions
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     config, Subscriptions
+// @Tags     Config, Subscription
 // @Router   /subscriptions [get]
 func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -34,7 +35,7 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
-// @Tags     config, Subscriptions
+// @Tags     Config, Subscription
 // @Router   /subscriptions/byDiscordId [get]
 func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -71,7 +72,7 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
-// @Tags     config, Subscriptions
+// @Tags     Config, Subscription
 // @Router   /subscriptions/bySourceId [get]
 func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -102,4 +103,54 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.Write(bres)
+}
+
+// NewDiscordWebHookSubscription
+// @Summary  Creates a new subscription to link a post from a Source to a DiscordWebHook.
+// @Param    discordWebHookId  query  string  true  "discordWebHookId"
+// @Param    sourceId          query  string  true  "sourceId"
+// @Tags     Config, Source, Discord, Subscription
+// @Router   /config/subscription/new/discordwebhook [post]
+func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
+	// Extract the values given
+	query := r.URL.Query()
+	discordWebHookId := query["discordWebHookId"][0]
+	sourceId := query["sourceId"][0]
+
+	// Check to make we didnt get a null
+	if discordWebHookId == "" {
+		http.Error(w, "invalid discordWebHooksId given", http.StatusBadRequest )
+		return
+	}
+	if sourceId == "" {
+		http.Error(w, "invalid sourceID given", http.StatusBadRequest )
+		return
+	}
+
+	// Valide they are UUID values
+	uHook, err := uuid.Parse(discordWebHookId)
+	if err != nil {
+		http.Error(w, "DiscordWebHooksID was not a uuid value.", http.StatusBadRequest)
+		return
+	}
+	uSource, err := uuid.Parse(sourceId)
+	if err != nil {
+		http.Error(w, "SourceId was not a uuid value", http.StatusBadRequest)
+		return
+	}
+	
+	params := database.CreateSubscriptionParams{
+		ID: uuid.New(),
+		Discordwebhookid: uHook,
+		Sourceid: uSource,
+	}
+	s.Db.CreateSubscription(*s.ctx, params)
+	
+	bJson, err := json.Marshal(&params)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bJson)
 }
