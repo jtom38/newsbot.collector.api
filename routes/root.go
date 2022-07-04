@@ -22,7 +22,7 @@ func RootRoutes() chi.Router {
 // HelloWorld
 // @Summary  Responds back with "Hello world!"
 // @Produce  plain
-// @Tags     debug
+// @Tags     Debug
 // @Router   /helloworld [get]
 func helloWorld(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Hello World!"))
@@ -31,7 +31,7 @@ func helloWorld(w http.ResponseWriter, r *http.Request) {
 // Ping
 // @Summary  Sends back "pong".  Good to test with.
 // @Produce  plain
-// @Tags     debug
+// @Tags     Debug
 // @Router   /ping [get]
 func ping(w http.ResponseWriter, r *http.Request) {
 	msg := "pong"
@@ -42,7 +42,7 @@ func ping(w http.ResponseWriter, r *http.Request) {
 // @Summary  Responds back with "Hello x" depending on param passed in.
 // @Param    who  path  string  true  "Who"
 // @Produce  plain
-// @Tags     debug
+// @Tags     Debug
 // @Router   /hello/{who} [get]
 func helloWho(w http.ResponseWriter, r *http.Request) {
 	msg := fmt.Sprintf("Hello %v", chi.URLParam(r, "who"))

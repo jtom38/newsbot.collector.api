@@ -91,7 +91,11 @@ func (s *Server) MountRoutes() {
 	
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
+
+	/* Reddit Source Routes */
+	
 	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
+
 	s.Router.Post("/api/config/sources/new/youtube", s.newYoutubeSource)
 	s.Router.Post("/api/config/sources/new/twitch", s.newTwitchSource)
 	s.Router.Route("/api/config/sources/{ID}", func(r chi.Router) {
@@ -105,4 +109,5 @@ func (s *Server) MountRoutes() {
 	s.Router.Get("/api/subscriptions", s.ListSubscriptions)
 	s.Router.Get("/api/subscriptions/byDiscordId", s.GetSubscriptionsByDiscordId)
 	s.Router.Get("/api/subscriptions/bySourceId", s.GetSubscriptionsBySourceId)
+	s.Router.Post("/api/subscriptions/new/discordwebhook", s.newDiscordWebHookSubscription)
 }

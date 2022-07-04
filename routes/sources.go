@@ -15,7 +15,7 @@ import (
 // ListSources
 // @Summary  Lists the top 50 records
 // @Produce  application/json
-// @Tags     config, source
+// @Tags     Config, Source
 // @Router   /config/sources [get]
 func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 	//TODO Add top?
@@ -48,7 +48,7 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns a single entity by ID
 // @Param    id  path  string  true  "uuid"
 // @Produce  application/json
-// @Tags     config, source
+// @Tags     Config, Source
 // @Router   /config/sources/{id} [get]
 func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
@@ -78,7 +78,7 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 // @Summary  Creates a new reddit source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
-// @Tags     config, source, reddit
+// @Tags     Config, Source, Reddit
 // @Router   /config/sources/new/reddit [post]
 func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
@@ -116,12 +116,16 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	w.Write(bJson)
 }
 
+func (s *Server) getSourceByType(w http.ResponseWriter, r *http.Request) {
+
+}
+
 // NewYoutubeSource
 // @Summary  Creates a new youtube source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
 // @Param    tags  query  string  true  "tags"
-// @Tags     config, source, youtube
+// @Tags     Config, Source, YouTube
 // @Router   /config/sources/new/youtube [post]
 func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
@@ -164,7 +168,7 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
 // @Param    tags  query  string  true  "tags"
-// @Tags     config, source, twitch
+// @Tags     Config, Source, Twitch
 // @Router   /config/sources/new/twitch [post]
 func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
@@ -205,7 +209,7 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 // DeleteSource
 // @Summary  Deletes a record by ID.
 // @Param    id  path  string  true  "id"
-// @Tags     config, source
+// @Tags     Config, Source
 // @Router   /config/sources/{id} [delete]
 func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources = model.Sources{}
@@ -232,7 +236,7 @@ func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 // DisableSource
 // @Summary  Disables a source from processing.
 // @Param    id  path  string  true  "id"
-// @Tags     config, source
+// @Tags     Config, Source
 // @Router   /config/sources/{id}/disable [post]
 func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
@@ -256,7 +260,7 @@ func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 // EnableSource
 // @Summary  Enables a source to continue processing.
 // @Param    id  path  string  true  "id"
-// @Tags     config, source
+// @Tags     Config, Source
 // @Router   /config/sources/{id}/enable [post]
 func (s *Server) enableSource(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")

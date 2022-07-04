@@ -11,7 +11,7 @@ import (
 // ListArticles
 // @Summary  Lists the top 50 records
 // @Produce  application/json
-// @Tags     articles
+// @Tags     Articles
 // @Router   /articles [get]
 func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -35,7 +35,7 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns an article based on defined ID.
 // @Param    id  path  string  true  "uuid"
 // @Produce  application/json
-// @Tags     articles
+// @Tags     Articles
 // @Router   /articles/{id} [get]
 func (s *Server) getArticleById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -67,7 +67,7 @@ func (s *Server) getArticleById(w http.ResponseWriter, r *http.Request) {
 // @Summary  Finds the articles based on the SourceID provided.  Returns the top 50.
 // @Param    id  query  string  true  "Source ID UUID"
 // @Produce  application/json
-// @Tags     articles
+// @Tags     Articles
 // @Router   /articles/by/sourceid [get]
 func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")

@@ -10,10 +10,10 @@ import (
 )
 
 // GetSettings
-// @Summary  Returns a object based on the Key that was given/
+// @Summary  Returns a object based on the Key that was given.
 // @Param    key  path  string  true  "Settings Key value"
 // @Produce  application/json
-// @Tags     settings
+// @Tags     Settings
 // @Router   /settings/{key} [get]
 func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources

@@ -13,7 +13,7 @@ import (
 // GetDiscordWebHooks
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     config, Discord, Webhooks
+// @Tags     Config, Discord, Webhook
 // @Router   /discord/webhooks [get]
 func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -37,7 +37,7 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
-// @Tags     config, Discord, Webhooks
+// @Tags     Config, Discord, Webhook
 // @Router   /discord/webhooks/byId [get]
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -74,8 +74,8 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 // @Summary  Creates a new record for a discord web hook to post data to.
 // @Param    url      query  string  true  "url"
 // @Param    server   query  string  true  "Server name"
-// @Param    channel  query  string  true  "Channel name."
-// @Tags     config, Discord, Webhooks
+// @Param    channel  query  string  true  "Channel name"
+// @Tags     Config, Discord, Webhook
 // @Router   /discord/webhooks/new [post]
 func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
