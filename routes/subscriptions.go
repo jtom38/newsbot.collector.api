@@ -110,7 +110,7 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 // @Param    discordWebHookId  query  string  true  "discordWebHookId"
 // @Param    sourceId          query  string  true  "sourceId"
 // @Tags     Config, Source, Discord, Subscription
-// @Router   /config/subscription/new/discordwebhook [post]
+// @Router   /subscriptions/new/discordwebhook [post]
 func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
 	// Extract the values given
 	query := r.URL.Query()
