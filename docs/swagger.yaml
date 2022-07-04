@@ -11,7 +11,7 @@ paths:
       responses: {}
       summary: Lists the top 50 records
       tags:
-      - articles
+      - Articles
   /articles/{id}:
     get:
       parameters:
@@ -25,7 +25,7 @@ paths:
       responses: {}
       summary: Returns an article based on defined ID.
       tags:
-      - articles
+      - Articles
   /articles/by/sourceid:
     get:
       parameters:
@@ -40,7 +40,7 @@ paths:
       summary: Finds the articles based on the SourceID provided.  Returns the top
         50.
       tags:
-      - articles
+      - Articles
   /config/sources:
     get:
       produces:
@@ -48,8 +48,8 @@ paths:
       responses: {}
       summary: Lists the top 50 records
       tags:
-      - config
-      - source
+      - Config
+      - Source
   /config/sources/{id}:
     delete:
       parameters:
@@ -61,8 +61,8 @@ paths:
       responses: {}
       summary: Deletes a record by ID.
       tags:
-      - config
-      - source
+      - Config
+      - Source
     get:
       parameters:
       - description: uuid
@@ -75,8 +75,8 @@ paths:
       responses: {}
       summary: Returns a single entity by ID
       tags:
-      - config
-      - source
+      - Config
+      - Source
   /config/sources/{id}/disable:
     post:
       parameters:
@@ -88,8 +88,8 @@ paths:
       responses: {}
       summary: Disables a source from processing.
       tags:
-      - config
-      - source
+      - Config
+      - Source
   /config/sources/{id}/enable:
     post:
       parameters:
@@ -101,8 +101,8 @@ paths:
       responses: {}
       summary: Enables a source to continue processing.
       tags:
-      - config
-      - source
+      - Config
+      - Source
   /config/sources/new/reddit:
     post:
       parameters:
@@ -119,9 +119,9 @@ paths:
       responses: {}
       summary: Creates a new reddit source to monitor.
       tags:
-      - config
-      - source
-      - reddit
+      - Config
+      - Source
+      - Reddit
   /config/sources/new/twitch:
     post:
       parameters:
@@ -143,9 +143,9 @@ paths:
       responses: {}
       summary: Creates a new twitch source to monitor.
       tags:
-      - config
-      - source
-      - twitch
+      - Config
+      - Source
+      - Twitch
   /config/sources/new/youtube:
     post:
       parameters:
@@ -167,9 +167,29 @@ paths:
       responses: {}
       summary: Creates a new youtube source to monitor.
       tags:
-      - config
-      - source
-      - youtube
+      - Config
+      - Source
+      - YouTube
+  /config/subscription/new/discordwebhook:
+    post:
+      parameters:
+      - description: discordWebHookId
+        in: query
+        name: discordWebHookId
+        required: true
+        type: string
+      - description: sourceId
+        in: query
+        name: sourceId
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new subscription to link a post from a Source to a DiscordWebHook.
+      tags:
+      - Config
+      - Source
+      - Discord
+      - Subscription
   /discord/queue:
     get:
       produces:
@@ -177,7 +197,7 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - debug
+      - Debug
       - Discord
       - Queue
   /discord/webhooks:
@@ -187,9 +207,9 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - config
+      - Config
       - Discord
-      - Webhooks
+      - Webhook
   /discord/webhooks/byId:
     get:
       parameters:
@@ -203,9 +223,9 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - config
+      - Config
       - Discord
-      - Webhooks
+      - Webhook
   /discord/webhooks/new:
     post:
       parameters:
@@ -219,7 +239,7 @@ paths:
         name: server
         required: true
         type: string
-      - description: Channel name.
+      - description: Channel name
         in: query
         name: channel
         required: true
@@ -227,9 +247,9 @@ paths:
       responses: {}
       summary: Creates a new record for a discord web hook to post data to.
       tags:
-      - config
+      - Config
       - Discord
-      - Webhooks
+      - Webhook
   /hello/{who}:
     get:
       parameters:
@@ -243,7 +263,7 @@ paths:
       responses: {}
       summary: Responds back with "Hello x" depending on param passed in.
       tags:
-      - debug
+      - Debug
   /helloworld:
     get:
       produces:
@@ -251,7 +271,7 @@ paths:
       responses: {}
       summary: Responds back with "Hello world!"
       tags:
-      - debug
+      - Debug
   /ping:
     get:
       produces:
@@ -259,7 +279,7 @@ paths:
       responses: {}
       summary: Sends back "pong".  Good to test with.
       tags:
-      - debug
+      - Debug
   /settings/{key}:
     get:
       parameters:
@@ -271,9 +291,9 @@ paths:
       produces:
       - application/json
       responses: {}
-      summary: Returns a object based on the Key that was given/
+      summary: Returns a object based on the Key that was given.
       tags:
-      - settings
+      - Settings
   /subscriptions:
     get:
       produces:
@@ -281,8 +301,8 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - config
-      - Subscriptions
+      - Config
+      - Subscription
   /subscriptions/byDiscordId:
     get:
       parameters:
@@ -296,8 +316,8 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - config
-      - Subscriptions
+      - Config
+      - Subscription
   /subscriptions/bySourceId:
     get:
       parameters:
@@ -311,6 +331,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - config
-      - Subscriptions
+      - Config
+      - Subscription
 swagger: "2.0"
