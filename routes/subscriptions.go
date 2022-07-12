@@ -138,7 +138,24 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 		http.Error(w, "SourceId was not a uuid value", http.StatusBadRequest)
 		return
 	}
+
+	// Check if the sub already exists
+	item, err := s.Db.QuerySubscriptions(*s.ctx, database.QuerySubscriptionsParams{
+		Discordwebhookid:  uHook,
+		Sourceid: uSource,
+	})
+	if err == nil {
+		bJson, err := json.Marshal(&item)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bJson)
+		return
+	}
 	
+	// Does not exist, so make it.
 	params := database.CreateSubscriptionParams{
 		ID: uuid.New(),
 		Discordwebhookid: uHook,
