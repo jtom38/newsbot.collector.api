@@ -77,7 +77,7 @@ func (tc *TwitchClient) ReplaceSourceRecord(source database.Source) {
 }
 
 // Invokes Logon request to the API
-func (tc TwitchClient) Login() error {
+func (tc *TwitchClient) Login() error {
 	token, err := tc.api.RequestAppAccessToken([]string{twitchScopes})
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (tc TwitchClient) Login() error {
 	return nil
 }
 
-func (tc TwitchClient) GetContent() ([]database.Article, error) {
+func (tc *TwitchClient) GetContent() ([]database.Article, error) {
 	var items []database.Article
 
 	user, err := tc.GetUserDetails()
@@ -136,7 +136,7 @@ func (tc TwitchClient) GetContent() ([]database.Article, error) {
 	return items, nil
 }
 
-func (tc TwitchClient) GetUserDetails() (helix.User, error) {
+func (tc *TwitchClient) GetUserDetails() (helix.User, error) {
 	var blank helix.User
 
 	users, err := tc.api.GetUsers(&helix.UsersParams{
@@ -145,11 +145,16 @@ func (tc TwitchClient) GetUserDetails() (helix.User, error) {
 	if err != nil {
 		return blank, err
 	}
+
+	if len(users.Data.Users) == 0 {
+		return blank, errors.New("no results have been returned")
+	}
+
 	return users.Data.Users[0], nil
 }
 
 // This will reach out and collect the posts made by the user.
-func (tc TwitchClient) GetPosts(user helix.User) ([]helix.Video, error) {
+func (tc *TwitchClient) GetPosts(user helix.User) ([]helix.Video, error) {
 	var blank []helix.Video
 
 	videos, err := tc.api.GetVideos(&helix.VideosParams{
@@ -163,14 +168,14 @@ func (tc TwitchClient) GetPosts(user helix.User) ([]helix.Video, error) {
 	return videos.Data.Videos, nil
 }
 
-func (tc TwitchClient) ExtractAuthor(post helix.Video) (string, error) {
+func (tc *TwitchClient) ExtractAuthor(post helix.Video) (string, error) {
 	if post.UserName == "" {
 		return "", ErrMissingAuthorName
 	}
 	return post.UserName, nil
 }
 
-func (tc TwitchClient) ExtractThumbnail(post helix.Video) (string, error) {
+func (tc *TwitchClient) ExtractThumbnail(post helix.Video) (string, error) {
 	if post.ThumbnailURL == "" {
 		return "", ErrMissingThumbnail
 	}
@@ -180,7 +185,7 @@ func (tc TwitchClient) ExtractThumbnail(post helix.Video) (string, error) {
 	return thumb, nil
 }
 
-func (tc TwitchClient) ExtractPubDate(post helix.Video) (time.Time, error) {
+func (tc *TwitchClient) ExtractPubDate(post helix.Video) (time.Time, error) {
 	if post.PublishedAt == "" {
 		return time.Now(), ErrMissingPublishDate
 	}
@@ -191,7 +196,7 @@ func (tc TwitchClient) ExtractPubDate(post helix.Video) (time.Time, error) {
 	return pubDate, nil
 }
 
-func (tc TwitchClient) ExtractDescription(post helix.Video) (string, error) {
+func (tc *TwitchClient) ExtractDescription(post helix.Video) (string, error) {
 	// Check if the description is null but we have a title.
 	// The poster didnt add a description but this isnt an error.
 	if post.Description == "" && post.Title == "" {
@@ -204,7 +209,7 @@ func (tc TwitchClient) ExtractDescription(post helix.Video) (string, error) {
 }
 
 // Extracts the avatar of the author with some validation.
-func (tc TwitchClient) ExtractAuthorImage(user helix.User) (string, error) {
+func (tc *TwitchClient) ExtractAuthorImage(user helix.User) (string, error) {
 	if user.ProfileImageURL == "" { return "", ErrMissingAuthorImage }
 	if !strings.Contains(user.ProfileImageURL, "-profile_image-") { return "", ErrInvalidAuthorImage }
 	return user.ProfileImageURL, nil
@@ -212,20 +217,20 @@ func (tc TwitchClient) ExtractAuthorImage(user helix.User) (string, error) {
 
 // Generate tags based on the video metadata.
 // TODO Figure out how to query what game is played
-func (tc TwitchClient) ExtractTags(post helix.Video, user helix.User) (string, error) {
+func (tc *TwitchClient) ExtractTags(post helix.Video, user helix.User) (string, error) {
 	res := fmt.Sprintf("twitch,%v,%v", post.Title, user.DisplayName)
 	return res, nil
 }
 
 // Extracts the title from a post with some validation.
-func (tc TwitchClient) ExtractTitle(post helix.Video) (string, error) {
+func (tc *TwitchClient) ExtractTitle(post helix.Video) (string, error) {
 	if post.Title == "" {
 		return "", errors.New("unable to find the title on the requested post")
 	}
 	return post.Title, nil
 }
 
-func (tc TwitchClient) ExtractUrl(post helix.Video) (string, error) {
+func (tc *TwitchClient) ExtractUrl(post helix.Video) (string, error) {
 	if post.URL == "" { return "", ErrMissingUrl }
 	return post.URL, nil
 }
