@@ -59,7 +59,7 @@ func New(ctx context.Context) *Cron {
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_YOUTUBE_BACKEND)
 	if res {
-		timer.AddFunc("*/5 * * * *", func() { go c.CheckYoutube() })
+		timer.AddFunc("*/15 * * * *", func() { go c.CheckYoutube() })
 		log.Print("[Input] YouTube backend was enabled")
 	}
 
@@ -71,7 +71,7 @@ func New(ctx context.Context) *Cron {
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_TWITCH_BACKEND)
 	if res {
-		timer.AddFunc("* */1 * * *", func() { go c.CheckTwitch() })
+		timer.AddFunc("*/5 * * * *", func() { go c.CheckTwitch() })
 		log.Print("[Input] Twitch backend was enabled")
 	}
 
@@ -166,6 +166,11 @@ func (c *Cron) CheckTwitch() error {
 		return err
 	}
 
+	err = tc.Login()
+	if err != nil {
+		return err
+	}
+
 	for _, source := range sources {
 		if !source.Enabled {
 			continue
@@ -246,6 +251,8 @@ func (c *Cron) CheckDiscordQueue() error {
 		if err != nil {
 			return err
 		}
+
+		time.Sleep(10 * time.Second)
 	}
 
 	return nil
