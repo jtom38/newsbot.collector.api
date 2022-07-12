@@ -22,7 +22,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "articles"
+                    "Articles"
                 ],
                 "summary": "Lists the top 50 records",
                 "responses": {}
@@ -34,7 +34,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "articles"
+                    "Articles"
                 ],
                 "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
                 "parameters": [
@@ -55,7 +55,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "articles"
+                    "Articles"
                 ],
                 "summary": "Returns an article based on defined ID.",
                 "parameters": [
@@ -76,8 +76,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
-                    "source"
+                    "Config",
+                    "Source"
                 ],
                 "summary": "Lists the top 50 records",
                 "responses": {}
@@ -86,9 +86,9 @@ const docTemplate = `{
         "/config/sources/new/reddit": {
             "post": {
                 "tags": [
-                    "config",
-                    "source",
-                    "reddit"
+                    "Config",
+                    "Source",
+                    "Reddit"
                 ],
                 "summary": "Creates a new reddit source to monitor.",
                 "parameters": [
@@ -113,9 +113,9 @@ const docTemplate = `{
         "/config/sources/new/twitch": {
             "post": {
                 "tags": [
-                    "config",
-                    "source",
-                    "twitch"
+                    "Config",
+                    "Source",
+                    "Twitch"
                 ],
                 "summary": "Creates a new twitch source to monitor.",
                 "parameters": [
@@ -147,9 +147,9 @@ const docTemplate = `{
         "/config/sources/new/youtube": {
             "post": {
                 "tags": [
-                    "config",
-                    "source",
-                    "youtube"
+                    "Config",
+                    "Source",
+                    "YouTube"
                 ],
                 "summary": "Creates a new youtube source to monitor.",
                 "parameters": [
@@ -184,8 +184,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
-                    "source"
+                    "Config",
+                    "Source"
                 ],
                 "summary": "Returns a single entity by ID",
                 "parameters": [
@@ -201,8 +201,8 @@ const docTemplate = `{
             },
             "delete": {
                 "tags": [
-                    "config",
-                    "source"
+                    "Config",
+                    "Source"
                 ],
                 "summary": "Deletes a record by ID.",
                 "parameters": [
@@ -220,8 +220,8 @@ const docTemplate = `{
         "/config/sources/{id}/disable": {
             "post": {
                 "tags": [
-                    "config",
-                    "source"
+                    "Config",
+                    "Source"
                 ],
                 "summary": "Disables a source from processing.",
                 "parameters": [
@@ -239,8 +239,8 @@ const docTemplate = `{
         "/config/sources/{id}/enable": {
             "post": {
                 "tags": [
-                    "config",
-                    "source"
+                    "Config",
+                    "Source"
                 ],
                 "summary": "Enables a source to continue processing.",
                 "parameters": [
@@ -261,7 +261,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "debug",
+                    "Debug",
                     "Discord",
                     "Queue"
                 ],
@@ -275,9 +275,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
+                    "Config",
                     "Discord",
-                    "Webhooks"
+                    "Webhook"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
                 "responses": {}
@@ -289,9 +289,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
+                    "Config",
                     "Discord",
-                    "Webhooks"
+                    "Webhook"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
                 "parameters": [
@@ -309,9 +309,9 @@ const docTemplate = `{
         "/discord/webhooks/new": {
             "post": {
                 "tags": [
-                    "config",
+                    "Config",
                     "Discord",
-                    "Webhooks"
+                    "Webhook"
                 ],
                 "summary": "Creates a new record for a discord web hook to post data to.",
                 "parameters": [
@@ -331,7 +331,7 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Channel name.",
+                        "description": "Channel name",
                         "name": "channel",
                         "in": "query",
                         "required": true
@@ -346,7 +346,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "debug"
+                    "Debug"
                 ],
                 "summary": "Responds back with \"Hello x\" depending on param passed in.",
                 "parameters": [
@@ -367,7 +367,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "debug"
+                    "Debug"
                 ],
                 "summary": "Responds back with \"Hello world!\"",
                 "responses": {}
@@ -379,7 +379,7 @@ const docTemplate = `{
                     "text/plain"
                 ],
                 "tags": [
-                    "debug"
+                    "Debug"
                 ],
                 "summary": "Sends back \"pong\".  Good to test with.",
                 "responses": {}
@@ -391,9 +391,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "settings"
+                    "Settings"
                 ],
-                "summary": "Returns a object based on the Key that was given/",
+                "summary": "Returns a object based on the Key that was given.",
                 "parameters": [
                     {
                         "type": "string",
@@ -412,8 +412,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
-                    "Subscriptions"
+                    "Config",
+                    "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
                 "responses": {}
@@ -425,8 +425,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
-                    "Subscriptions"
+                    "Config",
+                    "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
                 "parameters": [
@@ -447,8 +447,8 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "config",
-                    "Subscriptions"
+                    "Config",
+                    "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
                 "parameters": [
@@ -456,6 +456,34 @@ const docTemplate = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/new/discordwebhook": {
+            "post": {
+                "tags": [
+                    "Config",
+                    "Source",
+                    "Discord",
+                    "Subscription"
+                ],
+                "summary": "Creates a new subscription to link a post from a Source to a DiscordWebHook.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "discordWebHookId",
+                        "name": "discordWebHookId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "sourceId",
+                        "name": "sourceId",
                         "in": "query",
                         "required": true
                     }

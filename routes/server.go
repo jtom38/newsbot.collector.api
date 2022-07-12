@@ -3,12 +3,13 @@ package routes
 import (
 	"context"
 	"database/sql"
+
 	//"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	httpSwagger "github.com/swaggo/http-swagger"
 	_ "github.com/lib/pq"
+	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/services/config"
@@ -16,14 +17,14 @@ import (
 
 type Server struct {
 	Router *chi.Mux
-	Db *database.Queries
-	ctx *context.Context
+	Db     *database.Queries
+	ctx    *context.Context
 }
 
 var (
-	ErrIdValueMissing string = "id value is missing"
-	ErrValueNotUuid string = "a value given was expected to be a uuid but was not correct."
-	ErrNoRecordFound string = "no record was found."
+	ErrIdValueMissing        string = "id value is missing"
+	ErrValueNotUuid          string = "a value given was expected to be a uuid but was not correct."
+	ErrNoRecordFound         string = "no record was found."
 	ErrUnableToConvertToJson string = "Unable to convert to json"
 )
 
@@ -59,13 +60,14 @@ func openDatabase(ctx context.Context) (*database.Queries, error) {
 func (s *Server) MountMiddleware() {
 	s.Router.Use(middleware.Logger)
 	s.Router.Use(middleware.Recoverer)
+	//s.Router.Use(middleware.Heartbeat())
 }
 
 func (s *Server) MountRoutes() {
 	s.Router.Get("/swagger/*", httpSwagger.Handler(
 		httpSwagger.URL("http://localhost:8081/swagger/doc.json"), //The url pointing to API definition
 	))
-	
+
 	/* Root Routes */
 	s.Router.Get("/api/helloworld", helloWorld)
 	s.Router.Get("/api/hello/{who}", helloWho)
@@ -88,10 +90,14 @@ func (s *Server) MountRoutes() {
 
 	/* Settings */
 	s.Router.Get("/api/settings", s.getSettings)
-	
+
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
+
+	/* Reddit Source Routes */
+
 	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
+
 	s.Router.Post("/api/config/sources/new/youtube", s.newYoutubeSource)
 	s.Router.Post("/api/config/sources/new/twitch", s.newTwitchSource)
 	s.Router.Route("/api/config/sources/{ID}", func(r chi.Router) {
@@ -105,4 +111,5 @@ func (s *Server) MountRoutes() {
 	s.Router.Get("/api/subscriptions", s.ListSubscriptions)
 	s.Router.Get("/api/subscriptions/byDiscordId", s.GetSubscriptionsByDiscordId)
 	s.Router.Get("/api/subscriptions/bySourceId", s.GetSubscriptionsBySourceId)
+	s.Router.Post("/api/subscriptions/new/discordwebhook", s.newDiscordWebHookSubscription)
 }

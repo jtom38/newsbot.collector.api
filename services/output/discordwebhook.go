@@ -1,80 +1,151 @@
 package output
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"net/http"
 	"strings"
-	"time"
 
 	"github.com/jtom38/newsbot/collector/database"
 )
 
 type discordField struct {
-	Name string `json:"name,omitempty"`
-	Value string `json:"value,omitempty"`
-	Inline bool `json:"inline,omitempty"`
+	Name   *string `json:"name,omitempty"`
+	Value  *string `json:"value,omitempty"`
+	Inline *bool   `json:"inline,omitempty"`
+}
+
+type discordFooter struct {
+	Value   *string `json:"text,omitempty"`
+	IconUrl *string `json:"icon_url,omitempty"`
 }
 
 type discordAuthor struct {
-	Name string `json:"name,omitempty"`
-	Url string `json:"url,omitempty"`
-	IconUrl string `json:"icon_url,omitempty"`
+	Name    *string `json:"name,omitempty"`
+	Url     *string `json:"url,omitempty"`
+	IconUrl *string `json:"icon_url,omitempty"`
 }
 
 type discordImage struct {
-	Url string `json:"url,omitempty"`
+	Url *string `json:"url,omitempty"`
 }
 
-type discordEmbed struct {
-	Title string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Url string `json:"url,omitempty"`
-	Color int32 `json:"color,omitempty"`
-	Timestamp time.Time `json:"timestamp,omitempty"`
-	Fields []discordField `json:"fields,omitempty"`
-	Author discordAuthor `json:"author,omitempty"`
-	Image discordImage `json:"image,omitempty"`
-	Thumbnail discordImage `json:"thumbnail,omitempty"`
+type DiscordEmbed struct {
+	Title       *string `json:"title,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Url         *string `json:"url,omitempty"`
+	Color       *int32  `json:"color,omitempty"`
+	//Timestamp   time.Time      `json:"timestamp,omitempty"`
+	Fields    []*discordField `json:"fields,omitempty"`
+	Author    discordAuthor   `json:"author,omitempty"`
+	Image     discordImage    `json:"image,omitempty"`
+	Thumbnail discordImage    `json:"thumbnail,omitempty"`
+	Footer    *discordFooter  `json:"footer,omitempty"`
 }
 
 // Root object for Discord Webhook messages
-type discordMessage struct {
-	Content string `json:"content,omitempty"`
-	Embeds []discordEmbed `json:"embeds,omitempty"`
+type DiscordMessage struct {
+	Username *string         `json:"username,omitempty"`
+	Content  *string         `json:"content,omitempty"`
+	Embeds   *[]DiscordEmbed `json:"embeds,omitempty"`
 }
+
+const (
+	DefaultColor = 0
+	YoutubeColor = 16711680
+	TwitchColor  = 0
+	RedditColor  = 0
+	TwitterColor = 0
+	FfxivColor   = 0
+)
 
 type Discord struct {
 	Subscriptions []string
-	article database.Article
-	Message discordMessage
+	article       database.Article
+	Message       *DiscordMessage
 }
 
-func NewDiscordWebHookMessage(Subscriptions []string, Article database.Article) Discord {
+func NewDiscordWebHookMessage(Article database.Article) Discord {
 	return Discord{
-		Subscriptions: Subscriptions,
 		article: Article,
-		Message: discordMessage{
-			Embeds: []discordEmbed{},
-		},
 	}
 }
 
-func (dwh Discord) GeneratePayload() error {
-	// Convert the message 
-	embed := discordEmbed {
-		Title: dwh.article.Title,
-		Description: dwh.convertFromHtml(dwh.article.Description),
-		Url: dwh.article.Url,
-		Thumbnail: discordImage{
-			Url: dwh.article.Thumbnail,
-		},
-	}
-	var arr []discordEmbed
+// Generates the link field to expose in the message
+func (dwh Discord) getFields() []*discordField {
+	var fields []*discordField
 
-	arr = append(arr, embed)
-	dwh.Message.Embeds = arr
-	return nil
+	key := "Link"
+	linkField := discordField{
+		Name:  &key,
+		Value: &dwh.article.Url,
+	}
+
+	fields = append(fields, &linkField)
+
+	return fields
 }
 
-func (dwh Discord) SendPayload() error {
+// This will create the message that will be sent out.
+func (dwh Discord) GeneratePayload() (*DiscordMessage, error) {
+
+	// Create the embed
+	footerMessage := "Brought to you by Newsbot"
+	footerUrl := ""
+	description := dwh.convertFromHtml(dwh.article.Description)
+	color := dwh.getColor(dwh.article.Url)
+
+	embed := DiscordEmbed{
+		Title:       &dwh.article.Title,
+		Description: &description,
+		Image: discordImage{
+			Url: &dwh.article.Thumbnail,
+		},
+		Fields: dwh.getFields(),
+		Footer: &discordFooter{
+			Value:   &footerMessage,
+			IconUrl: &footerUrl,
+		},
+		Color: &color,
+	}
+
+	// attach the embed to an array
+	var embedArray []DiscordEmbed
+	embedArray = append(embedArray, embed)
+
+	// create the base message
+	msg := DiscordMessage{
+		Embeds: &embedArray,
+	}
+
+	return &msg, nil
+}
+
+func (dwh Discord) SendPayload(Message *DiscordMessage, Url string) error {
+	// Convert the message to a io.reader object
+	buffer := new(bytes.Buffer)
+	json.NewEncoder(buffer).Encode(Message)
+
+	// Send the message
+	resp, err := http.Post(Url, "application/json", buffer)
+	if err != nil {
+		return err
+	}
+
+	// Check for 204
+	if resp.StatusCode != 204 {
+		defer resp.Body.Close()
+
+		errMsg, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		return fmt.Errorf(string(errMsg))
+	}
+
 	return nil
 }
 
@@ -104,7 +175,16 @@ func (dwh Discord) convertFromHtml(body string) string {
 	return clean
 }
 
-func (dwh Discord) convertLinks(body string) string {
+func (dwh *Discord) getColor(Url string) int32 {
+	if strings.Contains(Url, "youtube.com") {
+		return YoutubeColor
+	}
+
+	return DefaultColor
+
+}
+
+func (dwh *Discord) convertLinks(body string) string {
 	//items := regexp.MustCompile("<a(.*?)a>")
 	return ""
-} 
+}

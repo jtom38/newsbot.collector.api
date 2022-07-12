@@ -10,6 +10,9 @@ Where Url = $1 LIMIT 1;
 -- name: ListArticles :many
 Select * From articles Limit $1;
 
+-- name: ListArticlesByDate :many
+Select * From articles ORDER BY pubdate desc Limit $1;
+
 -- name: GetArticlesBySource :many
 select * from articles
 INNER join sources on articles.sourceid=Sources.ID
@@ -65,6 +68,9 @@ Where ID = $1 LIMIT 1;
 -- name: ListDiscordWebHooksByServer :many
 Select * From DiscordWebHooks
 Where Server = $1;
+
+-- name: GetDiscordWebHookByUrl :one
+Select * From DiscordWebHooks Where url = $1;
 
 -- name: ListDiscordWebhooks :many
 Select * From discordwebhooks LIMIT $1;
@@ -127,6 +133,9 @@ Values
 -- name: GetSourceByID :one
 Select * From Sources where ID = $1 Limit 1;
 
+-- name: GetSourceByName :one
+Select * from Sources where name = $1 Limit 1;
+
 -- name: ListSources :many
 Select * From Sources Limit $1;
 
@@ -154,8 +163,8 @@ Select * From subscriptions Limit $1;
 -- name: ListSubscriptionsBySourceId :many
 Select * From subscriptions where sourceid = $1;
 
--- name: QuerySubscriptions :many
-Select * From subscriptions Where discordwebhookid = $1 and sourceid = $2;
+-- name: QuerySubscriptions :one
+Select * From subscriptions Where discordwebhookid = $1 and sourceid = $2 Limit 1;
 
 -- name: GetSubscriptionsBySourceID :many
 Select * From subscriptions Where sourceid = $1;
@@ -164,4 +173,4 @@ Select * From subscriptions Where sourceid = $1;
 Select * from subscriptions Where discordwebhookid = $1;
 
 -- name: DeleteSubscription :exec
-Delete From subscriptions Where discordwebhookid = $1 and sourceid = $2;
+Delete From subscriptions Where id = $1;
