@@ -52,6 +52,15 @@ type DiscordMessage struct {
 	Embeds   *[]DiscordEmbed `json:"embeds,omitempty"`
 }
 
+const (
+	DefaultColor = 0
+	YoutubeColor = 16711680
+	TwitchColor  = 0
+	RedditColor  = 0
+	TwitterColor = 0
+	FfxivColor   = 0
+)
+
 type Discord struct {
 	Subscriptions []string
 	article       database.Article
@@ -86,11 +95,12 @@ func (dwh Discord) GeneratePayload() (*DiscordMessage, error) {
 	footerMessage := "Brought to you by Newsbot"
 	footerUrl := ""
 	description := dwh.convertFromHtml(dwh.article.Description)
+	color := dwh.getColor(dwh.article.Url)
 
 	embed := DiscordEmbed{
 		Title:       &dwh.article.Title,
 		Description: &description,
-		Thumbnail: discordImage{
+		Image: discordImage{
 			Url: &dwh.article.Thumbnail,
 		},
 		Fields: dwh.getFields(),
@@ -98,6 +108,7 @@ func (dwh Discord) GeneratePayload() (*DiscordMessage, error) {
 			Value:   &footerMessage,
 			IconUrl: &footerUrl,
 		},
+		Color: &color,
 	}
 
 	// attach the embed to an array
@@ -164,7 +175,16 @@ func (dwh Discord) convertFromHtml(body string) string {
 	return clean
 }
 
-func (dwh Discord) convertLinks(body string) string {
+func (dwh *Discord) getColor(Url string) int32 {
+	if strings.Contains(Url, "youtube.com") {
+		return YoutubeColor
+	}
+
+	return DefaultColor
+
+}
+
+func (dwh *Discord) convertLinks(body string) string {
 	//items := regexp.MustCompile("<a(.*?)a>")
 	return ""
 }
