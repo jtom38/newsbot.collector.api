@@ -16,7 +16,7 @@ import (
 func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	res, err := s.Db.ListArticles(*s.ctx, 50)
+	res, err := s.Db.ListArticlesByDate(*s.ctx, 50)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		panic(err)
@@ -27,7 +27,6 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(err.Error()))
 		panic(err)
 	}
-
 	w.Write(bres)
 }
 
@@ -70,6 +69,41 @@ func (s *Server) getArticleById(w http.ResponseWriter, r *http.Request) {
 // @Tags     Articles
 // @Router   /articles/by/sourceid [get]
 func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	r.URL.Query()
+	query := r.URL.Query()
+	_id := query["id"][0]
+
+	uuid, err := uuid.Parse(_id)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		panic(err)
+	}
+
+	res, err := s.Db.GetArticlesBySourceId(*s.ctx, uuid)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		panic(err)
+	}
+
+	bres, err := json.Marshal(res)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+		panic(err)
+	}
+
+	w.Write(bres)
+}
+
+// TODO add page support
+// GetArticlesByTag
+// @Summary  Finds the articles based on the SourceID provided.  Returns the top 50.
+// @Param    Tag  query  string  true  "Tag name"
+// @Produce  application/json
+// @Tags     Articles
+// @Router   /articles/by/sourceid [get]
+func (s *Server) GetArticlesByTag(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	r.URL.Query()
