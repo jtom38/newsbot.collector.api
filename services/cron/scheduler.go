@@ -52,26 +52,26 @@ func New(ctx context.Context) *Cron {
 
 	res, _ := features.GetFeature(config.FEATURE_ENABLE_REDDIT_BACKEND)
 	if res {
-		timer.AddFunc("*/5 * * * *", func() { go c.CheckReddit() })
+		timer.AddFunc("5 1-23 * * *", func() { go c.CheckReddit() })
 		log.Print("[Input] Reddit backend was enabled")
 		//go c.CheckReddit()
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_YOUTUBE_BACKEND)
 	if res {
-		timer.AddFunc("*/15 * * * *", func() { go c.CheckYoutube() })
+		timer.AddFunc("10 1-23 * * *", func() { go c.CheckYoutube() })
 		log.Print("[Input] YouTube backend was enabled")
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_FFXIV_BACKEND)
 	if res {
-		timer.AddFunc("* */1 * * *", func() { go c.CheckFfxiv() })
+		timer.AddFunc("5 5,10,15,20 * * *", func() { go c.CheckFfxiv() })
 		log.Print("[Input] FFXIV backend was enabled")
 	}
 
 	res, _ = features.GetFeature(config.FEATURE_ENABLE_TWITCH_BACKEND)
 	if res {
-		timer.AddFunc("*/5 * * * *", func() { go c.CheckTwitch() })
+		timer.AddFunc("15 1-23 * * *", func() { go c.CheckTwitch() })
 		log.Print("[Input] Twitch backend was enabled")
 	}
 
