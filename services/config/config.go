@@ -11,37 +11,34 @@ import (
 )
 
 const (
-	DB_URI string	= "DB_URI"
-	
+	DB_URI string = "DB_URI"
+
 	Sql_Connection_String string = "SQL_CONNECTION_STRING"
 
 	FEATURE_ENABLE_REDDIT_BACKEND = "FEATURE_ENABLE_REDDIT_BACKEND"
-	REDDIT_PULL_TOP = "REDDIT_PULL_TOP"
-	REDDIT_PULL_HOT = "REDDIT_PULL_HOT"
-	REDDIT_PULL_NSFW = "REDDIT_PULL_NSFW"
+	REDDIT_PULL_TOP               = "REDDIT_PULL_TOP"
+	REDDIT_PULL_HOT               = "REDDIT_PULL_HOT"
+	REDDIT_PULL_NSFW              = "REDDIT_PULL_NSFW"
 
 	FEATURE_ENABLE_YOUTUBE_BACKEND = "FEATURE_ENABLE_YOUTUBE_BACKEND"
-	YOUTUBE_DEBUG = "YOUTUBE_DEBUG"
+	YOUTUBE_DEBUG                  = "YOUTUBE_DEBUG"
 
 	FEATURE_ENABLE_TWITCH_BACKEND = "FEATURE_ENABLE_TWITCH_BACKEND"
-	TWITCH_CLIENT_ID = "TWITCH_CLIENT_ID"
-	TWITCH_CLIENT_SECRET = "TWITCH_CLIENT_SECRET"
-	TWITCH_MONITOR_CLIPS = "TWITCH_MONITOR_CLIPS"
-	TWITCH_MONITOR_VOD = "TWITCH_MONITOR_VOD"
+	TWITCH_CLIENT_ID              = "TWITCH_CLIENT_ID"
+	TWITCH_CLIENT_SECRET          = "TWITCH_CLIENT_SECRET"
+	TWITCH_MONITOR_CLIPS          = "TWITCH_MONITOR_CLIPS"
+	TWITCH_MONITOR_VOD            = "TWITCH_MONITOR_VOD"
 
 	FEATURE_ENABLE_FFXIV_BACKEND = "FEATURE_ENABLE_FFXIV_BACKEND"
-
 )
 
-type ConfigClient struct {}
+type ConfigClient struct{}
 
 func New() ConfigClient {
-	_, err := os.Open(".env")
-	if err == nil {
-		loadEnvFile()
-	}
+	c := ConfigClient{}
+	c.RefreshEnv()
 
-	return ConfigClient{}
+	return c
 }
 
 func (cc *ConfigClient) GetConfig(key string) string {
@@ -70,7 +67,16 @@ func (cc *ConfigClient) GetFeature(flag string) (bool, error) {
 
 // Use this when your ConfigClient has been opened for awhile and you want to ensure you have the most recent env changes.
 func (cc *ConfigClient) RefreshEnv() {
-	loadEnvFile()
+	// Check to see if we have the env file on the system
+	_, err := os.Stat(".env")
+
+	// We have the file, load it.
+	if err == nil {
+		_, err := os.Open(".env")
+		if err == nil {
+			loadEnvFile()
+		}
+	}
 }
 
 func loadEnvFile() {
