@@ -29,9 +29,9 @@ paths:
   /articles/by/sourceid:
     get:
       parameters:
-      - description: Source ID UUID
+      - description: Tag name
         in: query
-        name: id
+        name: Tag
         required: true
         type: string
       produces:

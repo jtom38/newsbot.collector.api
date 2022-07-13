@@ -40,8 +40,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Source ID UUID",
-                        "name": "id",
+                        "description": "Tag name",
+                        "name": "Tag",
                         "in": "query",
                         "required": true
                     }

@@ -26,6 +26,9 @@ type Cron struct {
 func openDatabase() (*database.Queries, error) {
 	_env := config.New()
 	connString := _env.GetConfig(config.Sql_Connection_String)
+	if connString == "" {
+		panic("Connection String is null!")
+	}
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
 		panic(err)
