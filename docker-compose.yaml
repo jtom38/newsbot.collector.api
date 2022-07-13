@@ -1,0 +1,33 @@
+version: "3"
+
+networks:
+  newsbot:
+    
+services:
+  api:
+    image: ghcr.io/jtom38/newsbot.collector.api:master
+    environment:
+      SQL_CONNECTION_STRING: "host=localhost user=postgres password=postgres dbname=postgres sslmode=disable"
+      
+      # Used for database migrations
+      GOOSE_DRIVER: "postgres"
+
+      # Connection String to Postgresql
+      GOOSE_DBSTRING: "host=localhost user=postgres password=postgres dbname=postgres sslmode=disable"
+
+      # Enable/Disable Reddit monitoring
+      FEATURE_ENABLE_REDDIT_BACKEND: true
+
+      # Enable/Disable YouTube monitoring
+      FEATURE_ENABLE_YOUTUBE_BACKEND: false
+
+      # Set your Twitch Developer ID and Secrets here and they will be used to collect updates.
+      TWITCH_CLIENT_ID: ""
+      TWITCH_CLIENT_SECRET: ""
+
+      # If you want to collect news on Final Fantasy XIV, set this to true
+      FEATURE_ENABLE_FFXIV_BACKEND: false
+    ports:
+      - 8081:8081
+    networks:
+      - newsbot
