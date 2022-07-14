@@ -1,4 +1,5 @@
 basePath: /api
+host: localhost:8081
 info:
   contact: {}
   title: NewsBot collector
@@ -29,9 +30,24 @@ paths:
   /articles/by/sourceid:
     get:
       parameters:
+      - description: Source ID UUID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Finds the articles based on the SourceID provided.  Returns the top
+        50.
+      tags:
+      - Articles
+  /articles/by/tag:
+    get:
+      parameters:
       - description: Tag name
         in: query
-        name: Tag
+        name: tag
         required: true
         type: string
       produces:
