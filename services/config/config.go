@@ -11,9 +11,9 @@ import (
 )
 
 const (
-	DB_URI string = "DB_URI"
+	ServerAddress = "SERVER_ADDRESS"
 
-	Sql_Connection_String string = "SQL_CONNECTION_STRING"
+	Sql_Connection_String = "SQL_CONNECTION_STRING"
 
 	FEATURE_ENABLE_REDDIT_BACKEND = "FEATURE_ENABLE_REDDIT_BACKEND"
 	REDDIT_PULL_TOP               = "REDDIT_PULL_TOP"

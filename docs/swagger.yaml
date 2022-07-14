@@ -1,5 +1,4 @@
 basePath: /api
-host: localhost:8081
 info:
   contact: {}
   title: NewsBot collector

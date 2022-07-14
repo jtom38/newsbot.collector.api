@@ -15,6 +15,7 @@ This is the collection service of newsbot to pull articles from the web.
    2. `curl -X 'GET' 'http://localhost:8081/api/config/sources' -H 'accept: application/json'`
 6. Add any new sources
 7. Add a Discord Web Hook
+   1. `curl -X 'POST' 'http://localhost:8081/api/discord/webhooks/new?url=WEBHOOKURL&server=SERVERNAME&channel=CHANNELNAME' -H 'accept: application/json' -d ''`
 8. Create your subscription links
    1. This is a link between a source and a discord web hook.  Without this, the app will not send a notification about new posts.
 
