@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/mmcdole/gofeed"
 
 	"github.com/jtom38/newsbot/collector/database"
@@ -18,7 +19,7 @@ import (
 
 type YoutubeClient struct {
 	record database.Source
-	
+
 	// internal variables at time of collection
 	channelID string
 	avatarUri string
@@ -32,7 +33,7 @@ type YoutubeClient struct {
 
 var (
 	// This is a local slice to store what URI's have been seen to remove extra calls to the DB
-	YoutubeUriCache []*string
+	YoutubeUriCache            []*string
 	ErrYoutubeChannelIdMissing = errors.New("unable to find the channelId on the requested page")
 )
 
@@ -40,7 +41,7 @@ const YOUTUBE_FEED_URL string = "https://www.youtube.com/feeds/videos.xml?channe
 
 func NewYoutubeClient(Record database.Source) YoutubeClient {
 	yc := YoutubeClient{
-		record: Record,
+		record:     Record,
 		cacheGroup: "youtube",
 	}
 	/*
@@ -109,7 +110,12 @@ func (yc *YoutubeClient) GetContent() ([]database.Article, error) {
 }
 
 func (yc *YoutubeClient) GetBrowser() *rod.Browser {
-	browser := rod.New().MustConnect()
+	//browser := rod.New().MustConnect()
+	var browser *rod.Browser
+	if path, exists := launcher.LookPath(); exists {
+		u := launcher.New().Bin(path).MustLaunch()
+		browser = rod.New().ControlURL(u).MustConnect()
+	}
 	return browser
 }
 
@@ -156,7 +162,8 @@ func (yc *YoutubeClient) GetChannelId(doc *goquery.Document) (string, error) {
 func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	var AvatarUri string
 
-	browser := rod.New().MustConnect()
+	//browser := rod.New().MustConnect()
+	browser := yc.GetBrowser()
 	page := browser.MustPage(yc.record.Url)
 
 	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")
