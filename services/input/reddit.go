@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/jtom38/newsbot/collector/database"
 	"github.com/jtom38/newsbot/collector/domain/model"
 	"github.com/jtom38/newsbot/collector/services/config"
@@ -48,7 +49,11 @@ func NewRedditClient(Record database.Source) *RedditClient {
 
 
 func (rc *RedditClient) GetBrowser() *rod.Browser {
-	browser := rod.New().MustConnect()
+	var browser *rod.Browser
+	if path, exists := launcher.LookPath(); exists {
+		u := launcher.New().Bin(path).MustLaunch()
+		browser = rod.New().ControlURL(u).MustConnect()
+	}
 	return browser
 }
 

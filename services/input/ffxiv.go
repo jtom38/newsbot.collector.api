@@ -10,6 +10,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/go-rod/rod"
+	"github.com/go-rod/rod/lib/launcher"
 	"github.com/google/uuid"
 
 	"github.com/jtom38/newsbot/collector/database"
@@ -113,7 +114,11 @@ func (fc *FFXIVClient) GetParser() (*goquery.Document, error) {
 }
 
 func (fc *FFXIVClient) GetBrowser() (*rod.Browser) {
-	browser := rod.New().MustConnect()
+	var browser *rod.Browser
+	if path, exists := launcher.LookPath(); exists {
+		u := launcher.New().Bin(path).MustLaunch()
+		browser = rod.New().ControlURL(u).MustConnect()
+	}
 	return browser
 }
 

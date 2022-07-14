@@ -7,7 +7,10 @@ RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
 FROM alpine:latest as app
 
-RUN apk --no-cache add bash libc6-compat chromium
+RUN apk --no-cache add bash 
+RUN apk --no-cache add libc6-compat
+RUN apk --no-cache add chromium
+
 RUN mkdir /app && mkdir /app/migrations
 COPY --from=build /app/collector /app
 COPY --from=build /go/bin/goose /app
