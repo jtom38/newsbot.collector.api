@@ -7,6 +7,8 @@ services:
   api:
     image: ghcr.io/jtom38/newsbot.collector.api:master
     environment:
+      SERVER_ADDRESS: "localhost"
+
       SQL_CONNECTION_STRING: "host=localhost user=postgres password=postgres dbname=postgres sslmode=disable"
       
       # Used for database migrations
@@ -21,6 +23,7 @@ services:
       # Enable/Disable YouTube monitoring
       FEATURE_ENABLE_YOUTUBE_BACKEND: false
 
+      FEATURE_ENABLE_TWITCH_BACKEND: false
       # Set your Twitch Developer ID and Secrets here and they will be used to collect updates.
       TWITCH_CLIENT_ID: ""
       TWITCH_CLIENT_SECRET: ""
