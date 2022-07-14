@@ -99,16 +99,16 @@ func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 // TODO add page support
 // GetArticlesByTag
 // @Summary  Finds the articles based on the SourceID provided.  Returns the top 50.
-// @Param    Tag  query  string  true  "Tag name"
+// @Param    tag  query  string  true  "Tag name"
 // @Produce  application/json
 // @Tags     Articles
-// @Router   /articles/by/sourceid [get]
+// @Router   /articles/by/tag [get]
 func (s *Server) GetArticlesByTag(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	r.URL.Query()
 	query := r.URL.Query()
-	_id := query["id"][0]
+	_id := query["tag"][0]
 
 	uuid, err := uuid.Parse(_id)
 	if err != nil {

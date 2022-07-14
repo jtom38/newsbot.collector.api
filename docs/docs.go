@@ -40,8 +40,29 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Source ID UUID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/articles/by/tag": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
+                "parameters": [
+                    {
+                        "type": "string",
                         "description": "Tag name",
-                        "name": "Tag",
+                        "name": "tag",
                         "in": "query",
                         "required": true
                     }
@@ -497,7 +518,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "0.1",
-	Host:             "",
+	Host:             "localhost:8081",
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "NewsBot collector",
