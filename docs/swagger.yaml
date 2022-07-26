@@ -118,6 +118,21 @@ paths:
       tags:
       - Config
       - Source
+  /config/sources/by/source:
+    get:
+      parameters:
+      - description: Source Name
+        in: query
+        name: source
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: 'Lists the top 50 records based on the name given. Example: reddit'
+      tags:
+      - Config
+      - Source
   /config/sources/new/reddit:
     post:
       parameters:

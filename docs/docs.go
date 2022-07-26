@@ -104,6 +104,28 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/config/sources/by/source": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config",
+                    "Source"
+                ],
+                "summary": "Lists the top 50 records based on the name given. Example: reddit",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Name",
+                        "name": "source",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/config/sources/new/reddit": {
             "post": {
                 "tags": [
