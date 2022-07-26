@@ -93,6 +93,7 @@ func (s *Server) MountRoutes() {
 
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
+	s.Router.Get("/api/config/sources/by/source", s.listSourcesBySource)
 
 	/* Reddit Source Routes */
 

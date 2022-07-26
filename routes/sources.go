@@ -28,12 +28,49 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
 
+	// Default way of showing all sources
 	res, err := s.Db.ListSources(*s.ctx, 50)
 	if err != nil {
 		http.Error(w, "url is missing a value", http.StatusBadRequest)
 		return
 	}
+	bResult, err := json.Marshal(res)
+	if err != nil {
+		http.Error(w, "unable to convert to json", http.StatusBadRequest)
+		return
+	}
 
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bResult)
+
+}
+
+// ListSourcesBySource
+// @Summary  Lists the top 50 records based on the name given. Example: reddit
+// @Param    source  query  string  true  "Source Name"
+// @Produce  application/json
+// @Tags     Config, Source
+// @Router   /config/sources/by/source [get]
+func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
+	//TODO Add top?
+	/*
+		top := chi.URLParam(r, "top")
+		topInt, err := strconv.ParseInt(top, 0, 32)
+		if err != nil {
+			panic(err)
+		}
+		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
+	*/
+
+	query := r.URL.Query()
+	_source := query["source"][0]
+
+	// Shows the list by Sources.source
+	res, err := s.Db.ListSourcesBySource(*s.ctx, strings.ToLower(_source))
+	if err != nil {
+		http.Error(w, "invalid source is missing a value", http.StatusBadRequest)
+		return
+	}
 	bResult, err := json.Marshal(res)
 	if err != nil {
 		http.Error(w, "unable to convert to json", http.StatusBadRequest)
@@ -114,10 +151,6 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(bJson)
-}
-
-func (s *Server) getSourceByType(w http.ResponseWriter, r *http.Request) {
-
 }
 
 // NewYoutubeSource
