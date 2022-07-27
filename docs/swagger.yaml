@@ -165,11 +165,6 @@ paths:
         name: url
         required: true
         type: string
-      - description: tags
-        in: query
-        name: tags
-        required: true
-        type: string
       responses: {}
       summary: Creates a new twitch source to monitor.
       tags:
@@ -187,11 +182,6 @@ paths:
       - description: url
         in: query
         name: url
-        required: true
-        type: string
-      - description: tags
-        in: query
-        name: tags
         required: true
         type: string
       responses: {}
