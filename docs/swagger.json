@@ -166,13 +166,6 @@
                         "name": "url",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "tags",
-                        "name": "tags",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {}
@@ -198,13 +191,6 @@
                         "type": "string",
                         "description": "url",
                         "name": "url",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "tags",
-                        "name": "tags",
                         "in": "query",
                         "required": true
                     }

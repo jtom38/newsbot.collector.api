@@ -121,7 +121,7 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
 	_url := query["url"][0]
-	_tags := query["tags"][0]
+	//_tags := query["tags"][0]
 
 	if _url == "" {
 		http.Error(w, "url is missing a value", http.StatusBadRequest)
@@ -132,7 +132,15 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags := fmt.Sprintf("reddit, %v, %v", _name, _tags)
+	/*
+	var tags string
+	if _tags == "" {
+		tags = fmt.Sprintf("twitch, %v", _name)
+	} else {
+	}
+	*/
+	tags := fmt.Sprintf("twitch, %v", _name)
+	
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
 		Site:    "reddit",
@@ -157,14 +165,13 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 // @Summary  Creates a new youtube source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
-// @Param    tags  query  string  true  "tags"
 // @Tags     Config, Source, YouTube
 // @Router   /config/sources/new/youtube [post]
 func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
 	_url := query["url"][0]
-	_tags := query["tags"][0]
+	//_tags := query["tags"][0]
 
 	if _url == "" {
 		http.Error(w, "url is missing a value", http.StatusBadRequest)
@@ -175,7 +182,14 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags := fmt.Sprintf("youtube, %v, %v", _name, _tags)
+	/*
+	if _tags == "" {
+		tags = fmt.Sprintf("twitch, %v", _name)
+		} else {
+		}
+	*/
+	tags := fmt.Sprintf("twitch, %v", _name)
+	
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
 		Site:    "youtube",
@@ -200,14 +214,13 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 // @Summary  Creates a new twitch source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
-// @Param    tags  query  string  true  "tags"
 // @Tags     Config, Source, Twitch
 // @Router   /config/sources/new/twitch [post]
 func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
 	_url := query["url"][0]
-	_tags := query["tags"][0]
+	//_tags := query["tags"][0]
 
 	if _url == "" {
 		http.Error(w, "url is missing a value", http.StatusBadRequest)
@@ -218,7 +231,17 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags := fmt.Sprintf("twitch, %v, %v", _name, _tags)
+	var tags string
+	/*
+	if _tags == "" {
+		tags = fmt.Sprintf("twitch, %v", _name)
+	} else {
+		
+	}
+	*/
+	//tags = fmt.Sprintf("twitch, %v, %v", _name, _tags)
+	tags = fmt.Sprintf("twitch, %v", _name)
+
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
 		Site:    "twitch",

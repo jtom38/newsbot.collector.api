@@ -175,13 +175,6 @@ const docTemplate = `{
                         "name": "url",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "tags",
-                        "name": "tags",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {}
@@ -207,13 +200,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "url",
                         "name": "url",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "tags",
-                        "name": "tags",
                         "in": "query",
                         "required": true
                     }
