@@ -213,34 +213,14 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 // NewTwitchSource
 // @Summary  Creates a new twitch source to monitor.
 // @Param    name  query  string  true  "name"
-// @Param    url   query  string  true  "url"
 // @Tags     Config, Source, Twitch
 // @Router   /config/sources/new/twitch [post]
 func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
-	_url := query["url"][0]
-	//_tags := query["tags"][0]
 
-	if _url == "" {
-		http.Error(w, "url is missing a value", http.StatusBadRequest)
-		return
-	}
-	if !strings.Contains(_url, "twitch.tv") {
-		http.Error(w, "invalid url", http.StatusBadRequest)
-		return
-	}
-
-	var tags string
-	/*
-	if _tags == "" {
-		tags = fmt.Sprintf("twitch, %v", _name)
-	} else {
-		
-	}
-	*/
-	//tags = fmt.Sprintf("twitch, %v, %v", _name, _tags)
-	tags = fmt.Sprintf("twitch, %v", _name)
+	tags := fmt.Sprintf("twitch, %v", _name)
+	_url := fmt.Sprintf("https://twitch.tv/%v", _name)
 
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
