@@ -168,13 +168,6 @@ const docTemplate = `{
                         "name": "name",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "url",
-                        "name": "url",
-                        "in": "query",
-                        "required": true
                     }
                 ],
                 "responses": {}
