@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
 )
@@ -33,12 +34,12 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 	w.Write(bres)
 }
 
-// GetDiscorWebHooksById
+// GetDiscordWebHook
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Param    id  query  string  true  "id"
+// @Param    id  path  string  true  "id"
 // @Tags     Config, Discord, Webhook
-// @Router   /discord/webhooks/byId [get]
+// @Router   /discord/webhooks/{id} [get]
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -112,4 +113,79 @@ func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(bJson)
+}
+
+// DisableDiscordWebHooks
+// @Summary  Disables a Webhook from being used.
+// @Param    id  path  string  true  "id"
+// @Tags     Config, Discord, Webhook
+// @Router   /discord/webhooks/{id}/disable [post]
+func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	// Check to make sure we can find the record
+	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = s.Db.DisableDiscordWebHook(*s.ctx, uuid)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+// EnableDiscordWebHook
+// @Summary  Enables a source to continue processing.
+// @Param    id  path  string  true  "id"
+// @Tags     Config, Discord, Webhook
+// @Router   /discord/webhooks/{id}/enable [post]
+func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	// Check to make sure we can find the record
+	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	err = s.Db.EnableDiscordWebHook(*s.ctx, uuid)
+	if err != nil {
+		log.Panic(err)
+	}
+}
+
+// DeleteDiscordWebHook
+// @Summary  Deletes a record by ID.
+// @Param    id  path  string  true  "id"
+// @Tags     Config, Discord, Webhook
+// @Router   /discord/webhooks/{id} [delete]
+func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
+	//var item model.Sources = model.Sources{}
+
+	id := chi.URLParam(r, "ID")
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	// Check to make sure we can find the record
+	_, err = s.Db.GetDiscordQueueByID(*s.ctx, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	// Delete the record
+	err = s.Db.DeleteDiscordWebHooks(*s.ctx, uuid)
+	if err != nil {
+		log.Panic(err)
+	}
 }

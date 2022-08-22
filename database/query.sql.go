@@ -261,12 +261,30 @@ func (q *Queries) DeleteSubscription(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const disableDiscordWebHook = `-- name: DisableDiscordWebHook :exec
+Update discordwebhooks Set Enabled = FALSE where ID = $1
+`
+
+func (q *Queries) DisableDiscordWebHook(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, disableDiscordWebHook, id)
+	return err
+}
+
 const disableSource = `-- name: DisableSource :exec
 Update Sources Set Enabled = FALSE where ID = $1
 `
 
 func (q *Queries) DisableSource(ctx context.Context, id uuid.UUID) error {
 	_, err := q.db.ExecContext(ctx, disableSource, id)
+	return err
+}
+
+const enableDiscordWebHook = `-- name: EnableDiscordWebHook :exec
+Update discordwebhooks Set Enabled = TRUE where ID = $1
+`
+
+func (q *Queries) EnableDiscordWebHook(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.ExecContext(ctx, enableDiscordWebHook, id)
 	return err
 }
 

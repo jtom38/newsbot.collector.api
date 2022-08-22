@@ -205,11 +205,24 @@ paths:
       - Config
       - Discord
       - Webhook
-  /discord/webhooks/byId:
+  /discord/webhooks/{id}:
+    delete:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Deletes a record by ID.
+      tags:
+      - Config
+      - Discord
+      - Webhook
     get:
       parameters:
       - description: id
-        in: query
+        in: path
         name: id
         required: true
         type: string
@@ -217,6 +230,34 @@ paths:
       - application/json
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - Config
+      - Discord
+      - Webhook
+  /discord/webhooks/{id}/disable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Disables a Webhook from being used.
+      tags:
+      - Config
+      - Discord
+      - Webhook
+  /discord/webhooks/{id}/enable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Enables a source to continue processing.
       tags:
       - Config
       - Discord
