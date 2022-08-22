@@ -296,29 +296,6 @@
                 "responses": {}
             }
         },
-        "/discord/webhooks/byId": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Config",
-                    "Discord",
-                    "Webhook"
-                ],
-                "summary": "Returns the top 100 entries from the queue to be processed.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/discord/webhooks/new": {
             "post": {
                 "tags": [
@@ -347,6 +324,87 @@
                         "description": "Channel name",
                         "name": "channel",
                         "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "delete": {
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Deletes a record by ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/{id}/disable": {
+            "post": {
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Disables a Webhook from being used.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/{id}/enable": {
+            "post": {
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Enables a source to continue processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
                         "required": true
                     }
                 ],

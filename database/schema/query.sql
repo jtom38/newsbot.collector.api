@@ -78,6 +78,11 @@ Select * From discordwebhooks LIMIT $1;
 -- name: DeleteDiscordWebHooks :exec
 Delete From discordwebhooks Where ID = $1;
 
+-- name: DisableDiscordWebHook :exec
+Update discordwebhooks Set Enabled = FALSE where ID = $1;
+
+-- name: EnableDiscordWebHook :exec
+Update discordwebhooks Set Enabled = TRUE where ID = $1;
 
 /* Icons */
 
