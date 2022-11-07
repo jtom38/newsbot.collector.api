@@ -11,12 +11,14 @@ Where Url = $1 LIMIT 1;
 Select * From articles Limit $1;
 
 -- name: ListArticlesByDate :many
-Select * From articles ORDER BY pubdate desc Limit $1;
+Select * From articles
+ORDER BY pubdate desc Limit $1;
 
 -- name: GetArticlesBySource :many
 select * from articles
 INNER join sources on articles.sourceid=Sources.ID
-where site = $1;
+WHERE site = $1
+ORDER By pubdate desc;
 
 -- name: GetArticlesBySourceId :many
 Select * From articles

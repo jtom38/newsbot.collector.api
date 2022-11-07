@@ -65,7 +65,7 @@ func (s *Server) MountMiddleware() {
 
 func (s *Server) MountRoutes() {
 	s.Router.Get("/swagger/*", httpSwagger.Handler(
-		httpSwagger.URL("http://localhost:8081/swagger/doc.json"), //The url pointing to API definition
+		httpSwagger.URL("doc.json"), //The url pointing to API definition
 	))
 
 	/* Root Routes */

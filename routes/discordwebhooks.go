@@ -189,3 +189,23 @@ func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 		log.Panic(err)
 	}
 }
+
+// UpdateDiscordWebHook
+// @Summary  Updates a valid discord webhook ID based on the body given.
+// @Param    id  path  string  true  "id"
+// @Tags     Config, Discord, Webhook
+// @Router   /discord/webhooks/{id} [delete]
+func (s *Server) UpdateDiscordWebHook(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "ID")
+
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	// Check to make sure we can find the record
+	_, err = s.Db.GetDiscordQueueByID(*s.ctx, uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+}
