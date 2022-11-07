@@ -354,7 +354,6 @@ const getArticlesBySource = `-- name: GetArticlesBySource :many
 select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags from articles
 INNER join sources on articles.sourceid=Sources.ID
 where site = $1
-ORDER By pubdate desc
 `
 
 type GetArticlesBySourceRow struct {
@@ -605,6 +604,49 @@ func (q *Queries) GetIconBySite(ctx context.Context, site string) (Icon, error) 
 	var i Icon
 	err := row.Scan(&i.ID, &i.Filename, &i.Site)
 	return i, err
+}
+
+const getNewArticlesBySourceId = `-- name: GetNewArticlesBySourceId :many
+SELECT id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage FROM articles
+Where sourceid = $1
+ORDER BY pubdate desc Limit 50
+`
+
+func (q *Queries) GetNewArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, getNewArticlesBySourceId, sourceid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getSettingByID = `-- name: GetSettingByID :one

@@ -81,7 +81,8 @@ func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	res, err := s.Db.GetArticlesBySourceId(*s.ctx, uuid)
+	res, err := s.Db.GetNewArticlesBySourceId(*s.ctx, uuid)
+	//res, err := s.Db.GetArticlesBySourceId(*s.ctx, uuid)
 	if err != nil {
 		w.Write([]byte(err.Error()))
 		panic(err)
