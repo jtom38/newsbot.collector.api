@@ -354,6 +354,7 @@ const getArticlesBySource = `-- name: GetArticlesBySource :many
 select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags from articles
 INNER join sources on articles.sourceid=Sources.ID
 where site = $1
+ORDER By pubdate desc
 `
 
 type GetArticlesBySourceRow struct {
