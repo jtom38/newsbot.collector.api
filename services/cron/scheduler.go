@@ -283,7 +283,7 @@ func (c *Cron) checkPosts(posts []database.Article, sourceName string) error {
 	return nil
 }
 
-func (c *Cron) postArticle(id uuid.UUID,item database.Article) error {
+func (c *Cron) postArticle(id uuid.UUID, item database.Article) error {
 	err := c.Db.CreateArticle(*c.ctx, database.CreateArticleParams{
 		ID:          id,
 		Sourceid:    item.Sourceid,
@@ -304,7 +304,7 @@ func (c *Cron) postArticle(id uuid.UUID,item database.Article) error {
 
 func (c *Cron) addToDiscordQueue(Id uuid.UUID) error {
 	err := c.Db.CreateDiscordQueue(*c.ctx, database.CreateDiscordQueueParams{
-		ID: uuid.New(),
+		ID:        uuid.New(),
 		Articleid: Id,
 	})
 	if err != nil {

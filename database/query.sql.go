@@ -582,6 +582,45 @@ func (q *Queries) GetDiscordWebHooksByID(ctx context.Context, id uuid.UUID) (Dis
 	return i, err
 }
 
+const getDiscordWebHooksByServerAndChannel = `-- name: GetDiscordWebHooksByServerAndChannel :many
+SELECT id, url, server, channel, enabled FROM DiscordWebHooks
+WHERE Server = $1 and Channel = $2
+`
+
+type GetDiscordWebHooksByServerAndChannelParams struct {
+	Server  string
+	Channel string
+}
+
+func (q *Queries) GetDiscordWebHooksByServerAndChannel(ctx context.Context, arg GetDiscordWebHooksByServerAndChannelParams) ([]Discordwebhook, error) {
+	rows, err := q.db.QueryContext(ctx, getDiscordWebHooksByServerAndChannel, arg.Server, arg.Channel)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Discordwebhook
+	for rows.Next() {
+		var i Discordwebhook
+		if err := rows.Scan(
+			&i.ID,
+			&i.Url,
+			&i.Server,
+			&i.Channel,
+			&i.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getIconByID = `-- name: GetIconByID :one
 Select id, filename, site FROM Icons
 Where ID = $1 Limit 1
@@ -727,6 +766,32 @@ Select id, site, name, source, type, value, enabled, url, tags from Sources wher
 
 func (q *Queries) GetSourceByName(ctx context.Context, name string) (Source, error) {
 	row := q.db.QueryRowContext(ctx, getSourceByName, name)
+	var i Source
+	err := row.Scan(
+		&i.ID,
+		&i.Site,
+		&i.Name,
+		&i.Source,
+		&i.Type,
+		&i.Value,
+		&i.Enabled,
+		&i.Url,
+		&i.Tags,
+	)
+	return i, err
+}
+
+const getSourceByNameAndSource = `-- name: GetSourceByNameAndSource :one
+Select id, site, name, source, type, value, enabled, url, tags from Sources WHERE name = $1 and source = $2
+`
+
+type GetSourceByNameAndSourceParams struct {
+	Name   string
+	Source string
+}
+
+func (q *Queries) GetSourceByNameAndSource(ctx context.Context, arg GetSourceByNameAndSourceParams) (Source, error) {
+	row := q.db.QueryRowContext(ctx, getSourceByNameAndSource, arg.Name, arg.Source)
 	var i Source
 	err := row.Scan(
 		&i.ID,

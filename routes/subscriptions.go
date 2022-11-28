@@ -3,7 +3,6 @@ package routes
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -121,11 +120,11 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 
 	// Check to make we didnt get a null
 	if discordWebHookId == "" {
-		http.Error(w, "invalid discordWebHooksId given", http.StatusBadRequest )
+		http.Error(w, "invalid discordWebHooksId given", http.StatusBadRequest)
 		return
 	}
 	if sourceId == "" {
-		http.Error(w, "invalid sourceID given", http.StatusBadRequest )
+		http.Error(w, "invalid sourceID given", http.StatusBadRequest)
 		return
 	}
 
@@ -143,8 +142,8 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 
 	// Check if the sub already exists
 	item, err := s.Db.QuerySubscriptions(*s.ctx, database.QuerySubscriptionsParams{
-		Discordwebhookid:  uHook,
-		Sourceid: uSource,
+		Discordwebhookid: uHook,
+		Sourceid:         uSource,
 	})
 	if err == nil {
 		bJson, err := json.Marshal(&item)
@@ -156,15 +155,15 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 		w.Write(bJson)
 		return
 	}
-	
+
 	// Does not exist, so make it.
 	params := database.CreateSubscriptionParams{
-		ID: uuid.New(),
+		ID:               uuid.New(),
 		Discordwebhookid: uHook,
-		Sourceid: uSource,
+		Sourceid:         uSource,
 	}
 	s.Db.CreateSubscription(*s.ctx, params)
-	
+
 	bJson, err := json.Marshal(&params)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -180,7 +179,7 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 // @Tags     Config, Source, Discord, Subscription
 // @Router   /subscriptions/discord/webhook/delete [post]
 func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
-	var ErrMissingSubscriptionID string = fmt.Sprint("Request was missing a 'Id' or was a invalid UUID.")
+	var ErrMissingSubscriptionID string = "Request was missing a 'Id' or was a invalid UUID."
 	query := r.URL.Query()
 
 	uid, err := uuid.Parse(query["Id"][0])
@@ -192,7 +191,6 @@ func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http
 	err = s.Db.DeleteSubscription(context.Background(), uid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return 
+		return
 	}
 }
-

@@ -133,6 +133,26 @@ paths:
       tags:
       - Config
       - Source
+  /config/sources/by/sourceAndName:
+    get:
+      parameters:
+      - description: dadjokes
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: reddit
+        in: query
+        name: source
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a single entity by ID
+      tags:
+      - Config
+      - Source
   /config/sources/new/reddit:
     post:
       parameters:
@@ -214,7 +234,7 @@ paths:
         required: true
         type: string
       responses: {}
-      summary: Updates a valid discord webhook ID based on the body given.
+      summary: Deletes a record by ID.
       tags:
       - Config
       - Discord
@@ -230,6 +250,19 @@ paths:
       - application/json
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - Config
+      - Discord
+      - Webhook
+    patch:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Updates a valid discord webhook ID based on the body given.
       tags:
       - Config
       - Discord
@@ -258,6 +291,27 @@ paths:
         type: string
       responses: {}
       summary: Enables a source to continue processing.
+      tags:
+      - Config
+      - Discord
+      - Webhook
+  /discord/webhooks/by/serverAndChannel:
+    get:
+      parameters:
+      - description: Fancy Server
+        in: path
+        name: server
+        required: true
+        type: string
+      - description: memes
+        in: query
+        name: channel
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns all the known web hooks based on the Server and Channel given.
       tags:
       - Config
       - Discord

@@ -114,7 +114,7 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 
 // GetSourceByNameAndSource
 // @Summary  Returns a single entity by ID
-// @Param    name  query  string  true  "dadjokes"
+// @Param    name    query  string  true  "dadjokes"
 // @Param    source  query  string  true  "reddit"
 // @Produce  application/json
 // @Tags     Config, Source
