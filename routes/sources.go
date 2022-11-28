@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -111,6 +112,45 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 	w.Write(bResult)
 }
 
+// GetSourceByNameAndSource
+// @Summary  Returns a single entity by ID
+// @Param    name  query  string  true  "dadjokes"
+// @Param    source  query  string  true  "reddit"
+// @Produce  application/json
+// @Tags     Config, Source
+// @Router   /config/sources/by/sourceAndName [get]
+func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
+
+	name := query["name"][0]
+	if name == "" {
+		http.Error(w, "Parameter 'name' was missing in the query.", http.StatusInternalServerError)
+		return
+	}
+
+	source := query["source"][0]
+	if source != "" {
+		http.Error(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
+		return
+	}
+
+	item, err := s.Db.GetSourceByNameAndSource(context.Background(), database.GetSourceByNameAndSourceParams{
+		Name:   name,
+		Source: source,
+	})
+	if err != nil {
+		http.Error(w, "Unable to find the requested record.", http.StatusInternalServerError)
+	}
+
+	bResult, err := json.Marshal(item)
+	if err != nil {
+		log.Panicln(err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(bResult)
+}
+
 // NewRedditSource
 // @Summary  Creates a new reddit source to monitor.
 // @Param    name  query  string  true  "name"
@@ -133,14 +173,14 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
-	var tags string
-	if _tags == "" {
-		tags = fmt.Sprintf("twitch, %v", _name)
-	} else {
-	}
+		var tags string
+		if _tags == "" {
+			tags = fmt.Sprintf("twitch, %v", _name)
+		} else {
+		}
 	*/
 	tags := fmt.Sprintf("twitch, %v", _name)
-	
+
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
 		Site:    "reddit",
@@ -183,13 +223,13 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	/*
-	if _tags == "" {
-		tags = fmt.Sprintf("twitch, %v", _name)
-		} else {
-		}
+		if _tags == "" {
+			tags = fmt.Sprintf("twitch, %v", _name)
+			} else {
+			}
 	*/
 	tags := fmt.Sprintf("twitch, %v", _name)
-	
+
 	params := database.CreateSourceParams{
 		ID:      uuid.New(),
 		Site:    "youtube",
