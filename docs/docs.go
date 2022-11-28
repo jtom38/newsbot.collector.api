@@ -367,7 +367,7 @@ const docTemplate = `{
                     "Discord",
                     "Webhook"
                 ],
-                "summary": "Deletes a record by ID.",
+                "summary": "Updates a valid discord webhook ID based on the body given.",
                 "parameters": [
                     {
                         "type": "string",
@@ -536,6 +536,27 @@ const docTemplate = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/discord/webhook/delete": {
+            "post": {
+                "tags": [
+                    "Config",
+                    "Source",
+                    "Discord",
+                    "Subscription"
+                ],
+                "summary": "Removes a Discord WebHook Subscription based on the Subscription ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id",
+                        "name": "Id",
                         "in": "query",
                         "required": true
                     }

@@ -119,4 +119,5 @@ func (s *Server) MountRoutes() {
 	s.Router.Get("/api/subscriptions/byDiscordId", s.GetSubscriptionsByDiscordId)
 	s.Router.Get("/api/subscriptions/bySourceId", s.GetSubscriptionsBySourceId)
 	s.Router.Post("/api/subscriptions/new/discordwebhook", s.newDiscordWebHookSubscription)
+	s.Router.Delete("/api/subscriptions/discord/webhook/delete", s.DeleteDiscordWebHookSubscription)
 }

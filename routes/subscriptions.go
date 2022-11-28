@@ -1,7 +1,9 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -171,3 +173,26 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(bJson)
 }
+
+// DeleteDiscordWebHookSubscription
+// @Summary  Removes a Discord WebHook Subscription based on the Subscription ID.
+// @Param    Id  query  string  true  "Id"
+// @Tags     Config, Source, Discord, Subscription
+// @Router   /subscriptions/discord/webhook/delete [post]
+func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
+	var ErrMissingSubscriptionID string = fmt.Sprint("Request was missing a 'Id' or was a invalid UUID.")
+	query := r.URL.Query()
+
+	uid, err := uuid.Parse(query["Id"][0])
+	if err != nil {
+		http.Error(w, ErrMissingSubscriptionID, http.StatusBadRequest)
+		return
+	}
+
+	err = s.Db.DeleteSubscription(context.Background(), uid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return 
+	}
+}
+
