@@ -115,7 +115,7 @@ func (s *Server) MountRoutes() {
 		r.Post("/disable", s.disableSource)
 		r.Post("/enable", s.enableSource)
 	})
-	s.Router.Get("/api/config/sources/by/serverAndName", s.GetSourceBySourceAndName)
+	s.Router.Get("/api/config/sources/by/sourceAndName", s.GetSourceBySourceAndName)
 
 	/* Subscriptions */
 	s.Router.Get("/api/subscriptions", s.ListSubscriptions)

@@ -129,7 +129,7 @@ func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request
 	}
 
 	source := query["source"][0]
-	if source != "" {
+	if source == "" {
 		http.Error(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
 		return
 	}

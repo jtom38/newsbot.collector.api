@@ -299,7 +299,7 @@ paths:
     get:
       parameters:
       - description: Fancy Server
-        in: path
+        in: query
         name: server
         required: true
         type: string
@@ -424,7 +424,7 @@ paths:
       - Config
       - Subscription
   /subscriptions/discord/webhook/delete:
-    post:
+    delete:
       parameters:
       - description: Id
         in: query

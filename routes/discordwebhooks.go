@@ -75,7 +75,7 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 // GetDiscordWebHookByServerAndChannel
 // @Summary  Returns all the known web hooks based on the Server and Channel given.
 // @Produce  application/json
-// @Param    server   path   string  true  "Fancy Server"
+// @Param    server   query  string  true  "Fancy Server"
 // @Param    channel  query  string  true  "memes"
 // @Tags     Config, Discord, Webhook
 // @Router   /discord/webhooks/by/serverAndChannel [get]

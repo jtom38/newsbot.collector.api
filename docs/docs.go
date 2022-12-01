@@ -350,7 +350,7 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Fancy Server",
                         "name": "server",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -621,7 +621,7 @@ const docTemplate = `{
             }
         },
         "/subscriptions/discord/webhook/delete": {
-            "post": {
+            "delete": {
                 "tags": [
                     "Config",
                     "Source",

@@ -177,7 +177,7 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 // @Summary  Removes a Discord WebHook Subscription based on the Subscription ID.
 // @Param    Id  query  string  true  "Id"
 // @Tags     Config, Source, Discord, Subscription
-// @Router   /subscriptions/discord/webhook/delete [post]
+// @Router   /subscriptions/discord/webhook/delete [delete]
 func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
 	var ErrMissingSubscriptionID string = "Request was missing a 'Id' or was a invalid UUID."
 	query := r.URL.Query()
