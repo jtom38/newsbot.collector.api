@@ -126,6 +126,35 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/config/sources/by/sourceAndName": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config",
+                    "Source"
+                ],
+                "summary": "Returns a single entity by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "dadjokes",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "reddit",
+                        "name": "source",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/config/sources/new/reddit": {
             "post": {
                 "tags": [
@@ -305,6 +334,36 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/discord/webhooks/by/serverAndChannel": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Returns all the known web hooks based on the Server and Channel given.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fancy Server",
+                        "name": "server",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "memes",
+                        "name": "channel",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/discord/webhooks/new": {
             "post": {
                 "tags": [
@@ -368,6 +427,24 @@ const docTemplate = `{
                     "Webhook"
                 ],
                 "summary": "Deletes a record by ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            },
+            "patch": {
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Updates a valid discord webhook ID based on the body given.",
                 "parameters": [
                     {
                         "type": "string",
@@ -536,6 +613,27 @@ const docTemplate = `{
                         "type": "string",
                         "description": "id",
                         "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/discord/webhook/delete": {
+            "delete": {
+                "tags": [
+                    "Config",
+                    "Source",
+                    "Discord",
+                    "Subscription"
+                ],
+                "summary": "Removes a Discord WebHook Subscription based on the Subscription ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id",
+                        "name": "Id",
                         "in": "query",
                         "required": true
                     }

@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -70,6 +71,48 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 
 	w.Write(bres)
 }
+
+// GetDiscordWebHookByServerAndChannel
+// @Summary  Returns all the known web hooks based on the Server and Channel given.
+// @Produce  application/json
+// @Param    server   query  string  true  "Fancy Server"
+// @Param    channel  query  string  true  "memes"
+// @Tags     Config, Discord, Webhook
+// @Router   /discord/webhooks/by/serverAndChannel [get]
+func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	query := r.URL.Query()
+	_server := query["server"][0]
+	if _server == "" {
+		http.Error(w, "ID is missing", http.StatusInternalServerError)
+		return
+	}
+
+	_channel := query["channel"][0]
+	if _channel == "" {
+		http.Error(w, "Channel is missing", http.StatusInternalServerError)
+		return
+	}
+	
+	res, err := s.Db.GetDiscordWebHooksByServerAndChannel(context.Background(), database.GetDiscordWebHooksByServerAndChannelParams{
+		Server: _server,
+		Channel: _channel,
+	})
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	bres, err := json.Marshal(res)
+	if err != nil {
+		http.Error(w, "unable to convert to json", http.StatusInternalServerError)
+		panic(err)
+	}
+
+	w.Write(bres)
+}
+
 
 // NewDiscordWebHook
 // @Summary  Creates a new record for a discord web hook to post data to.
@@ -194,7 +237,7 @@ func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // @Summary  Updates a valid discord webhook ID based on the body given.
 // @Param    id  path  string  true  "id"
 // @Tags     Config, Discord, Webhook
-// @Router   /discord/webhooks/{id} [delete]
+// @Router   /discord/webhooks/{id} [patch]
 func (s *Server) UpdateDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 

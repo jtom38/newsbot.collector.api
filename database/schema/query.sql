@@ -74,6 +74,10 @@ Where ID = $1 LIMIT 1;
 Select * From DiscordWebHooks
 Where Server = $1;
 
+-- name: GetDiscordWebHooksByServerAndChannel :many
+SELECT * FROM DiscordWebHooks
+WHERE Server = $1 and Channel = $2;
+
 -- name: GetDiscordWebHookByUrl :one
 Select * From DiscordWebHooks Where url = $1;
 
@@ -145,6 +149,9 @@ Select * From Sources where ID = $1 Limit 1;
 
 -- name: GetSourceByName :one
 Select * from Sources where name = $1 Limit 1;
+
+-- name: GetSourceByNameAndSource :one
+Select * from Sources WHERE name = $1 and source = $2;
 
 -- name: ListSources :many
 Select * From Sources Limit $1;
