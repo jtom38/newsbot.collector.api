@@ -641,27 +641,6 @@ const docTemplate = `{
         "/subscriptions/new/discordwebhook": {
             "post": {
                 "tags": [
-                    "Config",
-                    "Source",
-                    "Discord",
-                    "Subscription"
-                ],
-                "summary": "Removes a Discord WebHook Subscription based on the Subscription ID.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Id",
-                        "name": "Id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/subscriptions/new/discordwebhook": {
-            "post": {
-                "tags": [
                     "Subscription"
                 ],
                 "summary": "Creates a new subscription to link a post from a Source to a DiscordWebHook.",
