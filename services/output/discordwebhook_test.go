@@ -14,14 +14,14 @@ import (
 
 var (
 	article database.Article = database.Article{
-		ID: uuid.New(),
+		ID:       uuid.New(),
 		Sourceid: uuid.New(),
-		Tags: "unit, testing",
-		Title: "Demo",
-		Url: "https://github.com/jtom38/newsbot.collector.api",
+		Tags:     "unit, testing",
+		Title:    "Demo",
+		Url:      "https://github.com/jtom38/newsbot.collector.api",
 		//Pubdate: time.Now(),
 		Videoheight: 0,
-		Videowidth: 0,
+		Videowidth:  0,
 		Description: "Hello World",
 	}
 	blank string = ""
@@ -33,7 +33,7 @@ func TestDiscordMessageContainsTitle(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	for _, i := range *msg.Embeds {
 		if i.Title == &blank {
 			t.Error("title missing")
@@ -47,7 +47,7 @@ func TestDiscordMessageContainsDescription(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	
+
 	for _, i := range *msg.Embeds {
 		if i.Description == &blank {
 			t.Error("description missing")
@@ -68,7 +68,7 @@ func TestDiscordMessageFooter(t *testing.T) {
 		}
 		if i.Footer.IconUrl == &blank {
 			t.Error("missing footer url")
-		} 
+		}
 	}
 }
 
@@ -81,7 +81,7 @@ func TestDiscordMessageFields(t *testing.T) {
 	}
 	for _, embed := range *msg.Embeds {
 		for _, field := range embed.Fields {
-			var fName string 
+			var fName string
 			if field.Name != nil {
 				fName = *field.Name
 			} else {
@@ -110,7 +110,7 @@ func TestDiscordMessagePost(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-		
+
 	err = godotenv.Load()
 	if err != nil {
 		t.Error(err)
@@ -131,7 +131,7 @@ func TestDiscordMessagePost(t *testing.T) {
 		t.Error(err)
 	}
 
- 	err = d.SendPayload(msg, endpoints[0])
+	err = d.SendPayload(msg, endpoints[0])
 	if err != nil {
 		t.Error(err)
 	}

@@ -104,31 +104,47 @@ func (tc *TwitchClient) GetContent() ([]database.Article, error) {
 		var article database.Article
 
 		AuthorName, err := tc.ExtractAuthor(video)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 		article.Authorname = sql.NullString{String: AuthorName}
-		
+
 		Authorimage, err := tc.ExtractAuthorImage(user)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 		article.Authorimage = sql.NullString{String: Authorimage}
 
 		article.Description, err = tc.ExtractDescription(video)
-		if err != nil {return items, err }
+		if err != nil {
+			return items, err
+		}
 
 		article.Pubdate, err = tc.ExtractPubDate(video)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 
 		article.Sourceid = tc.SourceRecord.ID
 		article.Tags, err = tc.ExtractTags(video, user)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 
 		article.Thumbnail, err = tc.ExtractThumbnail(video)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 
 		article.Title, err = tc.ExtractTitle(video)
-		if err != nil { return items, err }
-		
+		if err != nil {
+			return items, err
+		}
+
 		article.Url, err = tc.ExtractUrl(video)
-		if err != nil { return items, err }
+		if err != nil {
+			return items, err
+		}
 
 		items = append(items, article)
 	}
@@ -210,8 +226,12 @@ func (tc *TwitchClient) ExtractDescription(post helix.Video) (string, error) {
 
 // Extracts the avatar of the author with some validation.
 func (tc *TwitchClient) ExtractAuthorImage(user helix.User) (string, error) {
-	if user.ProfileImageURL == "" { return "", ErrMissingAuthorImage }
-	if !strings.Contains(user.ProfileImageURL, "-profile_image-") { return "", ErrInvalidAuthorImage }
+	if user.ProfileImageURL == "" {
+		return "", ErrMissingAuthorImage
+	}
+	if !strings.Contains(user.ProfileImageURL, "-profile_image-") {
+		return "", ErrInvalidAuthorImage
+	}
 	return user.ProfileImageURL, nil
 }
 
@@ -231,6 +251,8 @@ func (tc *TwitchClient) ExtractTitle(post helix.Video) (string, error) {
 }
 
 func (tc *TwitchClient) ExtractUrl(post helix.Video) (string, error) {
-	if post.URL == "" { return "", ErrMissingUrl }
+	if post.URL == "" {
+		return "", ErrMissingUrl
+	}
 	return post.URL, nil
 }

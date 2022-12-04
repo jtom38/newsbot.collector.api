@@ -30,7 +30,7 @@ func main() {
 	fmt.Printf("Swagger: http://%v:8081/swagger/index.html\r\n", address)
 
 	err := http.ListenAndServe(":8081", server.Router)
-	if err != nil { 
+	if err != nil {
 		panic(err)
 	}
 }

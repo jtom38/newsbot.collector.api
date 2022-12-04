@@ -47,7 +47,6 @@ func NewRedditClient(Record database.Source) *RedditClient {
 //	os.Setenv("GODEBUG", "http2client=0")
 //}
 
-
 func (rc *RedditClient) GetBrowser() *rod.Browser {
 	var browser *rod.Browser
 	if path, exists := launcher.LookPath(); exists {
@@ -62,7 +61,7 @@ func (rc *RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 	return page
 }
 
-//func (rc RedditClient) 
+//func (rc RedditClient)
 
 // GetContent() reaches out to Reddit and pulls the Json data.
 // It will then convert the data to a struct and return the struct.
@@ -73,8 +72,6 @@ func (rc *RedditClient) GetContent() (model.RedditJsonContent, error) {
 	Url := fmt.Sprintf("%v.json", rc.record.Url)
 
 	log.Printf("[Reddit] Collecting results on '%v'", rc.record.Name)
-
-
 
 	content, err := getHttpContent(Url)
 	if err != nil {

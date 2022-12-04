@@ -35,7 +35,7 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 // @Param    id  path  string  true  "uuid"
 // @Produce  application/json
 // @Tags     Articles
-// @Router   /articles/{id} [get]
+// @Router   /articles/{ID} [get]
 func (s *Server) getArticleById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 

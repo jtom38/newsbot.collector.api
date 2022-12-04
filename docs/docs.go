@@ -70,7 +70,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/articles/{id}": {
+        "/articles/{ID}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -569,7 +569,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
@@ -582,7 +581,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
@@ -604,7 +602,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
@@ -644,9 +641,6 @@ const docTemplate = `{
         "/subscriptions/new/discordwebhook": {
             "post": {
                 "tags": [
-                    "Config",
-                    "Source",
-                    "Discord",
                     "Subscription"
                 ],
                 "summary": "Creates a new subscription to link a post from a Source to a DiscordWebHook.",

@@ -44,8 +44,7 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	query := r.URL.Query()
-	_id := query["id"][0]
+	_id := chi.URLParam(r, "ID")
 	if _id == "" {
 		http.Error(w, "id is missing", http.StatusBadRequest)
 		return
@@ -56,7 +55,7 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "unable to parse id value", http.StatusBadRequest)
 		return
 	}
-	
+
 	res, err := s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
 	if err != nil {
 		http.Error(w, "no record found", http.StatusBadRequest)
@@ -94,9 +93,9 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 		http.Error(w, "Channel is missing", http.StatusInternalServerError)
 		return
 	}
-	
+
 	res, err := s.Db.GetDiscordWebHooksByServerAndChannel(context.Background(), database.GetDiscordWebHooksByServerAndChannelParams{
-		Server: _server,
+		Server:  _server,
 		Channel: _channel,
 	})
 	if err != nil {
@@ -112,7 +111,6 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 
 	w.Write(bres)
 }
-
 
 // NewDiscordWebHook
 // @Summary  Creates a new record for a discord web hook to post data to.
@@ -135,7 +133,7 @@ func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid url", http.StatusBadRequest)
 		return
 	}
-	if _server ==  ""{
+	if _server == "" {
 		http.Error(w, "server is missing", http.StatusBadRequest)
 	}
 	if _channel == "" {

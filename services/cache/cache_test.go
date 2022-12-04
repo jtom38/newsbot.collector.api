@@ -18,14 +18,18 @@ func TestInsert(t *testing.T) {
 func TestFindGroupMissing(t *testing.T) {
 	cache := cache.NewCacheClient("faker")
 	_, err := cache.FindByKey("UnitTesting")
-	if err == nil { panic("Nothing was appended with the requested group.") }
+	if err == nil {
+		panic("Nothing was appended with the requested group.")
+	}
 }
 
 func TestFindGroupExists(t *testing.T) {
 	cache := cache.NewCacheClient("Testing")
 	cache.Insert("UnitTesting", "Something")
 	_, err := cache.FindByKey("UnitTesting")
-	if err != nil { panic("") }
+	if err != nil {
+		panic("")
+	}
 }
 
 func TestCacheStorage(t *testing.T) {
@@ -35,6 +39,7 @@ func TestCacheStorage(t *testing.T) {
 
 	cache := cache.NewCacheClient("Testing")
 	_, err := cache.FindByKey("UnitTesting02")
-	if err != nil { panic("expected to find the value")}
+	if err != nil {
+		panic("expected to find the value")
+	}
 }
-

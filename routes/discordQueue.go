@@ -12,7 +12,7 @@ import (
 // @Router   /discord/queue [get]
 func (s *Server) GetDiscordQueue(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	res, err := s.Db.ListDiscordQueueItems(*s.ctx, 100)
 	if err != nil {
 		w.Write([]byte(err.Error()))

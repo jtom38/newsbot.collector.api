@@ -20,4 +20,3 @@ type Sources interface {
 	ExtractTags(page *rod.Page) (string, error)
 	ExtractTitle(page *rod.Page) (string, error)
 }
-
