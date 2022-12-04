@@ -1,5 +1,6 @@
 .env
 dev.session.sql
+__debug_bin
 
 .vscode
 

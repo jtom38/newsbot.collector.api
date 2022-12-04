@@ -49,6 +49,17 @@ func (cc *ConfigClient) GetConfig(key string) string {
 	return res
 }
 
+// Looks for a value in the env and will panic if it does not exist.
+func (c ConfigClient) MustGetString(key string) string {
+	res, filled := os.LookupEnv(key)
+	if !filled {
+		msg := fmt.Sprintf("No value was found for '%v'", key)
+		panic(msg)
+	}
+
+	return res
+}
+
 func (cc *ConfigClient) GetFeature(flag string) (bool, error) {
 	cc.RefreshEnv()
 

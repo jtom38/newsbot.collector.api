@@ -9,13 +9,13 @@ import (
 	"github.com/jtom38/newsbot/collector/services/input"
 )
 
-var TwitchSourceRecord = database.Source {
+var TwitchSourceRecord = database.Source{
 	ID:     uuid.New(),
 	Name:   "nintendo",
 	Source: "Twitch",
 }
 
-var TwitchInvalidRecord = database.Source {
+var TwitchInvalidRecord = database.Source{
 	ID:     uuid.New(),
 	Name:   "EvilNintendo",
 	Source: "Twitch",
@@ -115,40 +115,62 @@ func TestTwitchReturnsVideoAuthor(t *testing.T) {
 
 func TestTwitchReturnsThumbnail(t *testing.T) {
 	tc, err := input.NewTwitchClient()
-	if err != nil {t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
 	err = tc.Login()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	user, err := tc.GetUserDetails()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	posts, err := tc.GetPosts(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	value, err := tc.ExtractThumbnail(posts[0])
-	if err != nil { t.Error(err) }
-	if value == "" { t.Error("uable to parse username") }
+	if err != nil {
+		t.Error(err)
+	}
+	if value == "" {
+		t.Error("uable to parse username")
+	}
 }
 
 func TestTwitchReturnsPubDate(t *testing.T) {
 	tc, err := input.NewTwitchClient()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
 	err = tc.Login()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	user, err := tc.GetUserDetails()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	posts, err := tc.GetPosts(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	date, err := tc.ExtractPubDate(posts[0])
 	log.Println(date)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestTwitchReturnsDescription(t *testing.T) {
@@ -181,17 +203,25 @@ func TestTwitchReturnsDescription(t *testing.T) {
 
 func TestTwitchReturnsAuthorImage(t *testing.T) {
 	tc, err := input.NewTwitchClient()
-	if err != nil {t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
 	err = tc.Login()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	user, err := tc.GetUserDetails()
-	if err != nil {t.Error(err) }
-	
+	if err != nil {
+		t.Error(err)
+	}
+
 	_, err = tc.ExtractAuthorImage(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestTwitchReturnsTags(t *testing.T) {
@@ -212,10 +242,14 @@ func TestTwitchReturnsTags(t *testing.T) {
 	}
 
 	posts, err := tc.GetPosts(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	_, err = tc.ExtractTags(posts[0], user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestTwitchReturnsTitle(t *testing.T) {
@@ -236,42 +270,70 @@ func TestTwitchReturnsTitle(t *testing.T) {
 	}
 
 	posts, err := tc.GetPosts(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	res, err := tc.ExtractTitle(posts[0])
-	if err != nil { t.Error(err) }
-	if res == "" { t.Error("expected a filled string but got nil")}
+	if err != nil {
+		t.Error(err)
+	}
+	if res == "" {
+		t.Error("expected a filled string but got nil")
+	}
 }
 
 func TestTwitchReturnsUrl(t *testing.T) {
 	tc, err := input.NewTwitchClient()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
 	err = tc.Login()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	user, err := tc.GetUserDetails()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	posts, err := tc.GetPosts(user)
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 
 	res, err := tc.ExtractUrl(posts[0])
-	if err != nil { t.Error(err) }
-	if res == "" { t.Error("expected a filled string but got nil")}
+	if err != nil {
+		t.Error(err)
+	}
+	if res == "" {
+		t.Error("expected a filled string but got nil")
+	}
 }
 
 func TestTwitchGetContent(t *testing.T) {
 	tc, err := input.NewTwitchClient()
-	if err != nil { t.Error(err) }
+	if err != nil {
+		t.Error(err)
+	}
 	tc.ReplaceSourceRecord(TwitchSourceRecord)
 
 	err = tc.Login()
-	if err != nil { t.Error(err) }
-	
+	if err != nil {
+		t.Error(err)
+	}
+
 	posts, err := tc.GetContent()
-	if err != nil {t.Error(err) }
-	if len(posts) == 0 { t.Error("posts came back with 0 posts") }
-	if len(posts) != 20 { t.Error("expected 20 posts") } 
+	if err != nil {
+		t.Error(err)
+	}
+	if len(posts) == 0 {
+		t.Error("posts came back with 0 posts")
+	}
+	if len(posts) != 20 {
+		t.Error("expected 20 posts")
+	}
 }

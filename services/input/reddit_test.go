@@ -9,12 +9,12 @@ import (
 )
 
 var RedditRecord database.Source = database.Source{
-	ID: uuid.New(),
-	Name: "dadjokes",
+	ID:     uuid.New(),
+	Name:   "dadjokes",
 	Source: "reddit",
-	Site: "reddit",
-	Url: "https://reddit.com/r/dadjokes",
-	Tags: "reddit, dadjokes",
+	Site:   "reddit",
+	Url:    "https://reddit.com/r/dadjokes",
+	Tags:   "reddit, dadjokes",
 }
 
 func TestGetContent(t *testing.T) {

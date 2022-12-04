@@ -9,7 +9,7 @@ import (
 // When a record becomes tainted, it needs to be renewed or it will be dropped from the cache.
 // If a record is tainted and used again, the taint will be removed and a new Expires value will be set.
 // If its not renewed, it will be dropped.
-type CacheAgeMonitor struct {}
+type CacheAgeMonitor struct{}
 
 func NewCacheAgeMonitor() CacheAgeMonitor {
 	return CacheAgeMonitor{}
@@ -20,10 +20,10 @@ func (cam CacheAgeMonitor) CheckExpiredEntries() {
 	now := time.Now()
 	for index, item := range cacheStorage {
 		if now.After(item.Expires) {
-			
+
 			// the timer expired, and its not tainted, taint it
 			if !item.IsTainted {
-				item.IsTainted = true 
+				item.IsTainted = true
 				item.Expires = now.Add(1 * time.Hour)
 			}
 
@@ -39,7 +39,9 @@ func (cam CacheAgeMonitor) CheckExpiredEntries() {
 func (cam CacheAgeMonitor) removeEntry(index int) []*model.CacheItem {
 	var temp []*model.CacheItem
 	for i, item := range cacheStorage {
-		if i != index { temp = append(temp, item )}
+		if i != index {
+			temp = append(temp, item)
+		}
 	}
 	return temp
 }

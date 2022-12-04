@@ -22,7 +22,7 @@ func NewRssClient(sourceRecord model.Sources) rssClient {
 }
 
 //func (rc rssClient) ReplaceSourceRecord(source model.Sources) {
-	//rc.SourceRecord = source
+//rc.SourceRecord = source
 //}
 
 func (rc rssClient) getCacheGroup() string {
@@ -31,7 +31,9 @@ func (rc rssClient) getCacheGroup() string {
 
 func (rc rssClient) GetContent() error {
 	feed, err := rc.PullFeed()
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	cacheClient := cache.NewCacheClient(rc.getCacheGroup())
 
@@ -49,7 +51,9 @@ func (rc rssClient) PullFeed() (*gofeed.Feed, error) {
 	feedUri := fmt.Sprintf("%v", rc.SourceRecord.Url)
 	fp := gofeed.NewParser()
 	feed, err := fp.ParseURL(feedUri)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 
 	return feed, nil
 }

@@ -12,7 +12,7 @@ paths:
       summary: Lists the top 50 records
       tags:
       - Articles
-  /articles/{id}:
+  /articles/{ID}:
     get:
       parameters:
       - description: uuid
@@ -391,7 +391,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - Config
       - Subscription
   /subscriptions/byDiscordId:
     get:
@@ -406,7 +405,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - Config
       - Subscription
   /subscriptions/bySourceId:
     get:
@@ -421,7 +419,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - Config
       - Subscription
   /subscriptions/discord/webhook/delete:
     delete:
@@ -454,8 +451,5 @@ paths:
       responses: {}
       summary: Creates a new subscription to link a post from a Source to a DiscordWebHook.
       tags:
-      - Config
-      - Source
-      - Discord
       - Subscription
 swagger: "2.0"

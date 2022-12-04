@@ -12,7 +12,7 @@ import (
 // GetSubscriptions
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     Config, Subscription
+// @Tags     Subscription
 // @Router   /subscriptions [get]
 func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -36,7 +36,7 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
-// @Tags     Config, Subscription
+// @Tags     Subscription
 // @Router   /subscriptions/byDiscordId [get]
 func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -73,7 +73,7 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
-// @Tags     Config, Subscription
+// @Tags     Subscription
 // @Router   /subscriptions/bySourceId [get]
 func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -110,7 +110,7 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 // @Summary  Creates a new subscription to link a post from a Source to a DiscordWebHook.
 // @Param    discordWebHookId  query  string  true  "discordWebHookId"
 // @Param    sourceId          query  string  true  "sourceId"
-// @Tags     Config, Source, Discord, Subscription
+// @Tags     Subscription
 // @Router   /subscriptions/new/discordwebhook [post]
 func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
 	// Extract the values given

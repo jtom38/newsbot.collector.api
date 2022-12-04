@@ -10,7 +10,7 @@ type CacheItem struct {
 
 	// Group defines what it should be a reference to.
 	// youtube, reddit, ect
-	Group   string
-	Expires time.Time
+	Group     string
+	Expires   time.Time
 	IsTainted bool
 }

@@ -9,5 +9,5 @@ import (
 func TestCacheTaintItem(t *testing.T) {
 	cc := cache.NewCacheClient("Testing")
 	cc.Insert("UnitTesting01", "test")
-	
+
 }
