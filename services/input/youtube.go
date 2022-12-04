@@ -44,13 +44,6 @@ func NewYoutubeClient(Record database.Source) YoutubeClient {
 		record:     Record,
 		cacheGroup: "youtube",
 	}
-	/*
-		cc := NewConfigClient()
-
-		debug, err := strconv.ParseBool(cc.GetConfig(YOUTUBE_DEBUG))
-		if err != nil { panic("'YOUTUBE_DEBUG' was not a bool value")}
-		yc.Config.Debug = debug
-	*/
 	return yc
 }
 
@@ -109,14 +102,18 @@ func (yc *YoutubeClient) GetContent() ([]database.Article, error) {
 	return items, nil
 }
 
-func (yc *YoutubeClient) GetBrowser() *rod.Browser {
+func (yc *YoutubeClient) GetBrowser() (*rod.Browser, error) {
 	//browser := rod.New().MustConnect()
 	var browser *rod.Browser
 	if path, exists := launcher.LookPath(); exists {
-		u := launcher.New().Bin(path).MustLaunch()
+		u, err := launcher.New().Bin(path).Launch()
+		if err != nil {
+			return browser, err
+		}
+		
 		browser = rod.New().ControlURL(u).MustConnect()
 	}
-	return browser
+	return browser, nil
 }
 
 func (yc *YoutubeClient) GetPage(parser *rod.Browser, url string) *rod.Page {
@@ -163,7 +160,11 @@ func (yc *YoutubeClient) GetAvatarUri() (string, error) {
 	var AvatarUri string
 
 	//browser := rod.New().MustConnect()
-	browser := yc.GetBrowser()
+	browser, err := yc.GetBrowser()
+	if err != nil {
+		return "", err
+	}
+
 	page := browser.MustPage(yc.record.Url)
 
 	res := page.MustElement("#channel-header-container > yt-img-shadow:nth-child(1) > img:nth-child(1)").MustAttribute("src")

@@ -21,7 +21,7 @@ func TestFfxivGetParser(t *testing.T) {
 	fc := ffxiv.NewFFXIVClient(FFXIVRecord)
 	_, err := fc.GetParser()
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
@@ -33,10 +33,10 @@ func TestFfxivPullFeed(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if len(links) == 0 {
-		panic("expected links to come back but got 0")
+		t.Error("expected links to come back but got 0")
 	}
 
 }
@@ -49,7 +49,7 @@ func TestFfxivExtractThumbnail(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -57,10 +57,10 @@ func TestFfxivExtractThumbnail(t *testing.T) {
 
 	thumb, err := fc.ExtractThumbnail(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if thumb == "" {
-		panic("expected a link but got nothing.")
+		t.Error("expected a link but got nothing.")
 	}
 }
 
@@ -72,7 +72,7 @@ func TestFfxivExtractPubDate(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -80,7 +80,7 @@ func TestFfxivExtractPubDate(t *testing.T) {
 
 	_, err = fc.ExtractPubDate(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestFfxivExtractDescription(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -100,7 +100,7 @@ func TestFfxivExtractDescription(t *testing.T) {
 
 	_, err = fc.ExtractDescription(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 }
 
@@ -112,7 +112,7 @@ func TestFfxivExtractAuthor(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -120,10 +120,10 @@ func TestFfxivExtractAuthor(t *testing.T) {
 
 	author, err := fc.ExtractAuthor(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if author == "" {
-		panic("failed to locate the author name")
+		t.Error("failed to locate the author name")
 	}
 }
 
@@ -135,7 +135,7 @@ func TestFfxivExtractTags(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -143,10 +143,10 @@ func TestFfxivExtractTags(t *testing.T) {
 
 	res, err := fc.ExtractTags(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if res == "" {
-		panic("failed to locate the tags")
+		t.Error("failed to locate the tags")
 	}
 }
 
@@ -158,7 +158,7 @@ func TestFfxivExtractTitle(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -166,10 +166,10 @@ func TestFfxivExtractTitle(t *testing.T) {
 
 	res, err := fc.ExtractTitle(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if res == "" {
-		panic("failed to locate the tags")
+		t.Error("failed to locate the tags")
 	}
 }
 
@@ -181,7 +181,7 @@ func TestFFxivExtractAuthorIamge(t *testing.T) {
 
 	links, err := fc.PullFeed(parser)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 
 	page := fc.GetPage(parser, links[0])
@@ -189,10 +189,10 @@ func TestFFxivExtractAuthorIamge(t *testing.T) {
 
 	res, err := fc.ExtractAuthorImage(page)
 	if err != nil {
-		panic(err)
+		t.Error(err)
 	}
 	if res == "" {
-		panic("failed to locate the tags")
+		t.Error("failed to locate the tags")
 	}
 }
 
