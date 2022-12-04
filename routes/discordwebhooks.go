@@ -93,9 +93,9 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 		http.Error(w, "Channel is missing", http.StatusInternalServerError)
 		return
 	}
-
+	
 	res, err := s.Db.GetDiscordWebHooksByServerAndChannel(context.Background(), database.GetDiscordWebHooksByServerAndChannelParams{
-		Server:  _server,
+		Server: _server,
 		Channel: _channel,
 	})
 	if err != nil {
@@ -111,6 +111,7 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 
 	w.Write(bres)
 }
+
 
 // NewDiscordWebHook
 // @Summary  Creates a new record for a discord web hook to post data to.

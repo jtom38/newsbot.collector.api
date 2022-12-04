@@ -435,6 +435,21 @@ paths:
       - Source
       - Discord
       - Subscription
+  /subscriptions/discord/webhook/delete:
+    delete:
+      parameters:
+      - description: Id
+        in: query
+        name: Id
+        required: true
+        type: string
+      responses: {}
+      summary: Removes a Discord WebHook Subscription based on the Subscription ID.
+      tags:
+      - Config
+      - Source
+      - Discord
+      - Subscription
   /subscriptions/new/discordwebhook:
     post:
       parameters:

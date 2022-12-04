@@ -355,6 +355,36 @@
                 "responses": {}
             }
         },
+        "/discord/webhooks/by/serverAndChannel": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Config",
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Returns all the known web hooks based on the Server and Channel given.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Fancy Server",
+                        "name": "server",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "memes",
+                        "name": "channel",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/discord/webhooks/new": {
             "post": {
                 "tags": [
@@ -610,6 +640,27 @@
         },
         "/subscriptions/discord/webhook/delete": {
             "delete": {
+                "tags": [
+                    "Config",
+                    "Source",
+                    "Discord",
+                    "Subscription"
+                ],
+                "summary": "Removes a Discord WebHook Subscription based on the Subscription ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Id",
+                        "name": "Id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/subscriptions/new/discordwebhook": {
+            "post": {
                 "tags": [
                     "Config",
                     "Source",
