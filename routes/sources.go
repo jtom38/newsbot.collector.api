@@ -35,7 +35,13 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "url is missing a value", http.StatusBadRequest)
 		return
 	}
-	bResult, err := json.Marshal(res)
+
+	var dto []database.SourceDto
+	for _, item := range res {
+		dto = append(dto, database.ConvertToSourceDto(item))
+	}
+
+	bResult, err := json.Marshal(dto)
 	if err != nil {
 		http.Error(w, "unable to convert to json", http.StatusBadRequest)
 		return
@@ -283,10 +289,10 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteSource
-// @Summary  Deletes a record by ID.
+// @Summary  Marks a source as deleted based on its ID value.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Source
-// @Router   /config/sources/{id} [delete]
+// @Tags     Source
+// @Router   /config/sources/{id} [POST]
 func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources = model.Sources{}
 

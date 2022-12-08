@@ -160,7 +160,7 @@ Select * From Sources Limit $1;
 Select * From Sources where Source = $1;
 
 -- name: DeleteSource :exec
-DELETE From sources where id = $1;
+UPDATE Sources Set Disabled = TRUE where id = $1;
 
 -- name: DisableSource :exec
 Update Sources Set Enabled = FALSE where ID = $1;

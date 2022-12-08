@@ -244,7 +244,7 @@ func (q *Queries) DeleteSetting(ctx context.Context, id uuid.UUID) error {
 }
 
 const deleteSource = `-- name: DeleteSource :exec
-DELETE From sources where id = $1
+UPDATE Sources Set Disabled = TRUE where id = $1
 `
 
 func (q *Queries) DeleteSource(ctx context.Context, id uuid.UUID) error {
@@ -351,7 +351,7 @@ func (q *Queries) GetArticleByUrl(ctx context.Context, url string) (Article, err
 }
 
 const getArticlesBySource = `-- name: GetArticlesBySource :many
-select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags from articles
+select articles.id, sourceid, articles.tags, title, articles.url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage, sources.id, site, name, source, type, value, enabled, sources.url, sources.tags, deleted from articles
 INNER join sources on articles.sourceid=Sources.ID
 where site = $1
 `
@@ -379,6 +379,7 @@ type GetArticlesBySourceRow struct {
 	Enabled     bool
 	Url_2       string
 	Tags_2      string
+	Deleted     sql.NullBool
 }
 
 func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetArticlesBySourceRow, error) {
@@ -413,6 +414,7 @@ func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetAr
 			&i.Enabled,
 			&i.Url_2,
 			&i.Tags_2,
+			&i.Deleted,
 		); err != nil {
 			return nil, err
 		}
@@ -740,7 +742,7 @@ func (q *Queries) GetSettingByValue(ctx context.Context, value string) (Setting,
 }
 
 const getSourceByID = `-- name: GetSourceByID :one
-Select id, site, name, source, type, value, enabled, url, tags From Sources where ID = $1 Limit 1
+Select id, site, name, source, type, value, enabled, url, tags, deleted From Sources where ID = $1 Limit 1
 `
 
 func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, error) {
@@ -756,12 +758,13 @@ func (q *Queries) GetSourceByID(ctx context.Context, id uuid.UUID) (Source, erro
 		&i.Enabled,
 		&i.Url,
 		&i.Tags,
+		&i.Deleted,
 	)
 	return i, err
 }
 
 const getSourceByName = `-- name: GetSourceByName :one
-Select id, site, name, source, type, value, enabled, url, tags from Sources where name = $1 Limit 1
+Select id, site, name, source, type, value, enabled, url, tags, deleted from Sources where name = $1 Limit 1
 `
 
 func (q *Queries) GetSourceByName(ctx context.Context, name string) (Source, error) {
@@ -777,12 +780,13 @@ func (q *Queries) GetSourceByName(ctx context.Context, name string) (Source, err
 		&i.Enabled,
 		&i.Url,
 		&i.Tags,
+		&i.Deleted,
 	)
 	return i, err
 }
 
 const getSourceByNameAndSource = `-- name: GetSourceByNameAndSource :one
-Select id, site, name, source, type, value, enabled, url, tags from Sources WHERE name = $1 and source = $2
+Select id, site, name, source, type, value, enabled, url, tags, deleted from Sources WHERE name = $1 and source = $2
 `
 
 type GetSourceByNameAndSourceParams struct {
@@ -803,6 +807,7 @@ func (q *Queries) GetSourceByNameAndSource(ctx context.Context, arg GetSourceByN
 		&i.Enabled,
 		&i.Url,
 		&i.Tags,
+		&i.Deleted,
 	)
 	return i, err
 }
@@ -1038,7 +1043,7 @@ func (q *Queries) ListDiscordWebhooks(ctx context.Context, limit int32) ([]Disco
 }
 
 const listSources = `-- name: ListSources :many
-Select id, site, name, source, type, value, enabled, url, tags From Sources Limit $1
+Select id, site, name, source, type, value, enabled, url, tags, deleted From Sources Limit $1
 `
 
 func (q *Queries) ListSources(ctx context.Context, limit int32) ([]Source, error) {
@@ -1060,6 +1065,7 @@ func (q *Queries) ListSources(ctx context.Context, limit int32) ([]Source, error
 			&i.Enabled,
 			&i.Url,
 			&i.Tags,
+			&i.Deleted,
 		); err != nil {
 			return nil, err
 		}
@@ -1075,7 +1081,7 @@ func (q *Queries) ListSources(ctx context.Context, limit int32) ([]Source, error
 }
 
 const listSourcesBySource = `-- name: ListSourcesBySource :many
-Select id, site, name, source, type, value, enabled, url, tags From Sources where Source = $1
+Select id, site, name, source, type, value, enabled, url, tags, deleted From Sources where Source = $1
 `
 
 func (q *Queries) ListSourcesBySource(ctx context.Context, source string) ([]Source, error) {
@@ -1097,6 +1103,7 @@ func (q *Queries) ListSourcesBySource(ctx context.Context, source string) ([]Sou
 			&i.Enabled,
 			&i.Url,
 			&i.Tags,
+			&i.Deleted,
 		); err != nil {
 			return nil, err
 		}

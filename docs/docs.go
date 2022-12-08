@@ -250,12 +250,11 @@ const docTemplate = `{
                 ],
                 "responses": {}
             },
-            "delete": {
+            "post": {
                 "tags": [
-                    "Config",
                     "Source"
                 ],
-                "summary": "Deletes a record by ID.",
+                "summary": "Marks a source as deleted based on its ID value.",
                 "parameters": [
                     {
                         "type": "string",
