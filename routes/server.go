@@ -102,11 +102,7 @@ func (s *Server) MountRoutes() {
 	/* Source Routes */
 	s.Router.Get("/api/config/sources", s.listSources)
 	s.Router.Get("/api/config/sources/by/source", s.listSourcesBySource)
-
-	/* Reddit Source Routes */
-
 	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
-
 	s.Router.Post("/api/config/sources/new/youtube", s.newYoutubeSource)
 	s.Router.Post("/api/config/sources/new/twitch", s.newTwitchSource)
 	s.Router.Route("/api/config/sources/{ID}", func(r chi.Router) {
@@ -114,6 +110,7 @@ func (s *Server) MountRoutes() {
 		r.Delete("/", s.deleteSources)
 		r.Post("/disable", s.disableSource)
 		r.Post("/enable", s.enableSource)
+		//r.Post("/delete", )
 	})
 	s.Router.Get("/api/config/sources/by/sourceAndName", s.GetSourceBySourceAndName)
 

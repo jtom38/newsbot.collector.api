@@ -49,7 +49,8 @@ Create Table Sources (
 	Value 	TEXT,
 	Enabled BOOLEAN NOT NULL,
 	Url 	TEXT NOT NULL,
-	Tags 	TEXT NOT NULL
+	Tags 	TEXT NOT NULL,
+	Deleted BOOLEAN
 );
 
 /* This table is used to track what the Web Hook wants to have sent by Source */;

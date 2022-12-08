@@ -66,18 +66,6 @@ paths:
       - Config
       - Source
   /config/sources/{id}:
-    delete:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Deletes a record by ID.
-      tags:
-      - Config
-      - Source
     get:
       parameters:
       - description: uuid
@@ -91,6 +79,17 @@ paths:
       summary: Returns a single entity by ID
       tags:
       - Config
+      - Source
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Marks a source as deleted based on its ID value.
+      tags:
       - Source
   /config/sources/{id}/disable:
     post:
