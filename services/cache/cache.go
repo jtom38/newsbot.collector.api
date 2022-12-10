@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
 type CacheClient struct {
@@ -19,7 +19,7 @@ func NewCacheClient(group string) CacheClient {
 }
 
 func (cc *CacheClient) Insert(key string, value string) {
-	item := model.CacheItem{
+	item := models.CacheItem{
 		Key:       key,
 		Value:     value,
 		Group:     cc.group,
@@ -29,7 +29,7 @@ func (cc *CacheClient) Insert(key string, value string) {
 	cacheStorage = append(cacheStorage, &item)
 }
 
-func (cc *CacheClient) FindByKey(key string) (*model.CacheItem, error) {
+func (cc *CacheClient) FindByKey(key string) (*models.CacheItem, error) {
 	for _, item := range cacheStorage {
 		if item.Group != cc.group {
 			continue
@@ -46,10 +46,10 @@ func (cc *CacheClient) FindByKey(key string) (*model.CacheItem, error) {
 		return item, nil
 	}
 
-	return &model.CacheItem{}, ErrCacheRecordMissing
+	return &models.CacheItem{}, ErrCacheRecordMissing
 }
 
-func (cc *CacheClient) FindByValue(value string) (*model.CacheItem, error) {
+func (cc *CacheClient) FindByValue(value string) (*models.CacheItem, error) {
 	for _, item := range cacheStorage {
 		if item.Group != cc.group {
 			continue
@@ -65,5 +65,5 @@ func (cc *CacheClient) FindByValue(value string) (*model.CacheItem, error) {
 		}
 		return item, nil
 	}
-	return &model.CacheItem{}, ErrCacheRecordMissing
+	return &models.CacheItem{}, ErrCacheRecordMissing
 }

@@ -3,11 +3,11 @@ package cache
 import (
 	"errors"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
 var (
-	cacheStorage []*model.CacheItem
+	cacheStorage []*models.CacheItem
 
 	ErrCacheRecordMissing = errors.New("unable to find the requested record")
 )

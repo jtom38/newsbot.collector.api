@@ -12,7 +12,7 @@ import (
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/launcher"
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
@@ -65,8 +65,8 @@ func (rc *RedditClient) GetPage(parser *rod.Browser, url string) *rod.Page {
 
 // GetContent() reaches out to Reddit and pulls the Json data.
 // It will then convert the data to a struct and return the struct.
-func (rc *RedditClient) GetContent() (model.RedditJsonContent, error) {
-	var items model.RedditJsonContent = model.RedditJsonContent{}
+func (rc *RedditClient) GetContent() (models.RedditJsonContent, error) {
+	var items models.RedditJsonContent = models.RedditJsonContent{}
 
 	// TODO Wire this to support the config options
 	Url := fmt.Sprintf("%v.json", rc.record.Url)
@@ -88,7 +88,7 @@ func (rc *RedditClient) GetContent() (model.RedditJsonContent, error) {
 	return items, nil
 }
 
-func (rc *RedditClient) ConvertToArticles(items model.RedditJsonContent) []database.Article {
+func (rc *RedditClient) ConvertToArticles(items models.RedditJsonContent) []database.Article {
 	var redditArticles []database.Article
 	for _, item := range items.Data.Children {
 		var article database.Article
@@ -104,7 +104,7 @@ func (rc *RedditClient) ConvertToArticles(items model.RedditJsonContent) []datab
 
 // ConvertToArticle() will take the reddit model struct and convert them over to Article structs.
 // This data can be passed to the database.
-func (rc *RedditClient) convertToArticle(source model.RedditPost) (database.Article, error) {
+func (rc *RedditClient) convertToArticle(source models.RedditPost) (database.Article, error) {
 	var item database.Article
 
 	if source.Content == "" && source.Url != "" {
@@ -131,7 +131,7 @@ func (rc *RedditClient) convertToArticle(source model.RedditPost) (database.Arti
 	return item, nil
 }
 
-func (rc *RedditClient) convertPicturePost(source model.RedditPost) database.Article {
+func (rc *RedditClient) convertPicturePost(source models.RedditPost) database.Article {
 	var item = database.Article{
 		Sourceid:    rc.record.ID,
 		Title:       source.Title,
@@ -149,7 +149,7 @@ func (rc *RedditClient) convertPicturePost(source model.RedditPost) database.Art
 	return item
 }
 
-func (rc *RedditClient) convertTextPost(source model.RedditPost) database.Article {
+func (rc *RedditClient) convertTextPost(source models.RedditPost) database.Article {
 	var item = database.Article{
 		Sourceid:    rc.record.ID,
 		Tags:        "a",
@@ -164,7 +164,7 @@ func (rc *RedditClient) convertTextPost(source model.RedditPost) database.Articl
 	return item
 }
 
-func (rc *RedditClient) convertVideoPost(source model.RedditPost) database.Article {
+func (rc *RedditClient) convertVideoPost(source models.RedditPost) database.Article {
 	var item = database.Article{
 		Sourceid:    rc.record.ID,
 		Tags:        "a",
@@ -180,7 +180,7 @@ func (rc *RedditClient) convertVideoPost(source model.RedditPost) database.Artic
 }
 
 // This post is nothing more then a redirect to another location.
-func (rc *RedditClient) convertRedirectPost(source model.RedditPost) database.Article {
+func (rc *RedditClient) convertRedirectPost(source models.RedditPost) database.Article {
 	var item = database.Article{
 		Sourceid:    rc.record.ID,
 		Tags:        "a",
