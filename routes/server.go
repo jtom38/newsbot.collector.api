@@ -3,6 +3,8 @@ package routes
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
+	"net/http"
 
 	//"net/http"
 
@@ -12,6 +14,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/jtom38/newsbot/collector/database"
+	"github.com/jtom38/newsbot/collector/domain/models"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
@@ -69,9 +72,9 @@ func (s *Server) MountRoutes() {
 	))
 
 	/* Root Routes */
-	s.Router.Get("/api/helloworld", helloWorld)
-	s.Router.Get("/api/hello/{who}", helloWho)
-	s.Router.Get("/api/ping", ping)
+	//s.Router.Get("/api/helloworld", helloWorld)
+	//s.Router.Get("/api/hello/{who}", helloWho)
+	//s.Router.Get("/api/ping", ping)
 
 	/* Article Routes */
 	s.Router.Get("/api/articles", s.listArticles)
@@ -80,15 +83,15 @@ func (s *Server) MountRoutes() {
 	})
 	s.Router.Get("/api/articles/by/sourceid", s.GetArticlesBySourceId)
 
-	/* Discord Queue */
-	s.Router.Get("/api/discord/queue", s.GetDiscordQueue)
+	/* Queue */
+	s.Router.Mount("/api/queue", s.GetQueueRouter())
 
 	/* Discord WebHooks */
-	s.Router.Post("/api/discord/webhooks/new", s.NewDiscordWebHook)
 	s.Router.Get("/api/discord/webhooks", s.GetDiscordWebHooks)
+	s.Router.Post("/api/discord/webhooks/new", s.NewDiscordWebHook)
 	//s.Router.Get("/api/discord/webhooks/byId", s.GetDiscordWebHooksById)
 	s.Router.Get("/api/discord/webhooks/by/serverAndChannel", s.GetDiscordWebHooksByServerAndChannel)
-	
+
 	s.Router.Route("/api/discord/webhooks/{ID}", func(r chi.Router) {
 		r.Get("/", s.GetDiscordWebHooksById)
 		r.Delete("/", s.deleteDiscordWebHook)
@@ -99,25 +102,21 @@ func (s *Server) MountRoutes() {
 	/* Settings */
 	s.Router.Get("/api/settings", s.getSettings)
 
-	/* Source Routes */
-	s.Router.Get("/api/config/sources", s.listSources)
-	s.Router.Get("/api/config/sources/by/source", s.listSourcesBySource)
-	s.Router.Post("/api/config/sources/new/reddit", s.newRedditSource)
-	s.Router.Post("/api/config/sources/new/youtube", s.newYoutubeSource)
-	s.Router.Post("/api/config/sources/new/twitch", s.newTwitchSource)
-	s.Router.Route("/api/config/sources/{ID}", func(r chi.Router) {
-		r.Get("/", s.getSources)
-		r.Delete("/", s.deleteSources)
-		r.Post("/disable", s.disableSource)
-		r.Post("/enable", s.enableSource)
-		//r.Post("/delete", )
-	})
-	s.Router.Get("/api/config/sources/by/sourceAndName", s.GetSourceBySourceAndName)
+	s.Router.Mount("/api/sources", s.GetSourcesRouter())
+	s.Router.Mount("/api/subscriptions", s.GetSubscriptionsRouter())
+}
 
-	/* Subscriptions */
-	s.Router.Get("/api/subscriptions", s.ListSubscriptions)
-	s.Router.Get("/api/subscriptions/byDiscordId", s.GetSubscriptionsByDiscordId)
-	s.Router.Get("/api/subscriptions/bySourceId", s.GetSubscriptionsBySourceId)
-	s.Router.Post("/api/subscriptions/new/discordwebhook", s.newDiscordWebHookSubscription)
-	s.Router.Delete("/api/subscriptions/discord/webhook/delete", s.DeleteDiscordWebHookSubscription)
+func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatusCode int, Payload interface{}) {
+	e := models.ApiError{
+		Message:    errMessage,
+		StatusCode: http.StatusInternalServerError,
+		Payload:    nil,
+	}
+
+	b, err := json.Marshal(e)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(b)
 }
