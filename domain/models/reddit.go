@@ -1,4 +1,4 @@
-package model
+package models
 
 // This is the root Json object.  It does not contain data that we care about though.
 type RedditJsonContent struct {
