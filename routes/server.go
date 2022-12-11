@@ -14,7 +14,6 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/jtom38/newsbot/collector/database"
-	"github.com/jtom38/newsbot/collector/domain/models"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
@@ -71,11 +70,6 @@ func (s *Server) MountRoutes() {
 		httpSwagger.URL("doc.json"), //The url pointing to API definition
 	))
 
-	/* Root Routes */
-	//s.Router.Get("/api/helloworld", helloWorld)
-	//s.Router.Get("/api/hello/{who}", helloWho)
-	//s.Router.Get("/api/ping", ping)
-
 	/* Article Routes */
 	s.Router.Get("/api/articles", s.listArticles)
 	s.Router.Route("/api/articles/{ID}", func(r chi.Router) {
@@ -106,11 +100,21 @@ func (s *Server) MountRoutes() {
 	s.Router.Mount("/api/subscriptions", s.GetSubscriptionsRouter())
 }
 
-func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatusCode int, Payload interface{}) {
-	e := models.ApiError{
-		Message:    errMessage,
-		StatusCode: http.StatusInternalServerError,
-		Payload:    nil,
+type ApiStatusModel struct {
+	StatusCode int    `json:"status"`
+	Message    string `json:"message"`
+}
+
+type ApiError struct {
+	*ApiStatusModel
+}
+
+func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatusCode int) {
+	e := ApiError{
+		ApiStatusModel: &ApiStatusModel{
+			StatusCode: http.StatusInternalServerError,
+			Message:    errMessage,
+		},
 	}
 
 	b, err := json.Marshal(e)
