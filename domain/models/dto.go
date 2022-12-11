@@ -1,9 +1,11 @@
-package database
+package models
 
 import (
 	"strings"
 
 	"github.com/google/uuid"
+
+	"github.com/jtom38/newsbot/collector/database"
 )
 
 type SourceDto struct {
@@ -19,7 +21,7 @@ type SourceDto struct {
 	Deleted bool      `json:"deleted"`
 }
 
-func ConvertToSourceDto(i Source) SourceDto {
+func ConvertToSourceDto(i database.Source) SourceDto {
 	var deleted bool
 	if !i.Deleted.Valid {
 		deleted = true
@@ -37,6 +39,33 @@ func ConvertToSourceDto(i Source) SourceDto {
 		Tags:    splitTags(i.Tags),
 		Deleted: deleted,
 	}
+}
+
+type DiscordQueueDto struct {
+	ID        uuid.UUID `json:"id"`
+	Articleid uuid.UUID `json:"articleId"`
+}
+
+func ConvertToDiscordQueueDto(i database.Discordqueue) DiscordQueueDto {
+	return DiscordQueueDto{
+		ID:        i.ID,
+		Articleid: i.Articleid,
+	}
+}
+
+type SubscriptionDto struct {
+	ID               uuid.UUID `json:"id"`
+	DiscordWebhookId uuid.UUID `json:"discordwebhookid"`
+	SourceId         uuid.UUID `json:"sourceid"`
+}
+
+func ConvertToSubscriptionDto(i database.Subscription) SubscriptionDto {
+	c := SubscriptionDto{
+		ID:               i.ID,
+		DiscordWebhookId: i.Discordwebhookid,
+		SourceId:         i.Sourceid,
+	}
+	return c
 }
 
 func splitTags(t string) []string {
