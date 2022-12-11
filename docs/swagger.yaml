@@ -1,4 +1,95 @@
 basePath: /api
+definitions:
+  models.DiscordQueueDto:
+    properties:
+      articleId:
+        type: string
+      id:
+        type: string
+    type: object
+  models.SourceDto:
+    properties:
+      deleted:
+        type: boolean
+      enabled:
+        type: boolean
+      id:
+        type: string
+      name:
+        type: string
+      site:
+        type: string
+      source:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      type:
+        type: string
+      url:
+        type: string
+      value:
+        type: string
+    type: object
+  models.SubscriptionDto:
+    properties:
+      discordwebhookid:
+        type: string
+      id:
+        type: string
+      sourceid:
+        type: string
+    type: object
+  routes.ApiError:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  routes.GetSourceResult:
+    properties:
+      message:
+        type: string
+      payload:
+        $ref: '#/definitions/models.SourceDto'
+      status:
+        type: integer
+    type: object
+  routes.ListDiscordWebHooksQueueResults:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.DiscordQueueDto'
+        type: array
+      status:
+        type: integer
+    type: object
+  routes.ListSourcesResults:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.SourceDto'
+        type: array
+      status:
+        type: integer
+    type: object
+  routes.ListSubscriptionResults:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.SubscriptionDto'
+        type: array
+      status:
+        type: integer
+    type: object
 info:
   contact: {}
   title: NewsBot collector
@@ -56,164 +147,6 @@ paths:
         50.
       tags:
       - Articles
-  /config/sources:
-    get:
-      produces:
-      - application/json
-      responses: {}
-      summary: Lists the top 50 records
-      tags:
-      - Config
-      - Source
-  /config/sources/{id}:
-    get:
-      parameters:
-      - description: uuid
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      summary: Returns a single entity by ID
-      tags:
-      - Config
-      - Source
-    post:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Marks a source as deleted based on its ID value.
-      tags:
-      - Source
-  /config/sources/{id}/disable:
-    post:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Disables a source from processing.
-      tags:
-      - Config
-      - Source
-  /config/sources/{id}/enable:
-    post:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Enables a source to continue processing.
-      tags:
-      - Config
-      - Source
-  /config/sources/by/source:
-    get:
-      parameters:
-      - description: Source Name
-        in: query
-        name: source
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      summary: 'Lists the top 50 records based on the name given. Example: reddit'
-      tags:
-      - Config
-      - Source
-  /config/sources/by/sourceAndName:
-    get:
-      parameters:
-      - description: dadjokes
-        in: query
-        name: name
-        required: true
-        type: string
-      - description: reddit
-        in: query
-        name: source
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      summary: Returns a single entity by ID
-      tags:
-      - Config
-      - Source
-  /config/sources/new/reddit:
-    post:
-      parameters:
-      - description: name
-        in: query
-        name: name
-        required: true
-        type: string
-      - description: url
-        in: query
-        name: url
-        required: true
-        type: string
-      responses: {}
-      summary: Creates a new reddit source to monitor.
-      tags:
-      - Config
-      - Source
-      - Reddit
-  /config/sources/new/twitch:
-    post:
-      parameters:
-      - description: name
-        in: query
-        name: name
-        required: true
-        type: string
-      responses: {}
-      summary: Creates a new twitch source to monitor.
-      tags:
-      - Config
-      - Source
-      - Twitch
-  /config/sources/new/youtube:
-    post:
-      parameters:
-      - description: name
-        in: query
-        name: name
-        required: true
-        type: string
-      - description: url
-        in: query
-        name: url
-        required: true
-        type: string
-      responses: {}
-      summary: Creates a new youtube source to monitor.
-      tags:
-      - Config
-      - Source
-      - YouTube
-  /discord/queue:
-    get:
-      produces:
-      - application/json
-      responses: {}
-      summary: Returns the top 100 entries from the queue to be processed.
-      tags:
-      - Debug
-      - Discord
-      - Queue
   /discord/webhooks:
     get:
       produces:
@@ -369,6 +302,18 @@ paths:
       summary: Sends back "pong".  Good to test with.
       tags:
       - Debug
+  /queue/discord/webhooks:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListDiscordWebHooksQueueResults'
+      summary: Returns the top 100 entries from the queue to be processed.
+      tags:
+      - Queue
   /settings/{key}:
     get:
       parameters:
@@ -383,15 +328,199 @@ paths:
       summary: Returns a object based on the Key that was given.
       tags:
       - Settings
+  /sources:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSourcesResults'
+        "400":
+          description: Unable to reach SQL or Data problems
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+      summary: Lists the top 50 records
+      tags:
+      - Source
+  /sources/{id}:
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.GetSourceResult'
+        "204":
+          description: No record found.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "400":
+          description: Unable to query SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "500":
+          description: Failed to process data from SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+      summary: Returns a single entity by ID
+      tags:
+      - Source
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Marks a source as deleted based on its ID value.
+      tags:
+      - Source
+  /sources/{id}/disable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Disables a source from processing.
+      tags:
+      - Source
+  /sources/{id}/enable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Enables a source to continue processing.
+      tags:
+      - Source
+  /sources/by/source:
+    get:
+      parameters:
+      - description: Source Name
+        in: query
+        name: source
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSourcesResults'
+        "400":
+          description: Unable to query SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "500":
+          description: Problems with data.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+      summary: 'Lists the top 50 records based on the name given. Example: reddit'
+      tags:
+      - Source
+  /sources/by/sourceAndName:
+    get:
+      parameters:
+      - description: dadjokes
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: reddit
+        in: query
+        name: source
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      summary: Returns a single entity by ID
+      tags:
+      - Source
+  /sources/new/reddit:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new reddit source to monitor.
+      tags:
+      - Source
+  /sources/new/twitch:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new twitch source to monitor.
+      tags:
+      - Source
+  /sources/new/youtube:
+    post:
+      parameters:
+      - description: name
+        in: query
+        name: name
+        required: true
+        type: string
+      - description: url
+        in: query
+        name: url
+        required: true
+        type: string
+      responses: {}
+      summary: Creates a new youtube source to monitor.
+      tags:
+      - Source
   /subscriptions:
     get:
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSubscriptionResults'
+        "400":
+          description: Unable to reach SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "500":
+          description: Failed to process data from SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Subscription
-  /subscriptions/byDiscordId:
+  /subscriptions/by/SourceId:
     get:
       parameters:
       - description: id
@@ -401,11 +530,15 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSubscriptionResults'
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Subscription
-  /subscriptions/bySourceId:
+  /subscriptions/by/discordId:
     get:
       parameters:
       - description: id
@@ -415,7 +548,19 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSubscriptionResults'
+        "400":
+          description: Unable to reach SQL or Data problems
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "500":
+          description: Data problems
+          schema:
+            $ref: '#/definitions/routes.ApiError'
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Subscription
@@ -430,11 +575,8 @@ paths:
       responses: {}
       summary: Removes a Discord WebHook Subscription based on the Subscription ID.
       tags:
-      - Config
-      - Source
-      - Discord
       - Subscription
-  /subscriptions/new/discordwebhook:
+  /subscriptions/new/discord/webhook:
     post:
       parameters:
       - description: discordWebHookId

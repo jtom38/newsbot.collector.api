@@ -91,234 +91,6 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/config/sources": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Lists the top 50 records",
-                "responses": {}
-            }
-        },
-        "/config/sources/by/source": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Lists the top 50 records based on the name given. Example: reddit",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Source Name",
-                        "name": "source",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/by/sourceAndName": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Returns a single entity by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "dadjokes",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "reddit",
-                        "name": "source",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/new/reddit": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source",
-                    "Reddit"
-                ],
-                "summary": "Creates a new reddit source to monitor.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "url",
-                        "name": "url",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/new/twitch": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source",
-                    "Twitch"
-                ],
-                "summary": "Creates a new twitch source to monitor.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/new/youtube": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source",
-                    "YouTube"
-                ],
-                "summary": "Creates a new youtube source to monitor.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "url",
-                        "name": "url",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/{id}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Returns a single entity by ID",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "uuid",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            },
-            "post": {
-                "tags": [
-                    "Source"
-                ],
-                "summary": "Marks a source as deleted based on its ID value.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/{id}/disable": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Disables a source from processing.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/config/sources/{id}/enable": {
-            "post": {
-                "tags": [
-                    "Config",
-                    "Source"
-                ],
-                "summary": "Enables a source to continue processing.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/discord/queue": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Debug",
-                    "Discord",
-                    "Queue"
-                ],
-                "summary": "Returns the top 100 entries from the queue to be processed.",
-                "responses": {}
-            }
-        },
         "/discord/webhooks": {
             "get": {
                 "produces": [
@@ -541,6 +313,25 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/queue/discord/webhooks": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Queue"
+                ],
+                "summary": "Returns the top 100 entries from the queue to be processed.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListDiscordWebHooksQueueResults"
+                        }
+                    }
+                }
+            }
+        },
         "/settings/{key}": {
             "get": {
                 "produces": [
@@ -562,6 +353,265 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/sources": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Lists the top 50 records",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSourcesResults"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to reach SQL or Data problems",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/sources/by/source": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Lists the top 50 records based on the name given. Example: reddit",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Source Name",
+                        "name": "source",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSourcesResults"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to query SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Problems with data.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
+            }
+        },
+        "/sources/by/sourceAndName": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Returns a single entity by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "dadjokes",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "reddit",
+                        "name": "source",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/new/reddit": {
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Creates a new reddit source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/new/twitch": {
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Creates a new twitch source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/new/youtube": {
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Creates a new youtube source to monitor.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "name",
+                        "name": "name",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "url",
+                        "name": "url",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Returns a single entity by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "uuid",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.GetSourceResult"
+                        }
+                    },
+                    "204": {
+                        "description": "No record found.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to query SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to process data from SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Marks a source as deleted based on its ID value.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/{id}/disable": {
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Disables a source from processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/sources/{id}/enable": {
+            "post": {
+                "tags": [
+                    "Source"
+                ],
+                "summary": "Enables a source to continue processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/subscriptions": {
             "get": {
                 "produces": [
@@ -571,10 +621,29 @@ const docTemplate = `{
                     "Subscription"
                 ],
                 "summary": "Returns the top 100 entries from the queue to be processed.",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to reach SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to process data from SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
             }
         },
-        "/subscriptions/byDiscordId": {
+        "/subscriptions/by/SourceId": {
             "get": {
                 "produces": [
                     "application/json"
@@ -592,10 +661,17 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                        }
+                    }
+                }
             }
         },
-        "/subscriptions/bySourceId": {
+        "/subscriptions/by/discordId": {
             "get": {
                 "produces": [
                     "application/json"
@@ -613,15 +689,31 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to reach SQL or Data problems",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Data problems",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
             }
         },
         "/subscriptions/discord/webhook/delete": {
             "delete": {
                 "tags": [
-                    "Config",
-                    "Source",
-                    "Discord",
                     "Subscription"
                 ],
                 "summary": "Removes a Discord WebHook Subscription based on the Subscription ID.",
@@ -637,7 +729,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/subscriptions/new/discordwebhook": {
+        "/subscriptions/new/discord/webhook": {
             "post": {
                 "tags": [
                     "Subscription"
@@ -660,6 +752,147 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "models.DiscordQueueDto": {
+            "type": "object",
+            "properties": {
+                "articleId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SourceDto": {
+            "type": "object",
+            "properties": {
+                "deleted": {
+                    "type": "boolean"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "site": {
+                    "type": "string"
+                },
+                "source": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.SubscriptionDto": {
+            "type": "object",
+            "properties": {
+                "discordwebhookid": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "sourceid": {
+                    "type": "string"
+                }
+            }
+        },
+        "routes.ApiError": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.GetSourceResult": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "$ref": "#/definitions/models.SourceDto"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ListDiscordWebHooksQueueResults": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DiscordQueueDto"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ListSourcesResults": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SourceDto"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ListSubscriptionResults": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SubscriptionDto"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
             }
         }
     }
