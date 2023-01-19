@@ -15,7 +15,7 @@ import (
 // GetDiscordWebHooks
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks [get]
 func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -39,7 +39,7 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id} [get]
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -76,7 +76,7 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 // @Produce  application/json
 // @Param    server   query  string  true  "Fancy Server"
 // @Param    channel  query  string  true  "memes"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/by/serverAndChannel [get]
 func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
@@ -118,7 +118,7 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 // @Param    url      query  string  true  "url"
 // @Param    server   query  string  true  "Server name"
 // @Param    channel  query  string  true  "Channel name"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/new [post]
 func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
@@ -160,7 +160,7 @@ func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // DisableDiscordWebHooks
 // @Summary  Disables a Webhook from being used.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id}/disable [post]
 func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
@@ -184,7 +184,7 @@ func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // EnableDiscordWebHook
 // @Summary  Enables a source to continue processing.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id}/enable [post]
 func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
@@ -208,7 +208,7 @@ func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // DeleteDiscordWebHook
 // @Summary  Deletes a record by ID.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id} [delete]
 func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources = model.Sources{}
@@ -235,7 +235,7 @@ func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // UpdateDiscordWebHook
 // @Summary  Updates a valid discord webhook ID based on the body given.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Discord, Webhook
+// @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id} [patch]
 func (s *Server) UpdateDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
