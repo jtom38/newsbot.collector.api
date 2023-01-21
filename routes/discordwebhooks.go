@@ -19,6 +19,7 @@ import (
 // @Router   /discord/webhooks [get]
 func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	
 
 	res, err := s.Db.ListDiscordWebhooks(*s.ctx, 100)
 	if err != nil {

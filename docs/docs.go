@@ -97,7 +97,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -111,7 +110,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -138,7 +136,6 @@ const docTemplate = `{
         "/discord/webhooks/new": {
             "post": {
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -175,7 +172,6 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -193,7 +189,6 @@ const docTemplate = `{
             },
             "delete": {
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -211,7 +206,6 @@ const docTemplate = `{
             },
             "patch": {
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -231,7 +225,6 @@ const docTemplate = `{
         "/discord/webhooks/{id}/disable": {
             "post": {
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -251,7 +244,6 @@ const docTemplate = `{
         "/discord/webhooks/{id}/enable": {
             "post": {
                 "tags": [
-                    "Config",
                     "Discord",
                     "Webhook"
                 ],
@@ -711,6 +703,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/subscriptions/details": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Returns the top 50 entries with full deatils on the source and output.",
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListSubscriptionDetails"
+                        }
+                    }
+                }
+            }
+        },
         "/subscriptions/discord/webhook/delete": {
             "delete": {
                 "tags": [
@@ -720,8 +731,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Id",
-                        "name": "Id",
+                        "description": "id",
+                        "name": "id",
                         "in": "query",
                         "required": true
                     }
@@ -729,7 +740,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/subscriptions/new/discord/webhook": {
+        "/subscriptions/discord/webhook/new": {
             "post": {
                 "tags": [
                     "Subscription"
@@ -763,6 +774,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.DiscordWebHooksDto": {
+            "type": "object",
+            "properties": {
+                "ID": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "enabled": {
+                    "type": "boolean"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "url": {
                     "type": "string"
                 }
             }
@@ -802,6 +833,20 @@ const docTemplate = `{
                 },
                 "value": {
                     "type": "string"
+                }
+            }
+        },
+        "models.SubscriptionDetails": {
+            "type": "object",
+            "properties": {
+                "discordwebhook": {
+                    "$ref": "#/definitions/models.DiscordWebHooksDto"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/models.SourceDto"
                 }
             }
         },
@@ -871,6 +916,23 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.SourceDto"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ListSubscriptionDetails": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.SubscriptionDetails"
                     }
                 },
                 "status": {

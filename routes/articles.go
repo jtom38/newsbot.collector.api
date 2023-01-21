@@ -14,7 +14,7 @@ import (
 // @Tags     Articles
 // @Router   /articles [get]
 func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", ApplicationJson)
 
 	res, err := s.Db.ListArticlesByDate(*s.ctx, 50)
 	if err != nil {

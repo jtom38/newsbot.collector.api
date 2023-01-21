@@ -23,6 +23,12 @@ type Server struct {
 	ctx    *context.Context
 }
 
+const (
+	HeaderContentType = "Content-Type"
+
+	ApplicationJson = "application/json"
+)
+
 var (
 	ErrIdValueMissing        string = "id value is missing"
 	ErrValueNotUuid          string = "a value given was expected to be a uuid but was not correct."

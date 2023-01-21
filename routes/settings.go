@@ -2,7 +2,6 @@ package routes
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -16,29 +15,28 @@ import (
 // @Tags     Settings
 // @Router   /settings/{key} [get]
 func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	//var item model.Sources
 	id := chi.URLParam(r, "ID")
 
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	res, err := s.Db.GetSourceByID(*s.ctx, uuid)
 	if err != nil {
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusNotFound)
+		return
 	}
-
-	//itemId := fmt.Sprint(item.ID)
-	//if id != itemId {
-	//	log.Panicln("Unable to find the requested record.  Either unable to access SQL or the record does not exist.")
-	//}
 
 	bResult, err := json.Marshal(res)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(bResult)
 }

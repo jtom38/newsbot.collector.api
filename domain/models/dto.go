@@ -8,6 +8,24 @@ import (
 	"github.com/jtom38/newsbot/collector/database"
 )
 
+type DiscordWebHooksDto struct {
+	ID      uuid.UUID `json:"ID"`
+	Url     string    `json:"url"`
+	Server  string    `json:"server"`
+	Channel string    `json:"channel"`
+	Enabled bool      `json:"enabled"`
+}
+
+func ConvertToDiscordWebhookDto(i database.Discordwebhook) DiscordWebHooksDto {
+	return DiscordWebHooksDto{
+		ID:      i.ID,
+		Url:     i.Url,
+		Server:  i.Server,
+		Channel: i.Channel,
+		Enabled: i.Enabled,
+	}
+}
+
 type SourceDto struct {
 	ID      uuid.UUID `json:"id"`
 	Site    string    `json:"site"`
@@ -66,6 +84,12 @@ func ConvertToSubscriptionDto(i database.Subscription) SubscriptionDto {
 		SourceId:         i.Sourceid,
 	}
 	return c
+}
+
+type SubscriptionDetails struct {
+	ID             uuid.UUID          `json:"id"`
+	Source         SourceDto          `json:"source"`
+	DiscordWebHook DiscordWebHooksDto `json:"discordwebhook"`
 }
 
 func splitTags(t string) []string {

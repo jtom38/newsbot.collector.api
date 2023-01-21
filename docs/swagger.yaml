@@ -7,6 +7,19 @@ definitions:
       id:
         type: string
     type: object
+  models.DiscordWebHooksDto:
+    properties:
+      ID:
+        type: string
+      channel:
+        type: string
+      enabled:
+        type: boolean
+      server:
+        type: string
+      url:
+        type: string
+    type: object
   models.SourceDto:
     properties:
       deleted:
@@ -31,6 +44,15 @@ definitions:
         type: string
       value:
         type: string
+    type: object
+  models.SubscriptionDetails:
+    properties:
+      discordwebhook:
+        $ref: '#/definitions/models.DiscordWebHooksDto'
+      id:
+        type: string
+      source:
+        $ref: '#/definitions/models.SourceDto'
     type: object
   models.SubscriptionDto:
     properties:
@@ -75,6 +97,17 @@ definitions:
       payload:
         items:
           $ref: '#/definitions/models.SourceDto'
+        type: array
+      status:
+        type: integer
+    type: object
+  routes.ListSubscriptionDetails:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.SubscriptionDetails'
         type: array
       status:
         type: integer
@@ -154,7 +187,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - Config
       - Discord
       - Webhook
   /discord/webhooks/{id}:
@@ -168,7 +200,6 @@ paths:
       responses: {}
       summary: Deletes a record by ID.
       tags:
-      - Config
       - Discord
       - Webhook
     get:
@@ -183,7 +214,6 @@ paths:
       responses: {}
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
-      - Config
       - Discord
       - Webhook
     patch:
@@ -196,7 +226,6 @@ paths:
       responses: {}
       summary: Updates a valid discord webhook ID based on the body given.
       tags:
-      - Config
       - Discord
       - Webhook
   /discord/webhooks/{id}/disable:
@@ -210,7 +239,6 @@ paths:
       responses: {}
       summary: Disables a Webhook from being used.
       tags:
-      - Config
       - Discord
       - Webhook
   /discord/webhooks/{id}/enable:
@@ -224,7 +252,6 @@ paths:
       responses: {}
       summary: Enables a source to continue processing.
       tags:
-      - Config
       - Discord
       - Webhook
   /discord/webhooks/by/serverAndChannel:
@@ -245,7 +272,6 @@ paths:
       responses: {}
       summary: Returns all the known web hooks based on the Server and Channel given.
       tags:
-      - Config
       - Discord
       - Webhook
   /discord/webhooks/new:
@@ -269,7 +295,6 @@ paths:
       responses: {}
       summary: Creates a new record for a discord web hook to post data to.
       tags:
-      - Config
       - Discord
       - Webhook
   /hello/{who}:
@@ -564,19 +589,31 @@ paths:
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Subscription
+  /subscriptions/details:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.ListSubscriptionDetails'
+      summary: Returns the top 50 entries with full deatils on the source and output.
+      tags:
+      - Subscription
   /subscriptions/discord/webhook/delete:
     delete:
       parameters:
-      - description: Id
+      - description: id
         in: query
-        name: Id
+        name: id
         required: true
         type: string
       responses: {}
       summary: Removes a Discord WebHook Subscription based on the Subscription ID.
       tags:
       - Subscription
-  /subscriptions/new/discord/webhook:
+  /subscriptions/discord/webhook/new:
     post:
       parameters:
       - description: discordWebHookId

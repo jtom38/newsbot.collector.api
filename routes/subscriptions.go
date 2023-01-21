@@ -15,6 +15,7 @@ func (s *Server) GetSubscriptionsRouter() http.Handler {
 	r := chi.NewRouter()
 
 	r.Get("/", s.ListSubscriptions)
+	r.Get("/details", s.ListSubscriptionDetails)
 	r.Get("/by/discordId", s.GetSubscriptionsByDiscordId)
 	r.Get("/by/sourceId", s.GetSubscriptionsBySourceId)
 	r.Post("/discord/webhook/new", s.newDiscordWebHookSubscription)
@@ -25,7 +26,7 @@ func (s *Server) GetSubscriptionsRouter() http.Handler {
 
 type ListSubscriptionResults struct {
 	ApiStatusModel
-	Payload    []models.SubscriptionDto `json:"payload"`
+	Payload []models.SubscriptionDto `json:"payload"`
 }
 
 // GetSubscriptions
@@ -46,7 +47,7 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	res, err := s.Db.ListSubscriptions(*s.ctx, 100)
+	res, err := s.Db.ListSubscriptions(*s.ctx, 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -65,9 +66,63 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Write(bres)
 }
 
+type ListSubscriptionDetails struct {
+	ApiStatusModel
+	Payload []models.SubscriptionDetails `json:"payload"`
+}
+
+// ListSubscriptionDetails
+// @Summary  Returns the top 50 entries with full deatils on the source and output.
+// @Produce  application/json
+// @Tags     Subscription
+// @Router   /subscriptions/details [get]
+// @Success  200  {object}  ListSubscriptionDetails  "ok"  
+func (s Server) ListSubscriptionDetails(w http.ResponseWriter, t *http.Request) {
+	w.Header().Set(HeaderContentType, ApplicationJson)
+	payload := ListSubscriptionDetails{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
+
+	res, err := s.Db.ListSubscriptions(t.Context(), 50)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	for _, item := range res {
+		dwh, err := s.Db.GetDiscordWebHooksByID(t.Context(), item.Discordwebhookid)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		source, err := s.Db.GetSourceByID(t.Context(), item.Sourceid)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		payload.Payload = append(payload.Payload, models.SubscriptionDetails{
+			ID:             item.ID,
+			DiscordWebHook: models.ConvertToDiscordWebhookDto(dwh),
+			Source:         models.ConvertToSourceDto(source),
+		})
+	}
+
+	b, err := json.Marshal(payload)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(b)
+}
+
 type GetSubscriptionResults struct {
 	ApiStatusModel
-	Payload    models.SubscriptionDto `json:"payload"`
+	Payload models.SubscriptionDto `json:"payload"`
 }
 
 // GetSubscriptionsByDiscordId
@@ -82,10 +137,10 @@ type GetSubscriptionResults struct {
 func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	p := ListSubscriptionResults {
+	p := ListSubscriptionResults{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
-			Message: "OK",
+			Message:    "OK",
 		},
 	}
 
@@ -131,10 +186,10 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	p := ListSubscriptionResults {
+	p := ListSubscriptionResults{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
-			Message: "OK",
+			Message:    "OK",
 		},
 	}
 
@@ -175,7 +230,7 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 // @Param    discordWebHookId  query  string  true  "discordWebHookId"
 // @Param    sourceId          query  string  true  "sourceId"
 // @Tags     Subscription
-// @Router   /subscriptions/new/discord/webhook [post]
+// @Router   /subscriptions/discord/webhook/new [post]
 func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -239,20 +294,20 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 
 // DeleteDiscordWebHookSubscription
 // @Summary  Removes a Discord WebHook Subscription based on the Subscription ID.
-// @Param    Id  query  string  true  "Id"
+// @Param    id  query  string  true  "id"
 // @Tags     Subscription
 // @Router   /subscriptions/discord/webhook/delete [delete]
 func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
 	var ErrMissingSubscriptionID string = "the request was missing a 'Id'"
 	query := r.URL.Query()
 
-	id := query["Id"][0]
+	id := query["id"][0]
 	if id == "" {
 		s.WriteError(w, ErrMissingSubscriptionID, http.StatusBadRequest)
 		return
 	}
 
-	uid, err := uuid.Parse(query["Id"][0])
+	uid, err := uuid.Parse(query["id"][0])
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
