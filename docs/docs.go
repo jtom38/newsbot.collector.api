@@ -237,13 +237,15 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
-            },
-            "delete": {
+            }
+        },
+        "/discord/webhooks/{ID}/enable": {
+            "post": {
                 "tags": [
-                    "Config",
-                    "Source"
+                    "Discord",
+                    "Webhook"
                 ],
-                "summary": "Deletes a record by ID.",
+                "summary": "Enables a source to continue processing.",
                 "parameters": [
                     {
                         "type": "string",

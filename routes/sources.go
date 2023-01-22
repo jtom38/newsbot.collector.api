@@ -383,7 +383,6 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 
 // DeleteSource
 // @Summary  Marks a source as deleted based on its ID value.
-// @Summary  Marks a source as deleted based on its ID value.
 // @Param    id  path  string  true  "id"
 // @Tags     Source
 // @Router   /sources/{id} [POST]

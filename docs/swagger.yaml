@@ -318,15 +318,13 @@ paths:
   /discord/webhooks/{ID}:
     delete:
       parameters:
-      - description: uuid
+      - description: id
         in: path
         name: id
         required: true
         type: string
-      produces:
-      - application/json
       responses: {}
-      summary: Returns a single entity by ID
+      summary: Deletes a record by ID.
       tags:
       - Discord
       - Webhook
