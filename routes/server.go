@@ -82,7 +82,7 @@ func (s *Server) MountRoutes() {
 	s.Router.Mount("/api/queue", s.GetQueueRouter())
 	s.Router.Mount("/api/discord/webhooks", s.DiscordWebHookRouter())
 	
-	s.Router.Get("/api/settings", s.getSettings)
+	//s.Router.Get("/api/settings", s.getSettings)
 
 	s.Router.Mount("/api/sources", s.GetSourcesRouter())
 	s.Router.Mount("/api/subscriptions", s.GetSubscriptionsRouter())

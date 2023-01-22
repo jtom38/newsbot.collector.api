@@ -170,7 +170,7 @@ definitions:
       status:
         type: integer
     type: object
-  routes.GetSourceResult:
+  routes.GetSource:
     properties:
       message:
         type: string
@@ -201,7 +201,7 @@ definitions:
       status:
         type: integer
     type: object
-  routes.ListSourcesResults:
+  routes.ListSources:
     properties:
       message:
         type: string
@@ -444,20 +444,6 @@ paths:
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Queue
-  /settings/{key}:
-    get:
-      parameters:
-      - description: Settings Key value
-        in: path
-        name: key
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
-      summary: Returns a object based on the Key that was given.
-      tags:
-      - Settings
   /sources:
     get:
       produces:
@@ -466,7 +452,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.ListSourcesResults'
+            $ref: '#/definitions/routes.ListSources'
         "400":
           description: Unable to reach SQL or Data problems
           schema:
@@ -488,7 +474,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.GetSourceResult'
+            $ref: '#/definitions/routes.GetSource'
         "204":
           description: No record found.
           schema:
@@ -553,7 +539,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.ListSourcesResults'
+            $ref: '#/definitions/routes.ListSources'
         "400":
           description: Unable to query SQL.
           schema:
@@ -580,7 +566,23 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/routes.GetSource'
+        "204":
+          description: No record found.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "400":
+          description: Unable to query SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
+        "500":
+          description: Failed to process data from SQL.
+          schema:
+            $ref: '#/definitions/routes.ApiError'
       summary: Returns a single entity by ID
       tags:
       - Source

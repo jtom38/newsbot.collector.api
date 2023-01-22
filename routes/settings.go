@@ -8,13 +8,15 @@ import (
 	"github.com/google/uuid"
 )
 
-// GetSettings
-// @Summary  Returns a object based on the Key that was given.
-// @Param    key  path  string  true  "Settings Key value"
-// @Produce  application/json
-// @Tags     Settings
-// @Router   /settings/{key} [get]
 func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) {
+	// GetSettings
+	// @Summary  Returns a object based on the Key that was given.
+	// @Param    key  path  string  true  "Settings Key value"
+	// @Produce  application/json
+	// @Tags     Settings
+	// @Router   /settings/{key} [get]
+
+	
 	w.Header().Set("Content-Type", "application/json")
 
 	//var item model.Sources

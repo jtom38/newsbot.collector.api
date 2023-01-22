@@ -95,7 +95,7 @@ func (c DtoClient) convertArticle(i database.Article) models.ArticleDto {
 func (c DtoClient) convertArticleDetails(i database.Article, s database.Source) models.ArticleDetailsDto {
 	return models.ArticleDetailsDto{
 		ID:          i.ID,
-		Source:      c.ConvertToSourceDto(s),
+		Source:      c.ConvertToSource(s),
 		Tags:        c.SplitTags(i.Tags),
 		Title:       i.Title,
 		Url:         i.Url,

@@ -323,27 +323,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/settings/{key}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Settings"
-                ],
-                "summary": "Returns a object based on the Key that was given.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Settings Key value",
-                        "name": "key",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/sources": {
             "get": {
                 "produces": [
@@ -357,7 +336,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.ListSourcesResults"
+                            "$ref": "#/definitions/routes.ListSources"
                         }
                     },
                     "400": {
@@ -391,7 +370,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.ListSourcesResults"
+                            "$ref": "#/definitions/routes.ListSources"
                         }
                     },
                     "400": {
@@ -434,7 +413,32 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/routes.GetSource"
+                        }
+                    },
+                    "204": {
+                        "description": "No record found.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "400": {
+                        "description": "Unable to query SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to process data from SQL.",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ApiError"
+                        }
+                    }
+                }
             }
         },
         "/sources/new/reddit": {
@@ -527,7 +531,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.GetSourceResult"
+                            "$ref": "#/definitions/routes.GetSource"
                         }
                     },
                     "204": {
@@ -1027,7 +1031,7 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.GetSourceResult": {
+        "routes.GetSource": {
             "type": "object",
             "properties": {
                 "message": {
@@ -1075,7 +1079,7 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.ListSourcesResults": {
+        "routes.ListSources": {
             "type": "object",
             "properties": {
                 "message": {

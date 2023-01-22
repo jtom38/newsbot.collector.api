@@ -1,10 +1,8 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
@@ -35,12 +33,12 @@ func (s *Server) GetSourcesRouter() http.Handler {
 	return r
 }
 
-type ListSourcesResults struct {
+type ListSources struct {
 	ApiStatusModel
 	Payload []models.SourceDto `json:"payload"`
 }
 
-type GetSourceResult struct {
+type GetSource struct {
 	ApiStatusModel
 	Payload models.SourceDto `json:"payload"`
 }
@@ -50,8 +48,8 @@ type GetSourceResult struct {
 // @Produce  application/json
 // @Tags     Source
 // @Router   /sources [get]
-// @Success  200  {object}  ListSourcesResults  "ok"
-// @Failure  400  {object}  ApiError            "Unable to reach SQL or Data problems"
+// @Success  200  {object}  ListSources  "ok"
+// @Failure  400  {object}  ApiError     "Unable to reach SQL or Data problems"
 func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 	//TODO Add top?
 	/*
@@ -63,8 +61,8 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
 
-	w.Header().Set("Content-Type", "application/json")
-	result := ListSourcesResults{
+	w.Header().Set(HeaderContentType, ApplicationJson)
+	result := ListSources{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -72,18 +70,13 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Default way of showing all sources
-	res, err := s.Db.ListSources(*s.ctx, 50)
+	items, err := s.dto.ListSources(r.Context(), 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var dto []models.SourceDto
-	for _, item := range res {
-		dto = append(dto, models.ConvertToSourceDto(item))
-	}
-
-	result.Payload = dto
+	result.Payload = items
 
 	bResult, err := json.Marshal(result)
 	if err != nil {
@@ -100,9 +93,9 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Tags     Source
 // @Router   /sources/by/source [get]
-// @Success  200  {object}  ListSourcesResults  "ok"
-// @Failure  400  {object}  ApiError            "Unable to query SQL."
-// @Failure  500  {object}  ApiError            "Problems with data."
+// @Success  200  {object}  ListSources  "ok"
+// @Failure  400  {object}  ApiError     "Unable to query SQL."
+// @Failure  500  {object}  ApiError     "Problems with data."
 func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 	//TODO Add top?
 	/*
@@ -113,9 +106,9 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 		}
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(HeaderContentType, ApplicationJson)
 
-	result := ListSourcesResults{
+	result := ListSources{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -126,15 +119,13 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 	_source := query["source"][0]
 
 	// Shows the list by Sources.source
-	res, err := s.Db.ListSourcesBySource(*s.ctx, strings.ToLower(_source))
+	res, err := s.dto.ListSourcesBySource(r.Context(), _source)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	for _, item := range res {
-		result.Payload = append(result.Payload, models.ConvertToSourceDto(item))
-	}
+	result.Payload = res
 
 	bResult, err := json.Marshal(result)
 	if err != nil {
@@ -151,12 +142,19 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Tags     Source
 // @Router   /sources/{id} [get]
-// @Success  200  {object}  GetSourceResult  "ok"
-// @Failure  204  {object}  ApiError         "No record found."
-// @Failure  400  {object}  ApiError         "Unable to query SQL."
-// @Failure  500  {object}  ApiError         "Failed to process data from SQL."
+// @Success  200  {object}  GetSource  "ok"
+// @Failure  204  {object}  ApiError   "No record found."
+// @Failure  400  {object}  ApiError   "Unable to query SQL."
+// @Failure  500  {object}  ApiError   "Failed to process data from SQL."
 func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	payload := GetSource{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
+
+	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
@@ -165,21 +163,13 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.Db.GetSourceByID(*s.ctx, uuid)
+	res, err := s.dto.GetSourceById(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
-	dto := models.ConvertToSourceDto(res)
-
-	payload := GetSourceResult{
-		ApiStatusModel: ApiStatusModel{
-			Message:    "OK",
-			StatusCode: http.StatusOK,
-		},
-		Payload: dto,
-	}
+	payload.Payload = res
 
 	bResult, err := json.Marshal(payload)
 	if err != nil {
@@ -197,35 +187,46 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Tags     Source
 // @Router   /sources/by/sourceAndName [get]
+// @Success  200  {object}  GetSource  "ok"
+// @Failure  204  {object}  ApiError   "No record found."
+// @Failure  400  {object}  ApiError   "Unable to query SQL."
+// @Failure  500  {object}  ApiError   "Failed to process data from SQL."
 func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
+	p := GetSource{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
 
+	query := r.URL.Query()
 	name := query["name"][0]
 	if name == "" {
-		http.Error(w, "Parameter 'name' was missing in the query.", http.StatusInternalServerError)
+		s.WriteError(w, "Parameter 'name' was missing in the query.", http.StatusInternalServerError)
 		return
 	}
 
 	source := query["source"][0]
 	if source == "" {
-		http.Error(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
+		s.WriteError(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
 		return
 	}
 
-	item, err := s.Db.GetSourceByNameAndSource(context.Background(), database.GetSourceByNameAndSourceParams{
-		Name:   name,
-		Source: source,
-	})
+	item, err := s.dto.GetSourceByNameAndSource(r.Context(), name, source)
 	if err != nil {
-		http.Error(w, "Unable to find the requested record.", http.StatusInternalServerError)
+		s.WriteError(w, "Unable to find the requested record.", http.StatusInternalServerError)
+		return
 	}
+
+	p.Payload = item
 
 	bResult, err := json.Marshal(item)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(HeaderContentType, ApplicationJson)
 	w.Write(bResult)
 }
 
@@ -297,7 +298,7 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 	_name := query["name"][0]
 	_url := query["url"][0]
 	//_tags := query["tags"][0]
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	if _url == "" {
 		s.WriteError(w, "url is missing a value", http.StatusBadRequest)
@@ -348,7 +349,7 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 // @Router   /sources/new/twitch [post]
 func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	
+
 	query := r.URL.Query()
 	_name := query["name"][0]
 
@@ -409,8 +410,8 @@ func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p := ApiStatusModel {
-		Message: "OK",
+	p := ApiStatusModel{
+		Message:    "OK",
 		StatusCode: http.StatusOK,
 	}
 
@@ -419,7 +420,7 @@ func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Write(b)
 }
 
@@ -446,8 +447,8 @@ func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	p := ApiStatusModel {
-		Message: "OK",
+	p := ApiStatusModel{
+		Message:    "OK",
 		StatusCode: http.StatusOK,
 	}
 
@@ -456,7 +457,7 @@ func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Write(b)
 }
 
@@ -483,8 +484,8 @@ func (s *Server) enableSource(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	p := ApiStatusModel {
-		Message: "OK",
+	p := ApiStatusModel{
+		Message:    "OK",
 		StatusCode: http.StatusOK,
 	}
 
@@ -493,6 +494,6 @@ func (s *Server) enableSource(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	w.Write(b)
 }
