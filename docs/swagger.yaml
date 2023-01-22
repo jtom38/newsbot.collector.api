@@ -432,36 +432,6 @@ paths:
       tags:
       - Discord
       - Webhook
-  /hello/{who}:
-    get:
-      parameters:
-      - description: Who
-        in: path
-        name: who
-        required: true
-        type: string
-      produces:
-      - text/plain
-      responses: {}
-      summary: Responds back with "Hello x" depending on param passed in.
-      tags:
-      - Debug
-  /helloworld:
-    get:
-      produces:
-      - text/plain
-      responses: {}
-      summary: Responds back with "Hello world!"
-      tags:
-      - Debug
-  /ping:
-    get:
-      produces:
-      - text/plain
-      responses: {}
-      summary: Sends back "pong".  Good to test with.
-      tags:
-      - Debug
   /queue/discord/webhooks:
     get:
       produces:

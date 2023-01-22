@@ -295,51 +295,6 @@
                 "responses": {}
             }
         },
-        "/hello/{who}": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Debug"
-                ],
-                "summary": "Responds back with \"Hello x\" depending on param passed in.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Who",
-                        "name": "who",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/helloworld": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Debug"
-                ],
-                "summary": "Responds back with \"Hello world!\"",
-                "responses": {}
-            }
-        },
-        "/ping": {
-            "get": {
-                "produces": [
-                    "text/plain"
-                ],
-                "tags": [
-                    "Debug"
-                ],
-                "summary": "Sends back \"pong\".  Good to test with.",
-                "responses": {}
-            }
-        },
         "/queue/discord/webhooks": {
             "get": {
                 "produces": [
