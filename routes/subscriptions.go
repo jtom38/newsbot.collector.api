@@ -5,31 +5,104 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
+
+func (s *Server) GetSubscriptionsRouter() http.Handler {
+	r := chi.NewRouter()
+
+	r.Get("/", s.ListSubscriptions)
+	r.Get("/details", s.ListSubscriptionDetails)
+	r.Get("/by/discordId", s.GetSubscriptionsByDiscordId)
+	r.Get("/by/sourceId", s.GetSubscriptionsBySourceId)
+	r.Post("/discord/webhook/new", s.newDiscordWebHookSubscription)
+	r.Delete("/discord/webhook/delete", s.DeleteDiscordWebHookSubscription)
+
+	return r
+}
+
+type ListSubscriptions struct {
+	ApiStatusModel
+	Payload []models.SubscriptionDto `json:"payload"`
+}
+
+type GetSubscription struct {
+	ApiStatusModel
+	Payload models.SubscriptionDto `json:"payload"`
+}
 
 // GetSubscriptions
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Tags     Subscription
 // @Router   /subscriptions [get]
+// @Success  200  {object}  ListSubscriptions  "ok"
+// @Failure  400  {object}  ApiError           "Unable to reach SQL."
+// @Failure  500  {object}  ApiError           "Failed to process data from SQL."
 func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	res, err := s.Db.ListSubscriptions(*s.ctx, 100)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		panic(err)
+	payload := ListSubscriptions{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
 	}
 
-	bres, err := json.Marshal(res)
+	res, err := s.dto.ListSubscriptions(r.Context(), 50)
 	if err != nil {
-		http.Error(w, ErrUnableToConvertToJson, http.StatusBadRequest)
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	payload.Payload = res
+
+	bres, err := json.Marshal(payload)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(bres)
+}
+
+type ListSubscriptionDetails struct {
+	ApiStatusModel
+	Payload []models.SubscriptionDetailsDto `json:"payload"`
+}
+
+// ListSubscriptionDetails
+// @Summary  Returns the top 50 entries with full deatils on the source and output.
+// @Produce  application/json
+// @Tags     Subscription
+// @Router   /subscriptions/details [get]
+// @Success  200  {object}  ListSubscriptionDetails  "ok"
+func (s Server) ListSubscriptionDetails(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set(HeaderContentType, ApplicationJson)
+	payload := ListSubscriptionDetails{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
+
+	res, err := s.dto.ListSubscriptionDetails(r.Context(), 50)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	payload.Payload = res
+
+	b, err := json.Marshal(payload)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write(b)
 }
 
 // GetSubscriptionsByDiscordId
@@ -37,32 +110,44 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
 // @Tags     Subscription
-// @Router   /subscriptions/byDiscordId [get]
+// @Router   /subscriptions/by/discordId [get]
+// @Success  200  {object}  ListSubscriptions  "ok"
+// @Failure  400  {object}  ApiError           "Unable to reach SQL or Data problems"
+// @Failure  500  {object}  ApiError           "Data problems"
 func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(HeaderContentType, ApplicationJson)
+
+	p := ListSubscriptions{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
 
 	query := r.URL.Query()
 	_id := query["id"][0]
 	if _id == "" {
-		http.Error(w, ErrIdValueMissing, http.StatusBadRequest)
+		s.WriteError(w, ErrIdValueMissing, http.StatusBadRequest)
 		return
 	}
 
 	uuid, err := uuid.Parse(_id)
 	if err != nil {
-		http.Error(w, ErrValueNotUuid, http.StatusBadRequest)
+		s.WriteError(w, ErrValueNotUuid, http.StatusBadRequest)
 		return
 	}
 
-	res, err := s.Db.GetSubscriptionsByDiscordWebHookId(*s.ctx, uuid)
+	res, err := s.dto.ListSubscriptionsByDiscordWebhookId(r.Context(), uuid)
 	if err != nil {
-		http.Error(w, ErrNoRecordFound, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
-	bres, err := json.Marshal(res)
+	p.Payload = res
+
+	bres, err := json.Marshal(p)
 	if err != nil {
-		http.Error(w, ErrUnableToConvertToJson, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -74,32 +159,42 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
 // @Tags     Subscription
-// @Router   /subscriptions/bySourceId [get]
+// @Router   /subscriptions/by/SourceId [get]
+// @Success  200  {object}  ListSubscriptions  "ok"
 func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	p := ListSubscriptions{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
 
 	query := r.URL.Query()
 	_id := query["id"][0]
 	if _id == "" {
-		http.Error(w, ErrIdValueMissing, http.StatusBadRequest)
+		s.WriteError(w, ErrIdValueMissing, http.StatusBadRequest)
 		return
 	}
 
 	uuid, err := uuid.Parse(_id)
 	if err != nil {
-		http.Error(w, ErrValueNotUuid, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	res, err := s.Db.GetSubscriptionsByDiscordWebHookId(*s.ctx, uuid)
+	res, err := s.dto.ListSubscriptionsBySourceId(r.Context(), uuid)
 	if err != nil {
-		http.Error(w, ErrNoRecordFound, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
-	bres, err := json.Marshal(res)
+	p.Payload = res
+
+	bres, err := json.Marshal(p)
 	if err != nil {
-		http.Error(w, ErrUnableToConvertToJson, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -111,48 +206,44 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 // @Param    discordWebHookId  query  string  true  "discordWebHookId"
 // @Param    sourceId          query  string  true  "sourceId"
 // @Tags     Subscription
-// @Router   /subscriptions/new/discordwebhook [post]
+// @Router   /subscriptions/discord/webhook/new [post]
 func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	// Extract the values given
 	query := r.URL.Query()
 	discordWebHookId := query["discordWebHookId"][0]
 	sourceId := query["sourceId"][0]
 
-	// Check to make we didnt get a null
+	// Check to make we didn't get a null
 	if discordWebHookId == "" {
-		http.Error(w, "invalid discordWebHooksId given", http.StatusBadRequest)
+		s.WriteError(w, "invalid discordWebHooksId given", http.StatusBadRequest)
 		return
 	}
 	if sourceId == "" {
-		http.Error(w, "invalid sourceID given", http.StatusBadRequest)
+		s.WriteError(w, "invalid sourceID given", http.StatusBadRequest)
 		return
 	}
 
-	// Valide they are UUID values
+	// Validate they are UUID values
 	uHook, err := uuid.Parse(discordWebHookId)
 	if err != nil {
-		http.Error(w, "DiscordWebHooksID was not a uuid value.", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	uSource, err := uuid.Parse(sourceId)
 	if err != nil {
-		http.Error(w, "SourceId was not a uuid value", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Check if the sub already exists
-	item, err := s.Db.QuerySubscriptions(*s.ctx, database.QuerySubscriptionsParams{
+	_, err = s.Db.QuerySubscriptions(*s.ctx, database.QuerySubscriptionsParams{
 		Discordwebhookid: uHook,
 		Sourceid:         uSource,
 	})
 	if err == nil {
-		bJson, err := json.Marshal(&item)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(bJson)
+		s.WriteError(w, "a subscription already exists between these two entities", http.StatusBadRequest)
 		return
 	}
 
@@ -162,29 +253,39 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 		Discordwebhookid: uHook,
 		Sourceid:         uSource,
 	}
-	s.Db.CreateSubscription(*s.ctx, params)
+	err = s.Db.CreateSubscription(*s.ctx, params)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.Write(bJson)
 }
 
 // DeleteDiscordWebHookSubscription
 // @Summary  Removes a Discord WebHook Subscription based on the Subscription ID.
-// @Param    Id  query  string  true  "Id"
-// @Tags     Config, Source, Discord, Subscription
+// @Param    id  query  string  true  "id"
+// @Tags     Subscription
 // @Router   /subscriptions/discord/webhook/delete [delete]
 func (s *Server) DeleteDiscordWebHookSubscription(w http.ResponseWriter, r *http.Request) {
-	var ErrMissingSubscriptionID string = "Request was missing a 'Id' or was a invalid UUID."
+	var ErrMissingSubscriptionID string = "the request was missing a 'Id'"
 	query := r.URL.Query()
 
-	uid, err := uuid.Parse(query["Id"][0])
+	id := query["id"][0]
+	if id == "" {
+		s.WriteError(w, ErrMissingSubscriptionID, http.StatusBadRequest)
+		return
+	}
+
+	uid, err := uuid.Parse(query["id"][0])
 	if err != nil {
-		http.Error(w, ErrMissingSubscriptionID, http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 

@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 	"github.com/jtom38/newsbot/collector/services/cache"
 	"github.com/mmcdole/gofeed"
 )
 
 type rssClient struct {
-	SourceRecord model.Sources
+	SourceRecord models.Sources
 }
 
-func NewRssClient(sourceRecord model.Sources) rssClient {
+func NewRssClient(sourceRecord models.Sources) rssClient {
 	client := rssClient{
 		SourceRecord: sourceRecord,
 	}

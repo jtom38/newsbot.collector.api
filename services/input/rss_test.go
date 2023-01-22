@@ -3,11 +3,11 @@ package input_test
 import (
 	"testing"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 	"github.com/jtom38/newsbot/collector/services/input"
 )
 
-var rssRecord = model.Sources{
+var rssRecord = models.Sources{
 	ID:   1,
 	Name: "ArsTechnica",
 	Url:  "https://feeds.arstechnica.com/arstechnica/index",

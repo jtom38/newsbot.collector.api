@@ -1,23 +1,55 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
+
+func (s *Server) GetSourcesRouter() http.Handler {
+	r := chi.NewRouter()
+
+	r.Get("/", s.listSources)
+	r.Get("/by/source", s.listSourcesBySource)
+	r.Get("/by/sourceAndName", s.GetSourceBySourceAndName)
+
+	r.Post("/new/reddit", s.newRedditSource)
+	r.Post("/new/youtube", s.newYoutubeSource)
+	r.Post("/new/twitch", s.newTwitchSource)
+
+	r.Route("/{ID}", func(p chi.Router) {
+		p.Get("/", s.getSources)
+		p.Delete("/", s.deleteSources)
+		p.Post("/disable", s.disableSource)
+		p.Post("/enable", s.enableSource)
+	})
+
+	return r
+}
+
+type ListSources struct {
+	ApiStatusModel
+	Payload []models.SourceDto `json:"payload"`
+}
+
+type GetSource struct {
+	ApiStatusModel
+	Payload models.SourceDto `json:"payload"`
+}
 
 // ListSources
 // @Summary  Lists the top 50 records
 // @Produce  application/json
-// @Tags     Config, Source
-// @Router   /config/sources [get]
+// @Tags     Source
+// @Router   /sources [get]
+// @Success  200  {object}  ListSources  "ok"
+// @Failure  400  {object}  ApiError     "Unable to reach SQL or Data problems"
 func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 	//TODO Add top?
 	/*
@@ -29,35 +61,41 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
 
+	w.Header().Set(HeaderContentType, ApplicationJson)
+	result := ListSources{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
+
 	// Default way of showing all sources
-	res, err := s.Db.ListSources(*s.ctx, 50)
+	items, err := s.dto.ListSources(r.Context(), 50)
 	if err != nil {
-		http.Error(w, "url is missing a value", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var dto []database.SourceDto
-	for _, item := range res {
-		dto = append(dto, database.ConvertToSourceDto(item))
-	}
+	result.Payload = items
 
-	bResult, err := json.Marshal(dto)
+	bResult, err := json.Marshal(result)
 	if err != nil {
-		http.Error(w, "unable to convert to json", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(bResult)
-
 }
 
 // ListSourcesBySource
 // @Summary  Lists the top 50 records based on the name given. Example: reddit
 // @Param    source  query  string  true  "Source Name"
 // @Produce  application/json
-// @Tags     Config, Source
-// @Router   /config/sources/by/source [get]
+// @Tags     Source
+// @Router   /sources/by/source [get]
+// @Success  200  {object}  ListSources  "ok"
+// @Failure  400  {object}  ApiError     "Unable to query SQL."
+// @Failure  500  {object}  ApiError     "Problems with data."
 func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 	//TODO Add top?
 	/*
@@ -68,23 +106,33 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 		}
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
+	w.Header().Set(HeaderContentType, ApplicationJson)
+
+	result := ListSources{
+		ApiStatusModel: ApiStatusModel{
+			StatusCode: http.StatusOK,
+			Message:    "OK",
+		},
+	}
 
 	query := r.URL.Query()
 	_source := query["source"][0]
 
 	// Shows the list by Sources.source
-	res, err := s.Db.ListSourcesBySource(*s.ctx, strings.ToLower(_source))
+	res, err := s.dto.ListSourcesBySource(r.Context(), _source)
 	if err != nil {
-		http.Error(w, "invalid source is missing a value", http.StatusBadRequest)
-		return
-	}
-	bResult, err := json.Marshal(res)
-	if err != nil {
-		http.Error(w, "unable to convert to json", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	result.Payload = res
+
+	bResult, err := json.Marshal(result)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.Write(bResult)
 }
 
@@ -92,29 +140,43 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 // @Summary  Returns a single entity by ID
 // @Param    id  path  string  true  "uuid"
 // @Produce  application/json
-// @Tags     Config, Source
-// @Router   /config/sources/{id} [get]
+// @Tags     Source
+// @Router   /sources/{id} [get]
+// @Success  200  {object}  GetSource  "ok"
+// @Failure  204  {object}  ApiError   "No record found."
+// @Failure  400  {object}  ApiError   "Unable to query SQL."
+// @Failure  500  {object}  ApiError   "Failed to process data from SQL."
 func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "ID")
+	payload := GetSource{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
 
+	w.Header().Set(HeaderContentType, ApplicationJson)
+
+	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		http.Error(w, "id is not a uuid", http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	res, err := s.Db.GetSourceByID(*s.ctx, uuid)
+	res, err := s.dto.GetSourceById(r.Context(), uuid)
 	if err != nil {
-		http.Error(w, "invalid id was given", http.StatusBadRequest)
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusNoContent)
+		return
 	}
 
-	bResult, err := json.Marshal(res)
+	payload.Payload = res
+
+	bResult, err := json.Marshal(payload)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.Write(bResult)
 }
 
@@ -123,37 +185,48 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 // @Param    name    query  string  true  "dadjokes"
 // @Param    source  query  string  true  "reddit"
 // @Produce  application/json
-// @Tags     Config, Source
-// @Router   /config/sources/by/sourceAndName [get]
+// @Tags     Source
+// @Router   /sources/by/sourceAndName [get]
+// @Success  200  {object}  GetSource  "ok"
+// @Failure  204  {object}  ApiError   "No record found."
+// @Failure  400  {object}  ApiError   "Unable to query SQL."
+// @Failure  500  {object}  ApiError   "Failed to process data from SQL."
 func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query()
+	p := GetSource{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
 
+	query := r.URL.Query()
 	name := query["name"][0]
 	if name == "" {
-		http.Error(w, "Parameter 'name' was missing in the query.", http.StatusInternalServerError)
+		s.WriteError(w, "Parameter 'name' was missing in the query.", http.StatusInternalServerError)
 		return
 	}
 
 	source := query["source"][0]
 	if source == "" {
-		http.Error(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
+		s.WriteError(w, "The parameter 'source' was missing in the query.", http.StatusInternalServerError)
 		return
 	}
 
-	item, err := s.Db.GetSourceByNameAndSource(context.Background(), database.GetSourceByNameAndSourceParams{
-		Name:   name,
-		Source: source,
-	})
+	item, err := s.dto.GetSourceByNameAndSource(r.Context(), name, source)
 	if err != nil {
-		http.Error(w, "Unable to find the requested record.", http.StatusInternalServerError)
+		s.WriteError(w, "Unable to find the requested record.", http.StatusInternalServerError)
+		return
 	}
+
+	p.Payload = item
 
 	bResult, err := json.Marshal(item)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(HeaderContentType, ApplicationJson)
 	w.Write(bResult)
 }
 
@@ -161,20 +234,22 @@ func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request
 // @Summary  Creates a new reddit source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
-// @Tags     Config, Source, Reddit
-// @Router   /config/sources/new/reddit [post]
+// @Tags     Source
+// @Router   /sources/new/reddit [post]
 func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
 	_url := query["url"][0]
 	//_tags := query["tags"][0]
 
+	w.Header().Set("Content-Type", "application/json")
+
 	if _url == "" {
-		http.Error(w, "url is missing a value", http.StatusBadRequest)
+		s.WriteError(w, "url is missing a value", http.StatusBadRequest)
 		return
 	}
 	if !strings.Contains(_url, "reddit.com") {
-		http.Error(w, "invalid url", http.StatusBadRequest)
+		s.WriteError(w, "invalid url", http.StatusBadRequest)
 		return
 	}
 
@@ -197,13 +272,18 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(*s.ctx, params)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.Write(bJson)
 }
 
@@ -211,20 +291,21 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 // @Summary  Creates a new youtube source to monitor.
 // @Param    name  query  string  true  "name"
 // @Param    url   query  string  true  "url"
-// @Tags     Config, Source, YouTube
-// @Router   /config/sources/new/youtube [post]
+// @Tags     Source
+// @Router   /sources/new/youtube [post]
 func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_name := query["name"][0]
 	_url := query["url"][0]
 	//_tags := query["tags"][0]
 
+	w.Header().Set("Content-Type", "application/json")
 	if _url == "" {
-		http.Error(w, "url is missing a value", http.StatusBadRequest)
+		s.WriteError(w, "url is missing a value", http.StatusBadRequest)
 		return
 	}
 	if !strings.Contains(_url, "youtube.com") {
-		http.Error(w, "invalid url", http.StatusBadRequest)
+		s.WriteError(w, "invalid url", http.StatusBadRequest)
 		return
 	}
 
@@ -246,22 +327,29 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(*s.ctx, params)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.Write(bJson)
 }
 
 // NewTwitchSource
 // @Summary  Creates a new twitch source to monitor.
 // @Param    name  query  string  true  "name"
-// @Tags     Config, Source, Twitch
-// @Router   /config/sources/new/twitch [post]
+// @Tags     Source
+// @Router   /sources/new/twitch [post]
 func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	query := r.URL.Query()
 	_name := query["name"][0]
 
@@ -278,13 +366,18 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(*s.ctx, params)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+
 	w.Write(bJson)
 }
 
@@ -292,73 +385,115 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 // @Summary  Marks a source as deleted based on its ID value.
 // @Param    id  path  string  true  "id"
 // @Tags     Source
-// @Router   /config/sources/{id} [POST]
+// @Router   /sources/{id} [POST]
 func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources = model.Sources{}
 
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	// Delete the record
 	err = s.Db.DeleteSource(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
+
+	p := ApiStatusModel{
+		Message:    "OK",
+		StatusCode: http.StatusOK,
+	}
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(b)
 }
 
 // DisableSource
 // @Summary  Disables a source from processing.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Source
-// @Router   /config/sources/{id}/disable [post]
+// @Tags     Source
+// @Router   /sources/{id}/disable [post]
 func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	err = s.Db.DisableSource(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	p := ApiStatusModel{
+		Message:    "OK",
+		StatusCode: http.StatusOK,
+	}
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(b)
 }
 
 // EnableSource
 // @Summary  Enables a source to continue processing.
 // @Param    id  path  string  true  "id"
-// @Tags     Config, Source
-// @Router   /config/sources/{id}/enable [post]
+// @Tags     Source
+// @Router   /sources/{id}/enable [post]
 func (s *Server) enableSource(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	err = s.Db.EnableSource(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	p := ApiStatusModel{
+		Message:    "OK",
+		StatusCode: http.StatusOK,
+	}
+
+	b, err := json.Marshal(p)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(b)
 }

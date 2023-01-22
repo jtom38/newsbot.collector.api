@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/jtom38/newsbot/collector/domain/model"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
 // When a record becomes tainted, it needs to be renewed or it will be dropped from the cache.
@@ -36,8 +36,8 @@ func (cam CacheAgeMonitor) CheckExpiredEntries() {
 }
 
 // This creates a new slice and skips over the item that needs to be dropped
-func (cam CacheAgeMonitor) removeEntry(index int) []*model.CacheItem {
-	var temp []*model.CacheItem
+func (cam CacheAgeMonitor) removeEntry(index int) []*models.CacheItem {
+	var temp []*models.CacheItem
 	for i, item := range cacheStorage {
 		if i != index {
 			temp = append(temp, item)
