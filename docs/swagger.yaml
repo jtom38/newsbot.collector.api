@@ -161,6 +161,15 @@ definitions:
       status:
         type: integer
     type: object
+  routes.GetDiscordWebhook:
+    properties:
+      message:
+        type: string
+      payload:
+        $ref: '#/definitions/models.DiscordWebHooksDto'
+      status:
+        type: integer
+    type: object
   routes.GetSourceResult:
     properties:
       message:
@@ -177,6 +186,17 @@ definitions:
       payload:
         items:
           $ref: '#/definitions/models.DiscordQueueDto'
+        type: array
+      status:
+        type: integer
+    type: object
+  routes.ListDiscordWebhooks:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.DiscordWebHooksDto'
         type: array
       status:
         type: integer
@@ -295,7 +315,7 @@ paths:
       tags:
       - Discord
       - Webhook
-  /discord/webhooks/{id}:
+  /discord/webhooks/{ID}:
     delete:
       parameters:
       - description: id
@@ -308,6 +328,33 @@ paths:
       tags:
       - Discord
       - Webhook
+  /discord/webhooks/{ID}/disable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Disables a Webhook from being used.
+      tags:
+      - Discord
+      - Webhook
+  /discord/webhooks/{ID}/enable:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses: {}
+      summary: Enables a source to continue processing.
+      tags:
+      - Discord
+      - Webhook
+  /discord/webhooks/{id}:
     get:
       parameters:
       - description: id
@@ -317,7 +364,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.GetDiscordWebhook'
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Discord
@@ -331,32 +382,6 @@ paths:
         type: string
       responses: {}
       summary: Updates a valid discord webhook ID based on the body given.
-      tags:
-      - Discord
-      - Webhook
-  /discord/webhooks/{id}/disable:
-    post:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Disables a Webhook from being used.
-      tags:
-      - Discord
-      - Webhook
-  /discord/webhooks/{id}/enable:
-    post:
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: string
-      responses: {}
-      summary: Enables a source to continue processing.
       tags:
       - Discord
       - Webhook
@@ -375,7 +400,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ListDiscordWebhooks'
       summary: Returns all the known web hooks based on the Server and Channel given.
       tags:
       - Discord

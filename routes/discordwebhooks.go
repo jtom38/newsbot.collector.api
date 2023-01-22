@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,30 +9,64 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jtom38/newsbot/collector/database"
+	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
-// GetDiscordWebHooks
+func (s Server) DiscordWebHookRouter() http.Handler {
+	r := chi.NewRouter()
+
+	r.Get("/", s.ListDiscordWebHooks)
+	r.Post("/new", s.NewDiscordWebHook)
+	r.Get("/by/serverAndChannel", s.GetDiscordWebHooksByServerAndChannel)
+	r.Route("/{ID}", func(r chi.Router) {
+		r.Get("/", s.GetDiscordWebHooksById)
+		r.Delete("/", s.deleteDiscordWebHook)
+		r.Post("/disable", s.disableDiscordWebHook)
+		r.Post("/enable", s.enableDiscordWebHook)
+	})
+
+	return r
+}
+
+type ListDiscordWebhooks struct {
+	ApiStatusModel
+	Payload []models.DiscordWebHooksDto `json:"payload"`
+}
+
+// ListDiscordWebhooks
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Tags     Discord, Webhook
 // @Router   /discord/webhooks [get]
-func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	
-
-	res, err := s.Db.ListDiscordWebhooks(*s.ctx, 100)
-	if err != nil {
-		w.Write([]byte(err.Error()))
-		panic(err)
+func (s *Server) ListDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
+	p := ListDiscordWebhooks{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
 	}
 
-	bres, err := json.Marshal(res)
+	w.Header().Set(HeaderContentType, ApplicationJson)
+
+	res, err := s.dto.ListDiscordWebHooks(r.Context(), 50)
 	if err != nil {
-		w.Write([]byte(err.Error()))
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	p.Payload = res
+
+	bres, err := json.Marshal(p)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(bres)
+}
+
+type GetDiscordWebhook struct {
+	ApiStatusModel
+	Payload models.DiscordWebHooksDto `json:"payload"`
 }
 
 // GetDiscordWebHook
@@ -42,31 +75,40 @@ func (s *Server) GetDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 // @Param    id  path  string  true  "id"
 // @Tags     Discord, Webhook
 // @Router   /discord/webhooks/{id} [get]
+// @Success  200  {object}  GetDiscordWebhook  "OK"
 func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	p := GetDiscordWebhook{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
+
+	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	_id := chi.URLParam(r, "ID")
 	if _id == "" {
-		http.Error(w, "id is missing", http.StatusBadRequest)
+		s.WriteError(w, "id is missing", http.StatusBadRequest)
 		return
 	}
 
 	uuid, err := uuid.Parse(_id)
 	if err != nil {
-		http.Error(w, "unable to parse id value", http.StatusBadRequest)
+		s.WriteError(w, "unable to parse id value", http.StatusBadRequest)
 		return
 	}
 
-	res, err := s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	res, err := s.dto.GetDiscordWebhook(r.Context(), uuid)
 	if err != nil {
-		http.Error(w, "no record found", http.StatusBadRequest)
+		s.WriteError(w, "no record found", http.StatusBadRequest)
 		return
 	}
+	p.Payload = res
 
-	bres, err := json.Marshal(res)
+	bres, err := json.Marshal(p)
 	if err != nil {
-		http.Error(w, "unable to convert to json", http.StatusBadRequest)
-		panic(err)
+		s.WriteError(w, "unable to convert to json", http.StatusBadRequest)
+		return
 	}
 
 	w.Write(bres)
@@ -79,40 +121,46 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 // @Param    channel  query  string  true  "memes"
 // @Tags     Discord, Webhook
 // @Router   /discord/webhooks/by/serverAndChannel [get]
+// @Success  200  {object}  ListDiscordWebhooks  "OK"
 func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	p := ListDiscordWebhooks{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
+
+	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	query := r.URL.Query()
 	_server := query["server"][0]
 	if _server == "" {
-		http.Error(w, "ID is missing", http.StatusInternalServerError)
+		s.WriteError(w, "ID is missing", http.StatusInternalServerError)
 		return
 	}
 
 	_channel := query["channel"][0]
 	if _channel == "" {
-		http.Error(w, "Channel is missing", http.StatusInternalServerError)
-		return
-	}
-	
-	res, err := s.Db.GetDiscordWebHooksByServerAndChannel(context.Background(), database.GetDiscordWebHooksByServerAndChannelParams{
-		Server: _server,
-		Channel: _channel,
-	})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		s.WriteError(w, "Channel is missing", http.StatusInternalServerError)
 		return
 	}
 
-	bres, err := json.Marshal(res)
+	res, err := s.dto.GetDiscordWebHookByServerAndChannel(r.Context(), _server, _channel)
 	if err != nil {
-		http.Error(w, "unable to convert to json", http.StatusInternalServerError)
-		panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	p.Payload = res
+
+	bres, err := json.Marshal(p)
+	if err != nil {
+		s.WriteError(w, "unable to convert to json", http.StatusInternalServerError)
+		return
 	}
 
 	w.Write(bres)
 }
-
 
 // NewDiscordWebHook
 // @Summary  Creates a new record for a discord web hook to post data to.
@@ -162,23 +210,25 @@ func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // @Summary  Disables a Webhook from being used.
 // @Param    id  path  string  true  "id"
 // @Tags     Discord, Webhook
-// @Router   /discord/webhooks/{id}/disable [post]
+// @Router   /discord/webhooks/{ID}/disable [post]
 func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	err = s.Db.DisableDiscordWebHook(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -186,23 +236,23 @@ func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // @Summary  Enables a source to continue processing.
 // @Param    id  path  string  true  "id"
 // @Tags     Discord, Webhook
-// @Router   /discord/webhooks/{id}/enable [post]
+// @Router   /discord/webhooks/{ID}/enable [post]
 func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	err = s.Db.EnableDiscordWebHook(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
@@ -210,26 +260,26 @@ func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 // @Summary  Deletes a record by ID.
 // @Param    id  path  string  true  "id"
 // @Tags     Discord, Webhook
-// @Router   /discord/webhooks/{id} [delete]
+// @Router   /discord/webhooks/{ID} [delete]
 func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	//var item model.Sources = model.Sources{}
 
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
 	if err != nil {
-		log.Panicln(err)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// Check to make sure we can find the record
 	_, err = s.Db.GetDiscordQueueByID(*s.ctx, uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// Delete the record
 	err = s.Db.DeleteDiscordWebHooks(*s.ctx, uuid)
 	if err != nil {
-		log.Panic(err)
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 

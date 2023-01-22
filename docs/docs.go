@@ -158,7 +158,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ListDiscordWebhooks"
+                        }
+                    }
+                }
             }
         },
         "/discord/webhooks/new": {
@@ -194,6 +201,63 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/discord/webhooks/{ID}": {
+            "delete": {
+                "tags": [
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Deletes a record by ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/{ID}/disable": {
+            "post": {
+                "tags": [
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Disables a Webhook from being used.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/discord/webhooks/{ID}/enable": {
+            "post": {
+                "tags": [
+                    "Discord",
+                    "Webhook"
+                ],
+                "summary": "Enables a source to continue processing.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/discord/webhooks/{id}": {
             "get": {
                 "produces": [
@@ -213,24 +277,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
-            },
-            "delete": {
-                "tags": [
-                    "Discord",
-                    "Webhook"
-                ],
-                "summary": "Deletes a record by ID.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.GetDiscordWebhook"
+                        }
                     }
-                ],
-                "responses": {}
+                }
             },
             "patch": {
                 "tags": [
@@ -238,44 +292,6 @@ const docTemplate = `{
                     "Webhook"
                 ],
                 "summary": "Updates a valid discord webhook ID based on the body given.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/discord/webhooks/{id}/disable": {
-            "post": {
-                "tags": [
-                    "Discord",
-                    "Webhook"
-                ],
-                "summary": "Disables a Webhook from being used.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/discord/webhooks/{id}/enable": {
-            "post": {
-                "tags": [
-                    "Discord",
-                    "Webhook"
-                ],
-                "summary": "Enables a source to continue processing.",
                 "parameters": [
                     {
                         "type": "string",
@@ -1042,6 +1058,20 @@ const docTemplate = `{
                 }
             }
         },
+        "routes.GetDiscordWebhook": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "$ref": "#/definitions/models.DiscordWebHooksDto"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "routes.GetSourceResult": {
             "type": "object",
             "properties": {
@@ -1066,6 +1096,23 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/models.DiscordQueueDto"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ListDiscordWebhooks": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.DiscordWebHooksDto"
                     }
                 },
                 "status": {

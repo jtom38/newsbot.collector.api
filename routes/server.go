@@ -80,21 +80,8 @@ func (s *Server) MountRoutes() {
 
 	s.Router.Mount("/api/articles", s.GetArticleRouter())
 	s.Router.Mount("/api/queue", s.GetQueueRouter())
-
-	/* Discord WebHooks */
-	s.Router.Get("/api/discord/webhooks", s.GetDiscordWebHooks)
-	s.Router.Post("/api/discord/webhooks/new", s.NewDiscordWebHook)
-	//s.Router.Get("/api/discord/webhooks/byId", s.GetDiscordWebHooksById)
-	s.Router.Get("/api/discord/webhooks/by/serverAndChannel", s.GetDiscordWebHooksByServerAndChannel)
-
-	s.Router.Route("/api/discord/webhooks/{ID}", func(r chi.Router) {
-		r.Get("/", s.GetDiscordWebHooksById)
-		r.Delete("/", s.deleteDiscordWebHook)
-		r.Post("/disable", s.disableDiscordWebHook)
-		r.Post("/enable", s.enableDiscordWebHook)
-	})
-
-	/* Settings */
+	s.Router.Mount("/api/discord/webhooks", s.DiscordWebHookRouter())
+	
 	s.Router.Get("/api/settings", s.getSettings)
 
 	s.Router.Mount("/api/sources", s.GetSourcesRouter())
