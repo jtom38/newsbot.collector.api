@@ -1,5 +1,67 @@
 basePath: /api
 definitions:
+  models.ArticleDetailsDto:
+    properties:
+      authorImage:
+        type: string
+      authorName:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      pubdate:
+        type: string
+      source:
+        $ref: '#/definitions/models.SourceDto'
+      tags:
+        items:
+          type: string
+        type: array
+      thumbnail:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+      video:
+        type: string
+      videoHeight:
+        type: integer
+      videoWidth:
+        type: integer
+    type: object
+  models.ArticleDto:
+    properties:
+      authorImage:
+        type: string
+      authorName:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      pubdate:
+        type: string
+      sourceid:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      thumbnail:
+        type: string
+      title:
+        type: string
+      url:
+        type: string
+      video:
+        type: string
+      videoHeight:
+        type: integer
+      videoWidth:
+        type: integer
+    type: object
   models.DiscordQueueDto:
     properties:
       articleId:
@@ -70,6 +132,35 @@ definitions:
       status:
         type: integer
     type: object
+  routes.ArticleDetailsResult:
+    properties:
+      message:
+        type: string
+      payload:
+        $ref: '#/definitions/models.ArticleDetailsDto'
+      status:
+        type: integer
+    type: object
+  routes.ArticleGetResults:
+    properties:
+      message:
+        type: string
+      payload:
+        $ref: '#/definitions/models.ArticleDto'
+      status:
+        type: integer
+    type: object
+  routes.ArticlesListResults:
+    properties:
+      message:
+        type: string
+      payload:
+        items:
+          $ref: '#/definitions/models.ArticleDto'
+        type: array
+      status:
+        type: integer
+    type: object
   routes.GetSourceResult:
     properties:
       message:
@@ -132,7 +223,11 @@ paths:
     get:
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ArticlesListResults'
       summary: Lists the top 50 records
       tags:
       - Articles
@@ -141,13 +236,35 @@ paths:
       parameters:
       - description: uuid
         in: path
-        name: id
+        name: ID
         required: true
         type: string
       produces:
       - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ArticleGetResults'
       summary: Returns an article based on defined ID.
+      tags:
+      - Articles
+  /articles/{ID}/details:
+    get:
+      parameters:
+      - description: uuid
+        in: path
+        name: ID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ArticleDetailsResult'
+      summary: Returns an article and source based on defined ID.
       tags:
       - Articles
   /articles/by/sourceid:
@@ -160,22 +277,11 @@ paths:
         type: string
       produces:
       - application/json
-      responses: {}
-      summary: Finds the articles based on the SourceID provided.  Returns the top
-        50.
-      tags:
-      - Articles
-  /articles/by/tag:
-    get:
-      parameters:
-      - description: Tag name
-        in: query
-        name: tag
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses: {}
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/routes.ArticlesListResults'
       summary: Finds the articles based on the SourceID provided.  Returns the top
         50.
       tags:

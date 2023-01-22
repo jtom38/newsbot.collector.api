@@ -2,11 +2,44 @@ package models
 
 import (
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/jtom38/newsbot/collector/database"
 )
+
+type ArticleDto struct {
+	ID          uuid.UUID `json:"id"`
+	Source      uuid.UUID `json:"sourceid"`
+	Tags        []string  `json:"tags"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	Pubdate     time.Time `json:"pubdate"`
+	Video       string    `json:"video"`
+	Videoheight int32     `json:"videoHeight"`
+	Videowidth  int32     `json:"videoWidth"`
+	Thumbnail   string    `json:"thumbnail"`
+	Description string    `json:"description"`
+	Authorname  string    `json:"authorName"`
+	Authorimage string    `json:"authorImage"`
+}
+
+type ArticleDetailsDto struct {
+	ID          uuid.UUID `json:"id"`
+	Source      SourceDto `json:"source"`
+	Tags        []string  `json:"tags"`
+	Title       string    `json:"title"`
+	Url         string    `json:"url"`
+	Pubdate     time.Time `json:"pubdate"`
+	Video       string    `json:"video"`
+	Videoheight int32     `json:"videoHeight"`
+	Videowidth  int32     `json:"videoWidth"`
+	Thumbnail   string    `json:"thumbnail"`
+	Description string    `json:"description"`
+	Authorname  string    `json:"authorName"`
+	Authorimage string    `json:"authorImage"`
+}
 
 type DiscordWebHooksDto struct {
 	ID      uuid.UUID `json:"ID"`

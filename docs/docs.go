@@ -25,7 +25,14 @@ const docTemplate = `{
                     "Articles"
                 ],
                 "summary": "Lists the top 50 records",
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ArticlesListResults"
+                        }
+                    }
+                }
             }
         },
         "/articles/by/sourceid": {
@@ -46,28 +53,14 @@ const docTemplate = `{
                         "required": true
                     }
                 ],
-                "responses": {}
-            }
-        },
-        "/articles/by/tag": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Articles"
-                ],
-                "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Tag name",
-                        "name": "tag",
-                        "in": "query",
-                        "required": true
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ArticlesListResults"
+                        }
                     }
-                ],
-                "responses": {}
+                }
             }
         },
         "/articles/{ID}": {
@@ -83,12 +76,47 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "uuid",
-                        "name": "id",
+                        "name": "ID",
                         "in": "path",
                         "required": true
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ArticleGetResults"
+                        }
+                    }
+                }
+            }
+        },
+        "/articles/{ID}/details": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Returns an article and source based on defined ID.",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "uuid",
+                        "name": "ID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ArticleDetailsResult"
+                        }
+                    }
+                }
             }
         },
         "/discord/webhooks": {
@@ -767,6 +795,100 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "models.ArticleDetailsDto": {
+            "type": "object",
+            "properties": {
+                "authorImage": {
+                    "type": "string"
+                },
+                "authorName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pubdate": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/models.SourceDto"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "video": {
+                    "type": "string"
+                },
+                "videoHeight": {
+                    "type": "integer"
+                },
+                "videoWidth": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.ArticleDto": {
+            "type": "object",
+            "properties": {
+                "authorImage": {
+                    "type": "string"
+                },
+                "authorName": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "pubdate": {
+                    "type": "string"
+                },
+                "sourceid": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "thumbnail": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "video": {
+                    "type": "string"
+                },
+                "videoHeight": {
+                    "type": "integer"
+                },
+                "videoWidth": {
+                    "type": "integer"
+                }
+            }
+        },
         "models.DiscordQueueDto": {
             "type": "object",
             "properties": {
@@ -869,6 +991,51 @@ const docTemplate = `{
             "properties": {
                 "message": {
                     "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ArticleDetailsResult": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "$ref": "#/definitions/models.ArticleDetailsDto"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ArticleGetResults": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "$ref": "#/definitions/models.ArticleDto"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "routes.ArticlesListResults": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "payload": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.ArticleDto"
+                    }
                 },
                 "status": {
                     "type": "integer"

@@ -6,20 +6,20 @@ import (
 	"encoding/json"
 	"net/http"
 
-	//"net/http"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	_ "github.com/lib/pq"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"github.com/jtom38/newsbot/collector/database"
+	"github.com/jtom38/newsbot/collector/dto"
 	"github.com/jtom38/newsbot/collector/services/config"
 )
 
 type Server struct {
 	Router *chi.Mux
 	Db     *database.Queries
+	dto    dto.DtoClient
 	ctx    *context.Context
 }
 
@@ -36,16 +36,18 @@ var (
 	ErrUnableToConvertToJson string = "Unable to convert to json"
 )
 
-func NewServer(ctx context.Context) *Server {
+func NewServer(ctx context.Context, db *database.Queries) *Server {
 	s := &Server{
 		ctx: &ctx,
+		Db:  db,
+		dto: dto.NewDtoClient(db),
 	}
 
-	db, err := openDatabase(ctx)
-	if err != nil {
-		panic(err)
-	}
-	s.Db = db
+	//db, err := openDatabase(ctx)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//s.Db = db
 
 	s.Router = chi.NewRouter()
 	s.MountMiddleware()
@@ -76,14 +78,7 @@ func (s *Server) MountRoutes() {
 		httpSwagger.URL("doc.json"), //The url pointing to API definition
 	))
 
-	/* Article Routes */
-	s.Router.Get("/api/articles", s.listArticles)
-	s.Router.Route("/api/articles/{ID}", func(r chi.Router) {
-		r.Get("/", s.getArticleById)
-	})
-	s.Router.Get("/api/articles/by/sourceid", s.GetArticlesBySourceId)
-
-	/* Queue */
+	s.Router.Mount("/api/articles", s.GetArticleRouter())
 	s.Router.Mount("/api/queue", s.GetQueueRouter())
 
 	/* Discord WebHooks */
