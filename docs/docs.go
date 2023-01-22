@@ -905,11 +905,11 @@ const docTemplate = `{
                 }
             }
         },
-        "models.DiscordQueueDto": {
+        "models.DiscordQueueDetailsDto": {
             "type": "object",
             "properties": {
-                "articleId": {
-                    "type": "string"
+                "article": {
+                    "$ref": "#/definitions/models.ArticleDetailsDto"
                 },
                 "id": {
                     "type": "string"
@@ -1095,7 +1095,7 @@ const docTemplate = `{
                 "payload": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.DiscordQueueDto"
+                        "$ref": "#/definitions/models.DiscordQueueDetailsDto"
                     }
                 },
                 "status": {

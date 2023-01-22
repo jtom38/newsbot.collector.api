@@ -18,7 +18,7 @@ func (s *Server) GetQueueRouter() http.Handler {
 
 type ListDiscordWebHooksQueueResults struct {
 	ApiStatusModel
-	Payload []models.DiscordQueueDto `json:"payload"`
+	Payload []models.DiscordQueueDetailsDto `json:"payload"`
 }
 
 // GetDiscordQueue
@@ -38,16 +38,13 @@ func (s *Server) ListDiscordWebhookQueue(w http.ResponseWriter, r *http.Request)
 	}
 
 	// Get the raw resp from sql
-	res, err := s.Db.ListDiscordQueueItems(*s.ctx, 100)
+	res, err := s.dto.ListDiscordWebhookQueueDetails(r.Context(), 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// convert to dto
-	for _, item := range res {
-		p.Payload = append(p.Payload, models.ConvertToDiscordQueueDto(item))
-	}
+	p.Payload = res
 
 	// convert to json
 	b, err := json.Marshal(p)

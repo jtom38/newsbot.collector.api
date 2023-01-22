@@ -97,11 +97,9 @@ type DiscordQueueDto struct {
 	Articleid uuid.UUID `json:"articleId"`
 }
 
-func ConvertToDiscordQueueDto(i database.Discordqueue) DiscordQueueDto {
-	return DiscordQueueDto{
-		ID:        i.ID,
-		Articleid: i.Articleid,
-	}
+type DiscordQueueDetailsDto struct {
+	ID      uuid.UUID         `json:"id"`
+	Article ArticleDetailsDto `json:"article"`
 }
 
 type SubscriptionDto struct {

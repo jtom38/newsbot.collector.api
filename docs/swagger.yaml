@@ -62,10 +62,10 @@ definitions:
       videoWidth:
         type: integer
     type: object
-  models.DiscordQueueDto:
+  models.DiscordQueueDetailsDto:
     properties:
-      articleId:
-        type: string
+      article:
+        $ref: '#/definitions/models.ArticleDetailsDto'
       id:
         type: string
     type: object
@@ -185,7 +185,7 @@ definitions:
         type: string
       payload:
         items:
-          $ref: '#/definitions/models.DiscordQueueDto'
+          $ref: '#/definitions/models.DiscordQueueDetailsDto'
         type: array
       status:
         type: integer
