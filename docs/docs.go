@@ -620,7 +620,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                            "$ref": "#/definitions/routes.ListSubscriptions"
                         }
                     },
                     "400": {
@@ -660,7 +660,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                            "$ref": "#/definitions/routes.ListSubscriptions"
                         }
                     }
                 }
@@ -688,7 +688,7 @@ const docTemplate = `{
                     "200": {
                         "description": "ok",
                         "schema": {
-                            "$ref": "#/definitions/routes.ListSubscriptionResults"
+                            "$ref": "#/definitions/routes.ListSubscriptions"
                         }
                     },
                     "400": {
@@ -933,7 +933,7 @@ const docTemplate = `{
                 }
             }
         },
-        "models.SubscriptionDetails": {
+        "models.SubscriptionDetailsDto": {
             "type": "object",
             "properties": {
                 "discordwebhook": {
@@ -1105,7 +1105,7 @@ const docTemplate = `{
                 "payload": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/models.SubscriptionDetails"
+                        "$ref": "#/definitions/models.SubscriptionDetailsDto"
                     }
                 },
                 "status": {
@@ -1113,7 +1113,7 @@ const docTemplate = `{
                 }
             }
         },
-        "routes.ListSubscriptionResults": {
+        "routes.ListSubscriptions": {
             "type": "object",
             "properties": {
                 "message": {

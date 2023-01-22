@@ -107,7 +107,7 @@ definitions:
       value:
         type: string
     type: object
-  models.SubscriptionDetails:
+  models.SubscriptionDetailsDto:
     properties:
       discordwebhook:
         $ref: '#/definitions/models.DiscordWebHooksDto'
@@ -218,12 +218,12 @@ definitions:
         type: string
       payload:
         items:
-          $ref: '#/definitions/models.SubscriptionDetails'
+          $ref: '#/definitions/models.SubscriptionDetailsDto'
         type: array
       status:
         type: integer
     type: object
-  routes.ListSubscriptionResults:
+  routes.ListSubscriptions:
     properties:
       message:
         type: string
@@ -640,7 +640,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.ListSubscriptionResults'
+            $ref: '#/definitions/routes.ListSubscriptions'
         "400":
           description: Unable to reach SQL.
           schema:
@@ -666,7 +666,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.ListSubscriptionResults'
+            $ref: '#/definitions/routes.ListSubscriptions'
       summary: Returns the top 100 entries from the queue to be processed.
       tags:
       - Subscription
@@ -684,7 +684,7 @@ paths:
         "200":
           description: ok
           schema:
-            $ref: '#/definitions/routes.ListSubscriptionResults'
+            $ref: '#/definitions/routes.ListSubscriptions'
         "400":
           description: Unable to reach SQL or Data problems
           schema:

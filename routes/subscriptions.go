@@ -24,9 +24,14 @@ func (s *Server) GetSubscriptionsRouter() http.Handler {
 	return r
 }
 
-type ListSubscriptionResults struct {
+type ListSubscriptions struct {
 	ApiStatusModel
 	Payload []models.SubscriptionDto `json:"payload"`
+}
+
+type GetSubscription struct {
+	ApiStatusModel
+	Payload models.SubscriptionDto `json:"payload"`
 }
 
 // GetSubscriptions
@@ -34,28 +39,26 @@ type ListSubscriptionResults struct {
 // @Produce  application/json
 // @Tags     Subscription
 // @Router   /subscriptions [get]
-// @Success  200  {object}  ListSubscriptionResults  "ok"
-// @Failure  400  {object}  ApiError                 "Unable to reach SQL."
-// @Failure  500  {object}  ApiError                 "Failed to process data from SQL."
+// @Success  200  {object}  ListSubscriptions  "ok"
+// @Failure  400  {object}  ApiError           "Unable to reach SQL."
+// @Failure  500  {object}  ApiError           "Failed to process data from SQL."
 func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	payload := ListSubscriptionResults{
+	payload := ListSubscriptions{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
 		},
 	}
 
-	res, err := s.Db.ListSubscriptions(*s.ctx, 50)
+	res, err := s.dto.ListSubscriptions(r.Context(), 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	for _, item := range res {
-		payload.Payload = append(payload.Payload, models.ConvertToSubscriptionDto(item))
-	}
+	payload.Payload = res
 
 	bres, err := json.Marshal(payload)
 	if err != nil {
@@ -68,7 +71,7 @@ func (s *Server) ListSubscriptions(w http.ResponseWriter, r *http.Request) {
 
 type ListSubscriptionDetails struct {
 	ApiStatusModel
-	Payload []models.SubscriptionDetails `json:"payload"`
+	Payload []models.SubscriptionDetailsDto `json:"payload"`
 }
 
 // ListSubscriptionDetails
@@ -76,8 +79,8 @@ type ListSubscriptionDetails struct {
 // @Produce  application/json
 // @Tags     Subscription
 // @Router   /subscriptions/details [get]
-// @Success  200  {object}  ListSubscriptionDetails  "ok"  
-func (s Server) ListSubscriptionDetails(w http.ResponseWriter, t *http.Request) {
+// @Success  200  {object}  ListSubscriptionDetails  "ok"
+func (s Server) ListSubscriptionDetails(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set(HeaderContentType, ApplicationJson)
 	payload := ListSubscriptionDetails{
 		ApiStatusModel: ApiStatusModel{
@@ -86,31 +89,13 @@ func (s Server) ListSubscriptionDetails(w http.ResponseWriter, t *http.Request) 
 		},
 	}
 
-	res, err := s.Db.ListSubscriptions(t.Context(), 50)
+	res, err := s.dto.ListSubscriptionDetails(r.Context(), 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	for _, item := range res {
-		dwh, err := s.Db.GetDiscordWebHooksByID(t.Context(), item.Discordwebhookid)
-		if err != nil {
-			s.WriteError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		source, err := s.Db.GetSourceByID(t.Context(), item.Sourceid)
-		if err != nil {
-			s.WriteError(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		payload.Payload = append(payload.Payload, models.SubscriptionDetails{
-			ID:             item.ID,
-			DiscordWebHook: models.ConvertToDiscordWebhookDto(dwh),
-			Source:         models.ConvertToSourceDto(source),
-		})
-	}
+	payload.Payload = res
 
 	b, err := json.Marshal(payload)
 	if err != nil {
@@ -120,24 +105,19 @@ func (s Server) ListSubscriptionDetails(w http.ResponseWriter, t *http.Request) 
 	w.Write(b)
 }
 
-type GetSubscriptionResults struct {
-	ApiStatusModel
-	Payload models.SubscriptionDto `json:"payload"`
-}
-
 // GetSubscriptionsByDiscordId
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
 // @Param    id  query  string  true  "id"
 // @Tags     Subscription
 // @Router   /subscriptions/by/discordId [get]
-// @Success  200  {object}  ListSubscriptionResults  "ok"
-// @Failure  400  {object}  ApiError                 "Unable to reach SQL or Data problems"
-// @Failure  500  {object}  ApiError                 "Data problems"
+// @Success  200  {object}  ListSubscriptions  "ok"
+// @Failure  400  {object}  ApiError           "Unable to reach SQL or Data problems"
+// @Failure  500  {object}  ApiError           "Data problems"
 func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set(HeaderContentType, ApplicationJson)
 
-	p := ListSubscriptionResults{
+	p := ListSubscriptions{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -157,15 +137,13 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	res, err := s.Db.GetSubscriptionsByDiscordWebHookId(*s.ctx, uuid)
+	res, err := s.dto.ListSubscriptionsByDiscordWebhookId(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
-	for _, item := range res {
-		p.Payload = append(p.Payload, models.ConvertToSubscriptionDto(item))
-	}
+	p.Payload = res
 
 	bres, err := json.Marshal(p)
 	if err != nil {
@@ -182,11 +160,11 @@ func (s *Server) GetSubscriptionsByDiscordId(w http.ResponseWriter, r *http.Requ
 // @Param    id  query  string  true  "id"
 // @Tags     Subscription
 // @Router   /subscriptions/by/SourceId [get]
-// @Success  200  {object}  ListSubscriptionResults  "ok"
+// @Success  200  {object}  ListSubscriptions  "ok"
 func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	p := ListSubscriptionResults{
+	p := ListSubscriptions{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -206,15 +184,13 @@ func (s *Server) GetSubscriptionsBySourceId(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	res, err := s.Db.GetSubscriptionsByDiscordWebHookId(*s.ctx, uuid)
+	res, err := s.dto.ListSubscriptionsBySourceId(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusNoContent)
 		return
 	}
 
-	for _, item := range res {
-		p.Payload = append(p.Payload, models.ConvertToSubscriptionDto(item))
-	}
+	p.Payload = res
 
 	bres, err := json.Marshal(p)
 	if err != nil {

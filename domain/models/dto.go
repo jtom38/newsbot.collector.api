@@ -117,7 +117,7 @@ func ConvertToSubscriptionDto(i database.Subscription) SubscriptionDto {
 	return c
 }
 
-type SubscriptionDetails struct {
+type SubscriptionDetailsDto struct {
 	ID             uuid.UUID          `json:"id"`
 	Source         SourceDto          `json:"source"`
 	DiscordWebHook DiscordWebHooksDto `json:"discordwebhook"`
