@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -55,8 +54,7 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 
 	query := r.URL.Query()
 	queryPage := query["page"]
-	fmt.Printf("queryPage: %v\n", queryPage)
-	
+
 	// if a page number was sent, process it
 	if len(queryPage) == 1 {
 		page, err := strconv.Atoi(query["page"][0])

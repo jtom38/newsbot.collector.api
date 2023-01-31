@@ -201,7 +201,7 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 	}
 
 	// Check if the sub already exists
-	_, err = s.Db.QuerySubscriptions(*s.ctx, database.QuerySubscriptionsParams{
+	_, err = s.Db.QuerySubscriptions(r.Context(), database.QuerySubscriptionsParams{
 		Discordwebhookid: uHook,
 		Sourceid:         uSource,
 	})
@@ -216,7 +216,7 @@ func (s *Server) newDiscordWebHookSubscription(w http.ResponseWriter, r *http.Re
 		Discordwebhookid: uHook,
 		Sourceid:         uSource,
 	}
-	err = s.Db.CreateSubscription(*s.ctx, params)
+	err = s.Db.CreateSubscription(r.Context(), params)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return

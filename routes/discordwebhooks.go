@@ -169,7 +169,7 @@ func (s *Server) NewDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 		Channel: _channel,
 		Enabled: true,
 	}
-	s.Db.CreateDiscordWebHook(*s.ctx, params)
+	s.Db.CreateDiscordWebHook(r.Context(), params)
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {
@@ -193,13 +193,13 @@ func (s *Server) disableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	_, err = s.Db.GetDiscordWebHooksByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err = s.Db.DisableDiscordWebHook(*s.ctx, uuid)
+	err = s.Db.DisableDiscordWebHook(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -218,12 +218,12 @@ func (s *Server) enableDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetDiscordWebHooksByID(*s.ctx, uuid)
+	_, err = s.Db.GetDiscordWebHooksByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
-	err = s.Db.EnableDiscordWebHook(*s.ctx, uuid)
+	err = s.Db.EnableDiscordWebHook(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -244,13 +244,13 @@ func (s *Server) deleteDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetDiscordQueueByID(*s.ctx, uuid)
+	_, err = s.Db.GetDiscordQueueByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// Delete the record
-	err = s.Db.DeleteDiscordWebHooks(*s.ctx, uuid)
+	err = s.Db.DeleteDiscordWebHooks(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -270,7 +270,7 @@ func (s *Server) UpdateDiscordWebHook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetDiscordQueueByID(*s.ctx, uuid)
+	_, err = s.Db.GetDiscordQueueByID(r.Context(), uuid)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
