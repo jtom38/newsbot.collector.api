@@ -15,13 +15,13 @@ type DtoClient struct {
 	db *database.Queries
 }
 
-func NewDtoClient(db *database.Queries) DtoClient {
-	return DtoClient{
+func NewDtoClient(db *database.Queries) *DtoClient {
+	return &DtoClient{
 		db: db,
 	}
 }
 
-func (c DtoClient) ListArticles(ctx context.Context, limit int) ([]models.ArticleDto, error) {
+func (c *DtoClient) ListArticles(ctx context.Context, limit int) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
 
 	a, err := c.db.ListArticles(ctx, int32(limit))
