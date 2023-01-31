@@ -8,7 +8,7 @@ import (
 	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
-func (c DtoClient) ListSubscriptions(ctx context.Context, limit int32) ([]models.SubscriptionDto, error) {
+func (c *DtoClient) ListSubscriptions(ctx context.Context, limit int32) ([]models.SubscriptionDto, error) {
 	var res []models.SubscriptionDto
 
 	items, err := c.db.ListSubscriptions(ctx, limit)
@@ -23,7 +23,7 @@ func (c DtoClient) ListSubscriptions(ctx context.Context, limit int32) ([]models
 	return res, nil
 }
 
-func (c DtoClient) ListSubscriptionDetails(ctx context.Context, limit int32) ([]models.SubscriptionDetailsDto, error) {
+func (c *DtoClient) ListSubscriptionDetails(ctx context.Context, limit int32) ([]models.SubscriptionDetailsDto, error) {
 	var res []models.SubscriptionDetailsDto
 
 	items, err := c.ListSubscriptions(ctx, limit)
@@ -52,7 +52,7 @@ func (c DtoClient) ListSubscriptionDetails(ctx context.Context, limit int32) ([]
 	return res, nil
 }
 
-func (c DtoClient) ListSubscriptionsByDiscordWebhookId(ctx context.Context, id uuid.UUID) ([]models.SubscriptionDto, error) {
+func (c *DtoClient) ListSubscriptionsByDiscordWebhookId(ctx context.Context, id uuid.UUID) ([]models.SubscriptionDto, error) {
 	var res []models.SubscriptionDto
 
 	items, err := c.db.GetSubscriptionsByDiscordWebHookId(ctx, id)
@@ -67,7 +67,7 @@ func (c DtoClient) ListSubscriptionsByDiscordWebhookId(ctx context.Context, id u
 	return res, nil
 }
 
-func (c DtoClient) ListSubscriptionsBySourceId(ctx context.Context, id uuid.UUID) ([]models.SubscriptionDto, error) {
+func (c *DtoClient) ListSubscriptionsBySourceId(ctx context.Context, id uuid.UUID) ([]models.SubscriptionDto, error) {
 	var res []models.SubscriptionDto
 
 	items, err := c.db.GetSubscriptionsBySourceID(ctx, id)
@@ -82,7 +82,7 @@ func (c DtoClient) ListSubscriptionsBySourceId(ctx context.Context, id uuid.UUID
 	return res, nil
 }
 
-func (c DtoClient) ConvertSubscription(i database.Subscription) models.SubscriptionDto {
+func (c *DtoClient) ConvertSubscription(i database.Subscription) models.SubscriptionDto {
 	return models.SubscriptionDto{
 		ID:               i.ID,
 		DiscordWebhookId: i.Discordwebhookid,

@@ -9,7 +9,7 @@ import (
 	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
-func (c DtoClient) ListSources(ctx context.Context, limit int32) ([]models.SourceDto, error) {
+func (c *DtoClient) ListSources(ctx context.Context, limit int32) ([]models.SourceDto, error) {
 	var res []models.SourceDto
 
 	items, err := c.db.ListSources(ctx, limit)
@@ -24,7 +24,7 @@ func (c DtoClient) ListSources(ctx context.Context, limit int32) ([]models.Sourc
 	return res, nil
 }
 
-func (c DtoClient) ListSourcesBySource(ctx context.Context, sourceName string) ([]models.SourceDto, error) {
+func (c *DtoClient) ListSourcesBySource(ctx context.Context, sourceName string) ([]models.SourceDto, error) {
 	var res []models.SourceDto
 
 	items, err := c.db.ListSourcesBySource(ctx, strings.ToLower(sourceName))
@@ -39,7 +39,7 @@ func (c DtoClient) ListSourcesBySource(ctx context.Context, sourceName string) (
 	return res, nil
 }
 
-func (c DtoClient) GetSourceById(ctx context.Context, id uuid.UUID) (models.SourceDto, error) {
+func (c *DtoClient) GetSourceById(ctx context.Context, id uuid.UUID) (models.SourceDto, error) {
 	var res models.SourceDto
 
 	item, err := c.db.GetSourceByID(ctx, id)
@@ -50,7 +50,7 @@ func (c DtoClient) GetSourceById(ctx context.Context, id uuid.UUID) (models.Sour
 	return c.ConvertToSource(item), nil
 }
 
-func (c DtoClient) GetSourceByNameAndSource(ctx context.Context, name, source string) (models.SourceDto, error) {
+func (c *DtoClient) GetSourceByNameAndSource(ctx context.Context, name, source string) (models.SourceDto, error) {
 	var res models.SourceDto
 
 	item, err := c.db.GetSourceByNameAndSource(ctx, database.GetSourceByNameAndSourceParams{
@@ -64,7 +64,7 @@ func (c DtoClient) GetSourceByNameAndSource(ctx context.Context, name, source st
 	return c.ConvertToSource(item), nil
 }
 
-func (c DtoClient) ConvertToSource(i database.Source) models.SourceDto {
+func (c *DtoClient) ConvertToSource(i database.Source) models.SourceDto {
 	var deleted bool
 	if !i.Deleted.Valid {
 		deleted = true

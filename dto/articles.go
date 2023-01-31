@@ -35,7 +35,7 @@ func (c *DtoClient) ListArticles(ctx context.Context, limit int) ([]models.Artic
 	return res, nil
 }
 
-func (c DtoClient) ListArticlesByPage(ctx context.Context, page, limit int32 ) ([]models.ArticleDto, error) {
+func (c *DtoClient) ListArticlesByPage(ctx context.Context, page, limit int32 ) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
 
 	a, err := c.db.ListArticlesByPage(ctx, database.ListArticlesByPageParams{
@@ -53,7 +53,7 @@ func (c DtoClient) ListArticlesByPage(ctx context.Context, page, limit int32 ) (
 	return res, nil
 }
 
-func (c DtoClient) GetArticle(ctx context.Context, ID uuid.UUID) (models.ArticleDto, error) {
+func (c *DtoClient) GetArticle(ctx context.Context, ID uuid.UUID) (models.ArticleDto, error) {
 	a, err := c.db.GetArticleByID(ctx, ID)
 	if err != nil {
 		return models.ArticleDto{}, err
@@ -62,7 +62,7 @@ func (c DtoClient) GetArticle(ctx context.Context, ID uuid.UUID) (models.Article
 	return c.convertArticle(a), nil
 }
 
-func (c DtoClient) GetArticleDetails(ctx context.Context, ID uuid.UUID) (models.ArticleDetailsDto, error) {
+func (c *DtoClient) GetArticleDetails(ctx context.Context, ID uuid.UUID) (models.ArticleDetailsDto, error) {
 	a, err := c.db.GetArticleByID(ctx, ID)
 	if err != nil {
 		return models.ArticleDetailsDto{}, err
@@ -78,7 +78,7 @@ func (c DtoClient) GetArticleDetails(ctx context.Context, ID uuid.UUID) (models.
 	return res, nil
 }
 
-func (c DtoClient) GetArticlesBySourceId(ctx context.Context, SourceID uuid.UUID) ([]models.ArticleDto, error) {
+func (c *DtoClient) GetArticlesBySourceId(ctx context.Context, SourceID uuid.UUID) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
 	a, err := c.db.GetArticlesBySourceId(ctx, SourceID)
 	if err != nil {
@@ -92,7 +92,7 @@ func (c DtoClient) GetArticlesBySourceId(ctx context.Context, SourceID uuid.UUID
 	return res, nil
 }
 
-func (c DtoClient) convertArticle(i database.Article) models.ArticleDto {
+func (c *DtoClient) convertArticle(i database.Article) models.ArticleDto {
 	return models.ArticleDto{
 		ID:          i.ID,
 		Source:      i.Sourceid,
@@ -110,7 +110,7 @@ func (c DtoClient) convertArticle(i database.Article) models.ArticleDto {
 	}
 }
 
-func (c DtoClient) convertArticleDetails(i database.Article, s database.Source) models.ArticleDetailsDto {
+func (c *DtoClient) convertArticleDetails(i database.Article, s database.Source) models.ArticleDetailsDto {
 	return models.ArticleDetailsDto{
 		ID:          i.ID,
 		Source:      c.ConvertToSource(s),
