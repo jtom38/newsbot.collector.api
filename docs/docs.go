@@ -35,6 +35,34 @@ const docTemplate = `{
                 }
             }
         },
+        "/articles/by/page": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "List 50 items based on the requested page",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/routes.ArticlesListResults"
+                        }
+                    }
+                }
+            }
+        },
         "/articles/by/sourceid": {
             "get": {
                 "produces": [

@@ -35,6 +35,24 @@ func (c DtoClient) ListArticles(ctx context.Context, limit int) ([]models.Articl
 	return res, nil
 }
 
+func (c DtoClient) ListArticlesByPage(ctx context.Context, page, limit int32 ) ([]models.ArticleDto, error) {
+	var res []models.ArticleDto
+
+	a, err := c.db.ListArticlesByPage(ctx, database.ListArticlesByPageParams{
+		Limit: limit,
+		Offset: page * limit,
+	})
+	if err != nil {
+		return res, err
+	}
+
+	for _, article := range a {
+		res = append(res, c.convertArticle(article))
+	}
+
+	return res, nil
+}
+
 func (c DtoClient) GetArticle(ctx context.Context, ID uuid.UUID) (models.ArticleDto, error) {
 	a, err := c.db.GetArticleByID(ctx, ID)
 	if err != nil {

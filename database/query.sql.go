@@ -948,6 +948,55 @@ func (q *Queries) ListArticlesByDate(ctx context.Context, limit int32) ([]Articl
 	return items, nil
 }
 
+const listArticlesByPage = `-- name: ListArticlesByPage :many
+select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage from articles
+order by pubdate desc
+offset $2
+fetch next $1 rows only
+`
+
+type ListArticlesByPageParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListArticlesByPage(ctx context.Context, arg ListArticlesByPageParams) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listArticlesByPage, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDiscordQueueItems = `-- name: ListDiscordQueueItems :many
 Select id, articleid from DiscordQueue LIMIT $1
 `
