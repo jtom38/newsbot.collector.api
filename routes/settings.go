@@ -28,7 +28,7 @@ func (s *Server) getSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := s.Db.GetSourceByID(*s.ctx, uuid)
+	res, err := s.Db.GetSourceByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusNotFound)
 		return

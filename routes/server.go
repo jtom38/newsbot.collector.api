@@ -19,8 +19,8 @@ import (
 type Server struct {
 	Router *chi.Mux
 	Db     *database.Queries
-	dto    dto.DtoClient
-	ctx    *context.Context
+	dto    *dto.DtoClient
+	//ctx    *context.Context
 }
 
 const (
@@ -38,16 +38,16 @@ var (
 
 func NewServer(ctx context.Context, db *database.Queries) *Server {
 	s := &Server{
-		ctx: &ctx,
+		//ctx: &ctx,
 		Db:  db,
 		dto: dto.NewDtoClient(db),
 	}
 
-	//db, err := openDatabase(ctx)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//s.Db = db
+	db, err := openDatabase(ctx)
+	if err != nil {
+		panic(err)
+	}
+	s.Db = db
 
 	s.Router = chi.NewRouter()
 	s.MountMiddleware()
@@ -98,6 +98,7 @@ type ApiError struct {
 }
 
 func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatusCode int) {
+	w.Header().Set(HeaderContentType, ApplicationJson)
 	e := ApiError{
 		ApiStatusModel: &ApiStatusModel{
 			StatusCode: HttpStatusCode,

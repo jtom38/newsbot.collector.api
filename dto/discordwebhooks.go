@@ -8,7 +8,7 @@ import (
 	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
-func (c DtoClient) ListDiscordWebHooks(ctx context.Context, total int32) ([]models.DiscordWebHooksDto, error) {
+func (c *DtoClient) ListDiscordWebHooks(ctx context.Context, total int32) ([]models.DiscordWebHooksDto, error) {
 	var res []models.DiscordWebHooksDto
 
 	items, err := c.db.ListDiscordWebhooks(ctx, total)
@@ -23,7 +23,7 @@ func (c DtoClient) ListDiscordWebHooks(ctx context.Context, total int32) ([]mode
 	return res, nil
 }
 
-func (c DtoClient) GetDiscordWebhook(ctx context.Context, id uuid.UUID) (models.DiscordWebHooksDto, error) {
+func (c *DtoClient) GetDiscordWebhook(ctx context.Context, id uuid.UUID) (models.DiscordWebHooksDto, error) {
 	var res models.DiscordWebHooksDto
 
 	item, err := c.db.GetDiscordWebHooksByID(ctx, id)
@@ -34,7 +34,7 @@ func (c DtoClient) GetDiscordWebhook(ctx context.Context, id uuid.UUID) (models.
 	return c.ConvertDiscordWebhook(item), nil
 }
 
-func (c DtoClient) GetDiscordWebHookByServerAndChannel(ctx context.Context, server, channel string) ([]models.DiscordWebHooksDto, error) {
+func (c *DtoClient) GetDiscordWebHookByServerAndChannel(ctx context.Context, server, channel string) ([]models.DiscordWebHooksDto, error) {
 	var res []models.DiscordWebHooksDto
 
 	items, err := c.db.GetDiscordWebHooksByServerAndChannel(ctx, database.GetDiscordWebHooksByServerAndChannelParams{
@@ -52,7 +52,7 @@ func (c DtoClient) GetDiscordWebHookByServerAndChannel(ctx context.Context, serv
 	return res, nil
 }
 
-func (c DtoClient) ConvertDiscordWebhook(i database.Discordwebhook) models.DiscordWebHooksDto {
+func (c *DtoClient) ConvertDiscordWebhook(i database.Discordwebhook) models.DiscordWebHooksDto {
 	return models.DiscordWebHooksDto{
 		ID:      i.ID,
 		Url:     i.Url,

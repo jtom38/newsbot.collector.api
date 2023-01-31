@@ -58,7 +58,7 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
+		res, err := s.Db.ListSources(r.Context(), int32(topInt))
 	*/
 
 	p := ListSources{
@@ -96,7 +96,7 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
-		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
+		res, err := s.Db.ListSources(r.Context(), int32(topInt))
 	*/
 
 	p := ListSources{
@@ -235,7 +235,7 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	err := s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(r.Context(), params)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -291,7 +291,7 @@ func (s *Server) newYoutubeSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	err := s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(r.Context(), params)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -330,7 +330,7 @@ func (s *Server) newTwitchSource(w http.ResponseWriter, r *http.Request) {
 		Url:     _url,
 		Tags:    tags,
 	}
-	err := s.Db.CreateSource(*s.ctx, params)
+	err := s.Db.CreateSource(r.Context(), params)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -361,14 +361,14 @@ func (s *Server) deleteSources(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
+	_, err = s.Db.GetSourceByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Delete the record
-	err = s.Db.DeleteSource(*s.ctx, uuid)
+	err = s.Db.DeleteSource(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -401,12 +401,12 @@ func (s *Server) disableSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
+	_, err = s.Db.GetSourceByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	err = s.Db.DisableSource(*s.ctx, uuid)
+	err = s.Db.DisableSource(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -438,12 +438,12 @@ func (s *Server) enableSource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check to make sure we can find the record
-	_, err = s.Db.GetSourceByID(*s.ctx, uuid)
+	_, err = s.Db.GetSourceByID(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	err = s.Db.EnableSource(*s.ctx, uuid)
+	err = s.Db.EnableSource(r.Context(), uuid)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 	}
