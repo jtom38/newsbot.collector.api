@@ -61,8 +61,7 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
 
-	w.Header().Set(HeaderContentType, ApplicationJson)
-	result := ListSources{
+	p := ListSources{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -76,15 +75,8 @@ func (s *Server) listSources(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	result.Payload = items
-
-	bResult, err := json.Marshal(result)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bResult)
+	p.Payload = items
+	s.WriteJson(w, p)
 }
 
 // ListSourcesBySource
@@ -106,9 +98,8 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 		}
 		res, err := s.Db.ListSources(*s.ctx, int32(topInt))
 	*/
-	w.Header().Set(HeaderContentType, ApplicationJson)
 
-	result := ListSources{
+	p := ListSources{
 		ApiStatusModel: ApiStatusModel{
 			StatusCode: http.StatusOK,
 			Message:    "OK",
@@ -116,24 +107,16 @@ func (s *Server) listSourcesBySource(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := r.URL.Query()
-	_source := query["source"][0]
 
 	// Shows the list by Sources.source
-	res, err := s.dto.ListSourcesBySource(r.Context(), _source)
+	res, err := s.dto.ListSourcesBySource(r.Context(), query["source"][0])
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	result.Payload = res
-
-	bResult, err := json.Marshal(result)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bResult)
+	p.Payload = res
+	s.WriteJson(w, p)
 }
 
 // GetSource
@@ -154,10 +137,7 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	w.Header().Set(HeaderContentType, ApplicationJson)
-
-	id := chi.URLParam(r, "ID")
-	uuid, err := uuid.Parse(id)
+	uuid, err := uuid.Parse(chi.URLParam(r, "ID"))
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
@@ -170,14 +150,7 @@ func (s *Server) getSources(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload.Payload = res
-
-	bResult, err := json.Marshal(payload)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bResult)
+	s.WriteJson(w, payload)
 }
 
 // GetSourceByNameAndSource
@@ -219,15 +192,7 @@ func (s *Server) GetSourceBySourceAndName(w http.ResponseWriter, r *http.Request
 	}
 
 	p.Payload = item
-
-	bResult, err := json.Marshal(item)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set(HeaderContentType, ApplicationJson)
-	w.Write(bResult)
+	s.WriteJson(w, p)
 }
 
 // NewRedditSource
@@ -241,8 +206,6 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 	_name := query["name"][0]
 	_url := query["url"][0]
 	//_tags := query["tags"][0]
-
-	w.Header().Set("Content-Type", "application/json")
 
 	if _url == "" {
 		s.WriteError(w, "url is missing a value", http.StatusBadRequest)
@@ -277,6 +240,7 @@ func (s *Server) newRedditSource(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	//s.WriteJson(w, &params)
 
 	bJson, err := json.Marshal(&params)
 	if err != nil {

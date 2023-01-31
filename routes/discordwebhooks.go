@@ -12,6 +12,16 @@ import (
 	"github.com/jtom38/newsbot/collector/domain/models"
 )
 
+type ListDiscordWebhooks struct {
+	ApiStatusModel
+	Payload []models.DiscordWebHooksDto `json:"payload"`
+}
+
+type GetDiscordWebhook struct {
+	ApiStatusModel
+	Payload models.DiscordWebHooksDto `json:"payload"`
+}
+
 func (s Server) DiscordWebHookRouter() http.Handler {
 	r := chi.NewRouter()
 
@@ -28,11 +38,6 @@ func (s Server) DiscordWebHookRouter() http.Handler {
 	return r
 }
 
-type ListDiscordWebhooks struct {
-	ApiStatusModel
-	Payload []models.DiscordWebHooksDto `json:"payload"`
-}
-
 // ListDiscordWebhooks
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
@@ -46,27 +51,13 @@ func (s *Server) ListDiscordWebHooks(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	w.Header().Set(HeaderContentType, ApplicationJson)
-
 	res, err := s.dto.ListDiscordWebHooks(r.Context(), 50)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	p.Payload = res
-
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bres)
-}
-
-type GetDiscordWebhook struct {
-	ApiStatusModel
-	Payload models.DiscordWebHooksDto `json:"payload"`
+	s.WriteJson(w, p)
 }
 
 // GetDiscordWebHook
@@ -83,8 +74,6 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 			StatusCode: http.StatusOK,
 		},
 	}
-
-	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	_id := chi.URLParam(r, "ID")
 	if _id == "" {
@@ -104,14 +93,7 @@ func (s *Server) GetDiscordWebHooksById(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	p.Payload = res
-
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, "unable to convert to json", http.StatusBadRequest)
-		return
-	}
-
-	w.Write(bres)
+	s.WriteJson(w, p)
 }
 
 // GetDiscordWebHookByServerAndChannel
@@ -129,8 +111,6 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 			StatusCode: http.StatusOK,
 		},
 	}
-
-	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	query := r.URL.Query()
 	_server := query["server"][0]
@@ -152,14 +132,7 @@ func (s *Server) GetDiscordWebHooksByServerAndChannel(w http.ResponseWriter, r *
 	}
 
 	p.Payload = res
-
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, "unable to convert to json", http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bres)
+	s.WriteJson(w, p)
 }
 
 // NewDiscordWebHook

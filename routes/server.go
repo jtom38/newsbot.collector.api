@@ -112,3 +112,15 @@ func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatus
 
 	w.Write(b)
 }
+
+func (s *Server) WriteJson(w http.ResponseWriter, model interface{}) {
+	w.Header().Set(HeaderContentType, ApplicationJson)
+	
+	bres, err := json.Marshal(model)
+	if err != nil {
+		s.WriteError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Write(bres)
+}
