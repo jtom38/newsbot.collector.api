@@ -1,12 +1,16 @@
 package routes
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jtom38/newsbot/collector/domain/models"
 )
+
+type ListDiscordWebHooksQueueResults struct {
+	ApiStatusModel
+	Payload []models.DiscordQueueDetailsDto `json:"payload"`
+}
 
 func (s *Server) GetQueueRouter() http.Handler {
 	r := chi.NewRouter()
@@ -16,11 +20,6 @@ func (s *Server) GetQueueRouter() http.Handler {
 	return r
 }
 
-type ListDiscordWebHooksQueueResults struct {
-	ApiStatusModel
-	Payload []models.DiscordQueueDetailsDto `json:"payload"`
-}
-
 // GetDiscordQueue
 // @Summary  Returns the top 100 entries from the queue to be processed.
 // @Produce  application/json
@@ -28,8 +27,6 @@ type ListDiscordWebHooksQueueResults struct {
 // @Router   /queue/discord/webhooks [get]
 // @Success  200  {object}  ListDiscordWebHooksQueueResults  "ok"
 func (s *Server) ListDiscordWebhookQueue(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-
 	p := ListDiscordWebHooksQueueResults{
 		ApiStatusModel: ApiStatusModel{
 			Message:    "OK",
@@ -45,13 +42,5 @@ func (s *Server) ListDiscordWebhookQueue(w http.ResponseWriter, r *http.Request)
 	}
 
 	p.Payload = res
-
-	// convert to json
-	b, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(b)
+	s.WriteJson(w, p)
 }

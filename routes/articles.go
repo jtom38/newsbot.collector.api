@@ -1,8 +1,9 @@
 package routes
 
 import (
-	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -27,9 +28,20 @@ type ArticlesListResults struct {
 	Payload []models.ArticleDto `json:"payload"`
 }
 
+type ArticleGetResults struct {
+	ApiStatusModel
+	Payload models.ArticleDto `json:"payload"`
+}
+
+type ArticleDetailsResult struct {
+	ApiStatusModel
+	Payload models.ArticleDetailsDto `json:"payload"`
+}
+
 // ListArticles
 // @Summary  Lists the top 50 records
 // @Produce  application/json
+// @Param    page  query  string  false  "page number"
 // @Tags     Articles
 // @Router   /articles [get]
 // @Success  200  {object}  ArticlesListResults  "OK"
@@ -41,27 +53,34 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	w.Header().Set(HeaderContentType, ApplicationJson)
+	query := r.URL.Query()
+	queryPage := query["page"]
+	fmt.Printf("queryPage: %v\n", queryPage)
+	
+	// if a page number was sent, process it
+	if len(queryPage) == 1 {
+		page, err := strconv.Atoi(query["page"][0])
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
-	res, err := s.dto.ListArticles(r.Context(), 50)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
+		res, err := s.dto.ListArticlesByPage(r.Context(), int32(page), 50)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		p.Payload = res
+		s.WriteJson(w, p)
+	} else {
+		res, err := s.dto.ListArticles(r.Context(), 50)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		p.Payload = res
+		s.WriteJson(w, p)
 	}
-
-	p.Payload = res
-
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	w.Write(bres)
-}
-
-type ArticleGetResults struct {
-	ApiStatusModel
-	Payload models.ArticleDto `json:"payload"`
 }
 
 // GetArticle
@@ -72,14 +91,12 @@ type ArticleGetResults struct {
 // @Router   /articles/{ID} [get]
 // @Success  200  {object}  ArticleGetResults  "OK"
 func (s *Server) getArticle(w http.ResponseWriter, r *http.Request) {
-	p := ArticleGetResults {
+	p := ArticleGetResults{
 		ApiStatusModel: ApiStatusModel{
-			Message: "OK",
+			Message:    "OK",
 			StatusCode: http.StatusOK,
 		},
 	}
-
-	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
@@ -96,18 +113,7 @@ func (s *Server) getArticle(w http.ResponseWriter, r *http.Request) {
 
 	p.Payload = res
 
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bres)
-}
-
-type ArticleDetailsResult struct {
-	ApiStatusModel
-	Payload models.ArticleDetailsDto `json:"payload"`
+	s.WriteJson(w, p)
 }
 
 // GetArticleDetails
@@ -118,14 +124,12 @@ type ArticleDetailsResult struct {
 // @Router   /articles/{ID}/details [get]
 // @Success  200  {object}  ArticleDetailsResult  "OK"
 func (s *Server) getArticleDetails(w http.ResponseWriter, r *http.Request) {
-	p := ArticleDetailsResult {
+	p := ArticleDetailsResult{
 		ApiStatusModel: ApiStatusModel{
 			Message:    "OK",
 			StatusCode: http.StatusOK,
 		},
 	}
-
-	w.Header().Set(HeaderContentType, ApplicationJson)
 
 	id := chi.URLParam(r, "ID")
 	uuid, err := uuid.Parse(id)
@@ -142,18 +146,7 @@ func (s *Server) getArticleDetails(w http.ResponseWriter, r *http.Request) {
 
 	p.Payload = res
 
-	bres, err := json.Marshal(p)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bres)
-}
-
-type ArticlesBySourceIDResults struct {
-	ApiStatusModel
-	Payload []models.ArticleDto `json:"payload"`
+	s.WriteJson(w, p)
 }
 
 // TODO add page support
@@ -165,7 +158,12 @@ type ArticlesBySourceIDResults struct {
 // @Router   /articles/by/sourceid [get]
 // @Success  200  {object}  ArticlesListResults  "OK"
 func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	p := ArticlesListResults{
+		ApiStatusModel: ApiStatusModel{
+			Message:    "OK",
+			StatusCode: http.StatusOK,
+		},
+	}
 
 	r.URL.Query()
 	query := r.URL.Query()
@@ -182,12 +180,7 @@ func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 		s.WriteError(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	p.Payload = res
 
-	bres, err := json.Marshal(res)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(bres)
+	s.WriteJson(w, p)
 }

@@ -241,6 +241,11 @@ info:
 paths:
   /articles:
     get:
+      parameters:
+      - description: page number
+        in: query
+        name: page
+        type: string
       produces:
       - application/json
       responses:

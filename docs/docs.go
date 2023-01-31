@@ -25,6 +25,14 @@ const docTemplate = `{
                     "Articles"
                 ],
                 "summary": "Lists the top 50 records",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page number",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

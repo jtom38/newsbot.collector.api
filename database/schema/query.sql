@@ -35,6 +35,12 @@ Left Join sources
 On articles.sourceid = sources.id
 Where name = $1;
 
+-- name: ListArticlesByPage :many
+select * from articles
+order by pubdate desc
+offset $2
+fetch next $1 rows only;
+
 -- name: CreateArticle :exec
 INSERT INTO Articles 
 (ID, SourceId, Tags, Title, Url, PubDate, Video, VideoHeight, VideoWidth, Thumbnail, Description, AuthorName, AuthorImage)
