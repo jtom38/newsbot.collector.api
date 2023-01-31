@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -70,9 +69,9 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 // @Router   /articles/by/page [get]
 // @Success  200  {object}  ArticlesListResults  "OK"
 func (s *Server) ListArticlesByPage(w http.ResponseWriter, r *http.Request) {
-	p := ArticlesListResults {
+	p := ArticlesListResults{
 		ApiStatusModel: ApiStatusModel{
-			Message: "OK",
+			Message:    "OK",
 			StatusCode: http.StatusOK,
 		},
 	}
