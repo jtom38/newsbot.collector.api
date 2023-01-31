@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -18,7 +19,6 @@ func (s *Server) GetArticleRouter() http.Handler {
 		r.Get("/details", s.getArticleDetails)
 	})
 	r.Get("/by/sourceid", s.GetArticlesBySourceId)
-	r.Get("/by/page", s.ListArticlesByPage)
 
 	return r
 }
@@ -41,6 +41,7 @@ type ArticleDetailsResult struct {
 // ListArticles
 // @Summary  Lists the top 50 records
 // @Produce  application/json
+// @Param    page  query  string  false  "page number"
 // @Tags     Articles
 // @Router   /articles [get]
 // @Success  200  {object}  ArticlesListResults  "OK"
@@ -52,46 +53,34 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	res, err := s.dto.ListArticles(r.Context(), 50)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	p.Payload = res
-	s.WriteJson(w, p)
-}
-
-// ListArticlesByPage
-// @Summary  List 50 items based on the requested page
-// @Produce  application/json
-// @Param    page  query  string  true  "page number"
-// @Tags     Articles
-// @Router   /articles/by/page [get]
-// @Success  200  {object}  ArticlesListResults  "OK"
-func (s *Server) ListArticlesByPage(w http.ResponseWriter, r *http.Request) {
-	p := ArticlesListResults{
-		ApiStatusModel: ApiStatusModel{
-			Message:    "OK",
-			StatusCode: http.StatusOK,
-		},
-	}
-
 	query := r.URL.Query()
-	page, err := strconv.Atoi(query["page"][0])
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusBadRequest)
-		return
+	queryPage := query["page"]
+	fmt.Printf("queryPage: %v\n", queryPage)
+	
+	// if a page number was sent, process it
+	if len(queryPage) == 1 {
+		page, err := strconv.Atoi(query["page"][0])
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		res, err := s.dto.ListArticlesByPage(r.Context(), int32(page), 50)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		p.Payload = res
+		s.WriteJson(w, p)
+	} else {
+		res, err := s.dto.ListArticles(r.Context(), 50)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		p.Payload = res
+		s.WriteJson(w, p)
 	}
-
-	res, err := s.dto.ListArticlesByPage(r.Context(), int32(page), 25)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	p.Payload = res
-
-	s.WriteJson(w, p)
 }
 
 // GetArticle

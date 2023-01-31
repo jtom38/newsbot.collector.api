@@ -241,6 +241,11 @@ info:
 paths:
   /articles:
     get:
+      parameters:
+      - description: page number
+        in: query
+        name: page
+        type: string
       produces:
       - application/json
       responses:
@@ -285,24 +290,6 @@ paths:
           schema:
             $ref: '#/definitions/routes.ArticleDetailsResult'
       summary: Returns an article and source based on defined ID.
-      tags:
-      - Articles
-  /articles/by/page:
-    get:
-      parameters:
-      - description: page number
-        in: query
-        name: page
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/routes.ArticlesListResults'
-      summary: List 50 items based on the requested page
       tags:
       - Articles
   /articles/by/sourceid:

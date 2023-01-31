@@ -100,14 +100,14 @@ type ApiError struct {
 func (s *Server) WriteError(w http.ResponseWriter, errMessage string, HttpStatusCode int) {
 	e := ApiError{
 		ApiStatusModel: &ApiStatusModel{
-			StatusCode: http.StatusInternalServerError,
+			StatusCode: HttpStatusCode,
 			Message:    errMessage,
 		},
 	}
 
 	b, err := json.Marshal(e)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), HttpStatusCode)
 	}
 
 	w.Write(b)
