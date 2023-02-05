@@ -24,7 +24,7 @@ const docTemplate = `{
                 "tags": [
                     "Articles"
                 ],
-                "summary": "Lists the top 50 records",
+                "summary": "Lists the top 25 records ordering from newest to oldest.",
                 "parameters": [
                     {
                         "type": "string",

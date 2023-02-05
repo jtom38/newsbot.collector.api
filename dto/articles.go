@@ -21,10 +21,13 @@ func NewDtoClient(db *database.Queries) *DtoClient {
 	}
 }
 
-func (c *DtoClient) ListArticles(ctx context.Context, limit int) ([]models.ArticleDto, error) {
+func (c *DtoClient) ListArticles(ctx context.Context, limit, page int) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
 
-	a, err := c.db.ListArticles(ctx, int32(limit))
+	a, err := c.db.ListArticles(ctx, database.ListArticlesParams{
+		Limit: int32(limit),
+		Offset: int32(limit * page),
+	})
 	if err != nil {
 		return res, err
 	}
@@ -80,7 +83,7 @@ func (c *DtoClient) GetArticleDetails(ctx context.Context, ID uuid.UUID) (models
 
 func (c *DtoClient) GetArticlesBySourceId(ctx context.Context, SourceID uuid.UUID) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
-	a, err := c.db.GetArticlesBySourceId(ctx, SourceID)
+	a, err := c.db.ListArticlesBySourceId(ctx, SourceID)
 	if err != nil {
 		return res, err
 	}

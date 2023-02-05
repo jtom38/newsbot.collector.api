@@ -8,24 +8,32 @@ Select * from Articles
 Where Url = $1 LIMIT 1;
 
 -- name: ListArticles :many
-Select * From articles Limit $1;
+Select * From articles 
+Order By PubDate DESC
+offset $2
+fetch next $1 rows only;
 
 -- name: ListArticlesByDate :many
-Select * From articles ORDER BY pubdate desc Limit $1;
+Select * From articles 
+ORDER BY pubdate desc 
+Limit $1;
 
 -- name: GetArticlesBySource :many
 select * from articles
 INNER join sources on articles.sourceid=Sources.ID
 where site = $1;
 
--- name: GetNewArticlesBySourceId :many
+-- name: ListNewArticlesBySourceId :many
 SELECT * FROM articles
 Where sourceid = $1
-ORDER BY pubdate desc Limit 50;
+ORDER BY pubdate desc
+offset $3
+fetch next $2 rows only;
 
--- name: GetArticlesBySourceId :many
+-- name: ListArticlesBySourceId :many
 Select * From articles
-Where sourceid = $1 Limit 50;
+Where sourceid = $1 
+Limit 50;
 
 -- name: GetArticlesBySourceName :many
 select 
