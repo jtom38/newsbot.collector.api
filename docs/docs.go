@@ -51,7 +51,7 @@ const docTemplate = `{
                 "tags": [
                     "Articles"
                 ],
-                "summary": "Finds the articles based on the SourceID provided.  Returns the top 50.",
+                "summary": "Finds the articles based on the SourceID provided.  Returns the top 25.",
                 "parameters": [
                     {
                         "type": "string",
@@ -59,6 +59,12 @@ const docTemplate = `{
                         "name": "id",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page to query",
+                        "name": "page",
+                        "in": "query"
                     }
                 ],
                 "responses": {

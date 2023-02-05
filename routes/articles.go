@@ -17,7 +17,7 @@ func (s *Server) GetArticleRouter() http.Handler {
 		r.Get("/", s.getArticle)
 		r.Get("/details", s.getArticleDetails)
 	})
-	r.Get("/by/sourceid", s.GetArticlesBySourceId)
+	r.Get("/by/sourceid", s.ListArticlesBySourceId)
 
 	return r
 }
@@ -148,14 +148,15 @@ func (s *Server) getArticleDetails(w http.ResponseWriter, r *http.Request) {
 }
 
 // TODO add page support
-// GetArticlesBySourceID
-// @Summary  Finds the articles based on the SourceID provided.  Returns the top 50.
-// @Param    id  query  string  true  "Source ID UUID"
+// ListArticlesBySourceID
+// @Summary  Finds the articles based on the SourceID provided.  Returns the top 25.
+// @Param    id    query  string  true   "Source ID UUID"
+// @Param    page  query  int     false  "Page to query"
 // @Produce  application/json
 // @Tags     Articles
 // @Router   /articles/by/sourceid [get]
 // @Success  200  {object}  ArticlesListResults  "OK"
-func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
+func (s *Server) ListArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 	p := ArticlesListResults{
 		ApiStatusModel: ApiStatusModel{
 			Message:    "OK",
@@ -167,18 +168,38 @@ func (s *Server) GetArticlesBySourceId(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	_id := query["id"][0]
 
+
 	uuid, err := uuid.Parse(_id)
 	if err != nil {
 		s.WriteError(w, err.Error(), http.StatusBadRequest)
 		return
+	}	
+
+	// if a page number was sent, process it
+	if len(query["page"]) >= 1 {
+		_page, err := strconv.Atoi(query["page"][0])
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		res, err := s.dto.ListNewArticlesBySourceId(r.Context(), uuid, 25, _page)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		p.Payload = res
+		s.WriteJson(w, p)
+	} else {
+		res, err := s.dto.ListNewArticlesBySourceId(r.Context(), uuid, 25, 0)
+		if err != nil {
+			s.WriteError(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		p.Payload = res
+		s.WriteJson(w, p)
 	}
 
-	res, err := s.dto.GetArticlesBySourceId(r.Context(), uuid)
-	if err != nil {
-		s.WriteError(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	p.Payload = res
-
-	s.WriteJson(w, p)
 }
