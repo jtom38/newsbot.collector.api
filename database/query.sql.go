@@ -429,48 +429,6 @@ func (q *Queries) GetArticlesBySource(ctx context.Context, site string) ([]GetAr
 	return items, nil
 }
 
-const getArticlesBySourceId = `-- name: GetArticlesBySourceId :many
-Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles
-Where sourceid = $1 Limit 50
-`
-
-func (q *Queries) GetArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
-	rows, err := q.db.QueryContext(ctx, getArticlesBySourceId, sourceid)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Article
-	for rows.Next() {
-		var i Article
-		if err := rows.Scan(
-			&i.ID,
-			&i.Sourceid,
-			&i.Tags,
-			&i.Title,
-			&i.Url,
-			&i.Pubdate,
-			&i.Video,
-			&i.Videoheight,
-			&i.Videowidth,
-			&i.Thumbnail,
-			&i.Description,
-			&i.Authorname,
-			&i.Authorimage,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getArticlesBySourceName = `-- name: GetArticlesBySourceName :many
 select 
 articles.ID, articles.SourceId, articles.Tags, articles.Title, articles.Url, articles.PubDate, articles.Video, articles.VideoHeight, articles.VideoWidth, articles.Thumbnail, articles.Description, articles.AuthorName, articles.AuthorImage, sources.source, sources.name
@@ -645,49 +603,6 @@ func (q *Queries) GetIconBySite(ctx context.Context, site string) (Icon, error) 
 	var i Icon
 	err := row.Scan(&i.ID, &i.Filename, &i.Site)
 	return i, err
-}
-
-const getNewArticlesBySourceId = `-- name: GetNewArticlesBySourceId :many
-SELECT id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage FROM articles
-Where sourceid = $1
-ORDER BY pubdate desc Limit 50
-`
-
-func (q *Queries) GetNewArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
-	rows, err := q.db.QueryContext(ctx, getNewArticlesBySourceId, sourceid)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Article
-	for rows.Next() {
-		var i Article
-		if err := rows.Scan(
-			&i.ID,
-			&i.Sourceid,
-			&i.Tags,
-			&i.Title,
-			&i.Url,
-			&i.Pubdate,
-			&i.Video,
-			&i.Videoheight,
-			&i.Videowidth,
-			&i.Thumbnail,
-			&i.Description,
-			&i.Authorname,
-			&i.Authorimage,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getSettingByID = `-- name: GetSettingByID :one
@@ -867,11 +782,19 @@ func (q *Queries) GetSubscriptionsBySourceID(ctx context.Context, sourceid uuid.
 }
 
 const listArticles = `-- name: ListArticles :many
-Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles Limit $1
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles 
+Order By PubDate DESC
+offset $2
+fetch next $1 rows only
 `
 
-func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, error) {
-	rows, err := q.db.QueryContext(ctx, listArticles, limit)
+type ListArticlesParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) ListArticles(ctx context.Context, arg ListArticlesParams) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listArticles, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -908,7 +831,9 @@ func (q *Queries) ListArticles(ctx context.Context, limit int32) ([]Article, err
 }
 
 const listArticlesByDate = `-- name: ListArticlesByDate :many
-Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles ORDER BY pubdate desc Limit $1
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles 
+ORDER BY pubdate desc 
+Limit $1
 `
 
 func (q *Queries) ListArticlesByDate(ctx context.Context, limit int32) ([]Article, error) {
@@ -962,6 +887,49 @@ type ListArticlesByPageParams struct {
 
 func (q *Queries) ListArticlesByPage(ctx context.Context, arg ListArticlesByPageParams) ([]Article, error) {
 	rows, err := q.db.QueryContext(ctx, listArticlesByPage, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listArticlesBySourceId = `-- name: ListArticlesBySourceId :many
+Select id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage From articles
+Where sourceid = $1 
+Limit 50
+`
+
+func (q *Queries) ListArticlesBySourceId(ctx context.Context, sourceid uuid.UUID) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listArticlesBySourceId, sourceid)
 	if err != nil {
 		return nil, err
 	}
@@ -1077,6 +1045,57 @@ func (q *Queries) ListDiscordWebhooks(ctx context.Context, limit int32) ([]Disco
 			&i.Server,
 			&i.Channel,
 			&i.Enabled,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listNewArticlesBySourceId = `-- name: ListNewArticlesBySourceId :many
+SELECT id, sourceid, tags, title, url, pubdate, video, videoheight, videowidth, thumbnail, description, authorname, authorimage FROM articles
+Where sourceid = $1
+ORDER BY pubdate desc
+offset $3
+fetch next $2 rows only
+`
+
+type ListNewArticlesBySourceIdParams struct {
+	Sourceid uuid.UUID
+	Limit    int32
+	Offset   int32
+}
+
+func (q *Queries) ListNewArticlesBySourceId(ctx context.Context, arg ListNewArticlesBySourceIdParams) ([]Article, error) {
+	rows, err := q.db.QueryContext(ctx, listNewArticlesBySourceId, arg.Sourceid, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Article
+	for rows.Next() {
+		var i Article
+		if err := rows.Scan(
+			&i.ID,
+			&i.Sourceid,
+			&i.Tags,
+			&i.Title,
+			&i.Url,
+			&i.Pubdate,
+			&i.Video,
+			&i.Videoheight,
+			&i.Videowidth,
+			&i.Thumbnail,
+			&i.Description,
+			&i.Authorname,
+			&i.Authorimage,
 		); err != nil {
 			return nil, err
 		}

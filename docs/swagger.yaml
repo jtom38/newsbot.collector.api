@@ -253,7 +253,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/routes.ArticlesListResults'
-      summary: Lists the top 50 records
+      summary: Lists the top 25 records ordering from newest to oldest.
       tags:
       - Articles
   /articles/{ID}:

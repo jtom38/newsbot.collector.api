@@ -38,7 +38,7 @@ type ArticleDetailsResult struct {
 }
 
 // ListArticles
-// @Summary  Lists the top 50 records
+// @Summary  Lists the top 25 records ordering from newest to oldest.
 // @Produce  application/json
 // @Param    page  query  string  false  "page number"
 // @Tags     Articles
@@ -56,14 +56,14 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 	queryPage := query["page"]
 
 	// if a page number was sent, process it
-	if len(queryPage) == 1 {
+	if len(queryPage) >= 1 {
 		page, err := strconv.Atoi(query["page"][0])
 		if err != nil {
 			s.WriteError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		res, err := s.dto.ListArticlesByPage(r.Context(), int32(page), 50)
+		res, err := s.dto.ListArticles(r.Context(), 25, page)
 		if err != nil {
 			s.WriteError(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -71,7 +71,7 @@ func (s *Server) listArticles(w http.ResponseWriter, r *http.Request) {
 		p.Payload = res
 		s.WriteJson(w, p)
 	} else {
-		res, err := s.dto.ListArticles(r.Context(), 50)
+		res, err := s.dto.ListArticles(r.Context(), 25, 0)
 		if err != nil {
 			s.WriteError(w, err.Error(), http.StatusInternalServerError)
 			return
