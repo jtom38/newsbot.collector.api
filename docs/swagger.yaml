@@ -300,6 +300,10 @@ paths:
         name: id
         required: true
         type: string
+      - description: Page to query
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -308,7 +312,7 @@ paths:
           schema:
             $ref: '#/definitions/routes.ArticlesListResults'
       summary: Finds the articles based on the SourceID provided.  Returns the top
-        50.
+        25.
       tags:
       - Articles
   /discord/webhooks:

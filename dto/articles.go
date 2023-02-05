@@ -81,9 +81,13 @@ func (c *DtoClient) GetArticleDetails(ctx context.Context, ID uuid.UUID) (models
 	return res, nil
 }
 
-func (c *DtoClient) GetArticlesBySourceId(ctx context.Context, SourceID uuid.UUID) ([]models.ArticleDto, error) {
+func (c *DtoClient) ListNewArticlesBySourceId(ctx context.Context, SourceID uuid.UUID, limit, page int) ([]models.ArticleDto, error) {
 	var res []models.ArticleDto
-	a, err := c.db.ListArticlesBySourceId(ctx, SourceID)
+	a, err := c.db.ListNewArticlesBySourceId(ctx, database.ListNewArticlesBySourceIdParams{
+		Sourceid: SourceID,
+		Limit: int32(limit),
+		Offset: int32(limit * page),
+	})
 	if err != nil {
 		return res, err
 	}

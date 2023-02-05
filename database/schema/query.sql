@@ -30,6 +30,14 @@ ORDER BY pubdate desc
 offset $3
 fetch next $2 rows only;
 
+-- name: ListOldestArticlesBySourceId :many
+SELECT * FROM articles
+Where sourceid = $1
+ORDER BY pubdate asc
+offset $3
+fetch next $2 rows only;
+
+
 -- name: ListArticlesBySourceId :many
 Select * From articles
 Where sourceid = $1 
