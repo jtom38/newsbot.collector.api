@@ -14,7 +14,7 @@ RUN /go/bin/sqlc generate
 RUN go build .
 RUN go install github.com/pressly/goose/v3/cmd/goose@latest
 
-FROM alpine:latest as app
+FROM alpine:3.18.3 as app
 
 RUN apk --no-cache add bash 
 RUN apk --no-cache add libc6-compat
